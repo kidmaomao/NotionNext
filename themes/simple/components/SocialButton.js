@@ -9,42 +9,6 @@ const SocialButton = () => {
   return (
     <div className='w-52 justify-center flex-wrap flex my-2'>
       <div className='space-x-5 md:text-xl text-3xl text-gray-600 dark:text-gray-400 text-center'>
-        /**{siteConfig('CONTACT_GITHUB') && (
-          <a
-            target='_blank'
-            rel='noreferrer'
-            title={'github'}
-            href={siteConfig('CONTACT_GITHUB')}>
-            <i className='fab fa-github transform hover:scale-125 duration-150' />
-          </a>
-        )}
-        {siteConfig('CONTACT_TWITTER') && (
-          <a
-            target='_blank'
-            rel='noreferrer'
-            title={'twitter'}
-            href={siteConfig('CONTACT_TWITTER')}>
-            <i className='fab fa-twitter transform hover:scale-125 duration-150' />
-          </a>
-        )}
-        {siteConfig('CONTACT_TELEGRAM') && (
-          <a
-            target='_blank'
-            rel='noreferrer'
-            href={siteConfig('CONTACT_TELEGRAM')}
-            title={'telegram'}>
-            <i className='fab fa-telegram transform hover:scale-125 duration-150' />
-          </a>
-        )}
-        {siteConfig('CONTACT_LINKEDIN') && (
-          <a
-            target='_blank'
-            rel='noreferrer'
-            href={siteConfig('CONTACT_LINKEDIN')}
-            title={'linkedIn'}>
-            <i className='fab fa-linkedin transform hover:scale-125 duration-150' />
-          </a>
-        )}
         {siteConfig('CONTACT_WEIBO') && (
           <a
             target='_blank'
@@ -80,7 +44,7 @@ const SocialButton = () => {
             href={'/rss/feed.xml'}>
             <i className='fas fa-rss transform hover:scale-125 duration-150' />
           </a>
-        )} */
+        )}
         {siteConfig('CONTACT_BILIBILI') && (
           <a
             target='_blank'
@@ -90,7 +54,7 @@ const SocialButton = () => {
             <i className='fab fa-bilibili transform hover:scale-125 duration-150' />
           </a>
         )}
-         /**{siteConfig('CONTACT_YOUTUBE') && (
+         {siteConfig('CONTACT_YOUTUBE') && (
           <a
             target='_blank'
             rel='noreferrer'
@@ -107,7 +71,7 @@ const SocialButton = () => {
             href={siteConfig('CONTACT_THREADS')}>
             <i className='fab fa-threads transform hover:scale-125 duration-150' />
           </a> 
-        )}*/
+        )}
       </div>
     </div>
   )
