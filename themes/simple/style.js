@@ -26,12 +26,12 @@ const Style = () => {
     --simple-bg-soft: #10141a;
     --simple-card: rgba(31, 37, 46, 0.92);
     --simple-card-solid: #1f252e;
-    --simple-text: #e7edf4;
-    --simple-muted: #9aa8b8;
+    --simple-text: #f2f8ff;
+    --simple-muted: #c3d0df;
     --simple-faint: #2a323d;
     --simple-border: rgba(207, 222, 238, 0.14);
-    --simple-primary: #7db7df;
-    --simple-primary-deep: #b7dcf6;
+    --simple-primary: #9cdbff;
+    --simple-primary-deep: #d4efff;
     --simple-accent: #f2bd72;
     --simple-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
     --simple-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.24);
@@ -57,6 +57,18 @@ const Style = () => {
     user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+  }
+
+  #theme-simple ::selection {
+    color: #ffffff;
+    background: rgba(47, 111, 159, 0.34);
+    text-shadow: none;
+  }
+
+  .dark #theme-simple ::selection {
+    color: #10141a;
+    background: #d4efff;
+    text-shadow: none;
   }
 
   #theme-simple {
@@ -226,6 +238,15 @@ const Style = () => {
 
   .dark #theme-simple .blog-item-title {
     color: var(--simple-primary-deep) !important;
+    text-shadow: 0 0 14px rgba(156, 219, 255, 0.32);
+  }
+
+  .dark #theme-simple header.h-80 .font-serif,
+  .dark #theme-simple section.mt-2 h2,
+  .dark #theme-simple #posts-wrapper h2 a {
+    text-shadow:
+      0 0 16px rgba(156, 219, 255, 0.28),
+      0 1px 1px rgba(0, 0, 0, 0.72);
   }
 
   #theme-simple #posts-wrapper > div > div {
@@ -271,6 +292,15 @@ const Style = () => {
     font-size: 0.86rem !important;
   }
 
+  .dark #theme-simple #posts-wrapper header,
+  .dark #theme-simple #posts-wrapper main,
+  .dark #theme-simple section.mt-2,
+  .dark #theme-simple .notion-text,
+  .dark #theme-simple .notion-list {
+    color: var(--simple-muted) !important;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+  }
+
   #theme-simple #posts-wrapper main {
     color: var(--simple-muted) !important;
     line-height: 1.8 !important;
@@ -311,6 +341,11 @@ const Style = () => {
   #theme-simple #right-sidebar .catalog-item:hover,
   #theme-simple #right-sidebar .catalog-item span.font-bold {
     color: var(--simple-primary-deep) !important;
+  }
+
+  .dark #theme-simple #right-sidebar .catalog-item:hover,
+  .dark #theme-simple #right-sidebar .catalog-item span.font-bold {
+    text-shadow: 0 0 12px rgba(156, 219, 255, 0.34);
   }
 
   #theme-simple section.mt-2 {
@@ -433,6 +468,73 @@ const Style = () => {
     color: var(--simple-primary);
     text-decoration-color: rgba(47, 111, 159, 0.35);
     text-underline-offset: 3px;
+  }
+
+  .dark #theme-simple .notion-link,
+  .dark #theme-simple .notion-page-link,
+  .dark #theme-simple a {
+    text-shadow: 0 0 10px rgba(156, 219, 255, 0.20);
+  }
+
+  .dark #theme-simple #article-wrapper .notion-gray {
+    color: #d5deea !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-brown {
+    color: #d8b58a !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-orange {
+    color: #ffbf80 !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-yellow {
+    color: #f6d77a !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-green {
+    color: #9fe6b8 !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-blue {
+    color: #8bd9ff !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-purple {
+    color: #d9b8ff !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-pink {
+    color: #ffadd7 !important;
+  }
+
+  .dark #theme-simple #article-wrapper .notion-red {
+    color: #ff8585 !important;
+  }
+
+  .dark #theme-simple #article-wrapper :is(
+    .notion-gray,
+    .notion-brown,
+    .notion-orange,
+    .notion-yellow,
+    .notion-green,
+    .notion-blue,
+    .notion-purple,
+    .notion-pink,
+    .notion-red
+  ) {
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 0.08),
+      0 1px 1px rgba(0, 0, 0, 0.52);
+  }
+
+  .dark #theme-simple #article-wrapper .notion-blue::selection,
+  .dark #theme-simple #article-wrapper .notion-purple::selection,
+  .dark #theme-simple #article-wrapper .notion-red::selection,
+  .dark #theme-simple #article-wrapper .notion-green::selection {
+    color: #10141a;
+    background: #f2f8ff;
+    text-shadow: none;
   }
 
   #theme-simple .notion-page-link:hover {
