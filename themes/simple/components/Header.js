@@ -1,7 +1,6 @@
 import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
-import CONFIG from '../config'
 import SocialButton from './SocialButton'
 
 /**
@@ -32,12 +31,11 @@ export default function Header(props) {
               <div className='text-2xl font-serif dark:text-white py-2 hover:scale-105 transform duration-200'>
                 {siteConfig('AUTHOR')}
               </div>
-              <div
-                className='font-light dark:text-white py-2 hover:scale-105 transform duration-200 text-center'
-                dangerouslySetInnerHTML={{
-                  __html: siteConfig('SIMPLE_LOGO_DESCRIPTION', null, CONFIG)
-                }}
-              />
+              <div className='font-light dark:text-white py-2 hover:scale-105 transform duration-200 text-center'>
+                <div>洛奇死忠粉</div>
+                <div>/国服-CN</div>
+                <div>/伊鲁夏玩家</div>
+              </div>
             </div>
           </div>
         </SmartLink>
