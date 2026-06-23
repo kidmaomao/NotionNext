@@ -15,7 +15,9 @@ const Style = () => {
     --simple-primary: #2f6f9f;
     --simple-primary-deep: #1f4f78;
     --simple-accent: #f1aa52;
-    --simple-glow: rgba(83, 153, 204, 0.22);
+    --simple-glow: rgba(47, 111, 159, 0.34);
+    --simple-shine: rgba(47, 111, 159, 0.22);
+    --simple-hover-surface: rgba(47, 111, 159, 0.045);
     --simple-shadow: 0 18px 50px rgba(45, 77, 108, 0.12);
     --simple-shadow-soft: 0 10px 24px rgba(45, 77, 108, 0.09);
     --simple-radius: 18px;
@@ -35,6 +37,8 @@ const Style = () => {
     --simple-primary-deep: #d4efff;
     --simple-accent: #f2bd72;
     --simple-glow: rgba(156, 219, 255, 0.22);
+    --simple-shine: rgba(255, 255, 255, 0.34);
+    --simple-hover-surface: rgba(156, 219, 255, 0.04);
     --simple-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
     --simple-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.24);
   }
@@ -326,9 +330,12 @@ const Style = () => {
   }
 
   #theme-simple nav.w-full:hover {
-    border-color: rgba(47, 111, 159, 0.34) !important;
-    box-shadow: 0 16px 36px var(--simple-glow);
-    transform: translateY(-1px);
+    animation: none;
+    border-color: rgba(47, 111, 159, 0.50) !important;
+    box-shadow:
+      0 16px 36px var(--simple-glow),
+      0 0 0 1px rgba(47, 111, 159, 0.12);
+    transform: translateY(-2px);
   }
 
   #theme-simple #nav-bar-inner {
@@ -426,7 +433,7 @@ const Style = () => {
     inset: -38% auto -38% -42%;
     width: 38%;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+    background: linear-gradient(90deg, transparent, var(--simple-shine), rgba(255, 255, 255, 0.46), var(--simple-shine), transparent);
     opacity: 0;
     transform: translateX(-135%) skewX(-18deg);
   }
@@ -440,8 +447,18 @@ const Style = () => {
   }
 
   #theme-simple #posts-wrapper > div > div:hover {
-    transform: translateY(-3px);
-    border-color: rgba(47, 111, 159, 0.46) !important;
+    animation: none;
+    transform: translateY(-5px);
+    border-color: rgba(47, 111, 159, 0.58) !important;
+    background:
+      linear-gradient(135deg, var(--simple-hover-surface), transparent 42%),
+      var(--simple-card);
+    box-shadow:
+      0 20px 46px rgba(47, 111, 159, 0.18),
+      0 0 0 1px rgba(47, 111, 159, 0.10);
+  }
+
+  .dark #theme-simple #posts-wrapper > div > div:hover {
     box-shadow: var(--simple-shadow);
   }
 
@@ -513,9 +530,15 @@ const Style = () => {
   }
 
   #theme-simple #right-sidebar > *:hover {
-    border-color: rgba(47, 111, 159, 0.38);
-    box-shadow: 0 16px 36px var(--simple-glow);
-    transform: translateY(-2px);
+    animation: none;
+    border-color: rgba(47, 111, 159, 0.52);
+    background:
+      linear-gradient(135deg, var(--simple-hover-surface), transparent 42%),
+      var(--simple-card);
+    box-shadow:
+      0 16px 36px var(--simple-glow),
+      0 0 0 1px rgba(47, 111, 159, 0.10);
+    transform: translateY(-3px);
   }
 
   #theme-simple #right-sidebar .catalog-item {
@@ -576,8 +599,11 @@ const Style = () => {
   }
 
   #theme-simple #article-wrapper:hover {
-    border-color: rgba(47, 111, 159, 0.32);
-    box-shadow: 0 22px 58px rgba(45, 77, 108, 0.16);
+    animation: none;
+    border-color: rgba(47, 111, 159, 0.50);
+    box-shadow:
+      0 22px 58px rgba(45, 77, 108, 0.20),
+      0 0 0 1px rgba(47, 111, 159, 0.10);
   }
 
   .dark #theme-simple #article-wrapper:hover {
