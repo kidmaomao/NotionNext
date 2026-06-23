@@ -424,10 +424,7 @@ const Style = () => {
     animation-delay: 0.26s;
   }
 
-  #theme-simple #posts-wrapper > div > div::after,
-  #theme-simple #right-sidebar > *::after,
-  #theme-simple section.mt-2::after,
-  #theme-simple #article-wrapper::after {
+  #theme-simple #posts-wrapper > div > div::after {
     content: "";
     position: absolute;
     inset: -38% auto -38% -42%;
@@ -438,12 +435,16 @@ const Style = () => {
     transform: translateX(-135%) skewX(-18deg);
   }
 
-  #theme-simple #posts-wrapper > div > div:hover::after,
-  #theme-simple #right-sidebar > *:hover::after,
-  #theme-simple section.mt-2:hover::after,
-  #theme-simple #article-wrapper:hover::after {
+  #theme-simple #posts-wrapper > div > div:hover::after {
     opacity: 1;
     animation: simple-shine 0.85s ease;
+  }
+
+  #theme-simple #right-sidebar > *::after,
+  #theme-simple section.mt-2::after,
+  #theme-simple #article-wrapper::after {
+    content: none !important;
+    animation: none !important;
   }
 
   #theme-simple #posts-wrapper > div > div:hover {
