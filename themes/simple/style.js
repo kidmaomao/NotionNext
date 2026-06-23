@@ -15,6 +15,7 @@ const Style = () => {
     --simple-primary: #2f6f9f;
     --simple-primary-deep: #1f4f78;
     --simple-accent: #f1aa52;
+    --simple-glow: rgba(83, 153, 204, 0.22);
     --simple-shadow: 0 18px 50px rgba(45, 77, 108, 0.12);
     --simple-shadow-soft: 0 10px 24px rgba(45, 77, 108, 0.09);
     --simple-radius: 18px;
@@ -33,8 +34,80 @@ const Style = () => {
     --simple-primary: #9cdbff;
     --simple-primary-deep: #d4efff;
     --simple-accent: #f2bd72;
+    --simple-glow: rgba(156, 219, 255, 0.22);
     --simple-shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
     --simple-shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.24);
+  }
+
+  @keyframes simple-fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes simple-hero-drift {
+    0% {
+      transform: scale(1.018) translate3d(0, 0, 0);
+    }
+    50% {
+      transform: scale(1.045) translate3d(-10px, 6px, 0);
+    }
+    100% {
+      transform: scale(1.018) translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes simple-aurora {
+    0% {
+      transform: translate3d(-6%, -4%, 0) rotate(0deg);
+      opacity: 0.72;
+    }
+    50% {
+      transform: translate3d(6%, 3%, 0) rotate(8deg);
+      opacity: 0.95;
+    }
+    100% {
+      transform: translate3d(-6%, -4%, 0) rotate(0deg);
+      opacity: 0.72;
+    }
+  }
+
+  @keyframes simple-shine {
+    from {
+      transform: translateX(-135%) skewX(-18deg);
+    }
+    to {
+      transform: translateX(135%) skewX(-18deg);
+    }
+  }
+
+  @keyframes simple-brand-vanish {
+    0%,
+    58% {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      filter: blur(3px);
+      transform: translateY(-8px) scale(0.98);
+    }
+  }
+
+  @keyframes simple-hero-scrim-vanish {
+    0%,
+    58% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.08;
+    }
   }
 
   body {
@@ -72,6 +145,7 @@ const Style = () => {
   }
 
   #theme-simple {
+    position: relative;
     background: transparent !important;
     color: var(--simple-text);
   }
@@ -87,6 +161,21 @@ const Style = () => {
       linear-gradient(90deg, rgba(47, 111, 159, 0.045) 1px, transparent 1px);
     background-size: 38px 38px;
     mask-image: linear-gradient(to bottom, #000, transparent 78%);
+  }
+
+  #theme-simple::after {
+    content: "";
+    position: fixed;
+    inset: 7% -14% auto;
+    z-index: -1;
+    height: 360px;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 28% 44%, rgba(91, 163, 211, 0.20), transparent 34%),
+      radial-gradient(circle at 68% 26%, rgba(241, 170, 82, 0.18), transparent 32%),
+      radial-gradient(circle at 50% 72%, rgba(103, 198, 182, 0.12), transparent 30%);
+    filter: blur(38px);
+    animation: simple-aurora 18s ease-in-out infinite;
   }
 
   #theme-simple #container-wrapper {
@@ -120,6 +209,7 @@ const Style = () => {
     box-shadow: var(--simple-shadow);
     overflow: hidden;
     isolation: isolate;
+    animation: simple-fade-up 0.72s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   #theme-simple header.h-80::before {
@@ -129,10 +219,11 @@ const Style = () => {
     z-index: 0;
     background-image: url("/images/simple-hero-bg.webp");
     background-size: cover;
-    background-position: center 43%;
-    filter: saturate(0.82) contrast(0.94) brightness(1.06) blur(0.6px);
-    opacity: 0.74;
+    background-position: 58% 45%;
+    filter: saturate(0.94) contrast(0.98) brightness(1.02) blur(0.35px);
+    opacity: 0.82;
     transform: scale(1.018);
+    animation: simple-hero-drift 24s ease-in-out infinite;
   }
 
   #theme-simple header.h-80::after {
@@ -141,10 +232,12 @@ const Style = () => {
     inset: 0;
     z-index: 1;
     background:
-      radial-gradient(ellipse 30% 74% at 50% 42%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.84) 34%, rgba(255, 255, 255, 0.36) 58%, rgba(255, 255, 255, 0.08) 100%),
-      linear-gradient(90deg, rgba(248, 252, 255, 0.22), rgba(248, 252, 255, 0.06) 24%, rgba(248, 252, 255, 0.04) 76%, rgba(248, 252, 255, 0.22)),
-      linear-gradient(180deg, rgba(255, 255, 255, 0.20), rgba(255, 255, 255, 0.08));
-    backdrop-filter: blur(0.4px);
+      radial-gradient(ellipse 20% 60% at 50% 42%, rgba(255, 255, 255, 0.50) 0%, rgba(255, 255, 255, 0.28) 42%, rgba(255, 255, 255, 0.08) 68%, transparent 100%),
+      linear-gradient(90deg, rgba(248, 252, 255, 0.08), transparent 28%, transparent 72%, rgba(248, 252, 255, 0.08)),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 72%);
+    opacity: 1;
+    animation: simple-hero-scrim-vanish 7.2s ease forwards;
+    transition: opacity 0.38s ease;
   }
 
   .dark #theme-simple header.h-80 {
@@ -152,26 +245,49 @@ const Style = () => {
   }
 
   .dark #theme-simple header.h-80::before {
-    filter: saturate(0.72) contrast(0.88) brightness(0.78) blur(0.8px);
-    opacity: 0.58;
+    filter: saturate(0.86) contrast(0.94) brightness(0.72) blur(0.45px);
+    opacity: 0.66;
   }
 
   .dark #theme-simple header.h-80::after {
     background:
-      radial-gradient(ellipse 30% 74% at 50% 42%, rgba(31, 37, 46, 0.90) 0%, rgba(31, 37, 46, 0.78) 36%, rgba(31, 37, 46, 0.42) 62%, rgba(31, 37, 46, 0.16) 100%),
-      linear-gradient(90deg, rgba(21, 25, 31, 0.28), rgba(21, 25, 31, 0.10) 24%, rgba(21, 25, 31, 0.08) 76%, rgba(21, 25, 31, 0.30)),
-      linear-gradient(180deg, rgba(21, 25, 31, 0.24), rgba(21, 25, 31, 0.10));
+      radial-gradient(ellipse 22% 62% at 50% 42%, rgba(21, 25, 31, 0.62) 0%, rgba(21, 25, 31, 0.34) 42%, rgba(21, 25, 31, 0.12) 68%, transparent 100%),
+      linear-gradient(90deg, rgba(21, 25, 31, 0.14), transparent 28%, transparent 72%, rgba(21, 25, 31, 0.14)),
+      linear-gradient(180deg, rgba(21, 25, 31, 0.12), transparent 72%);
   }
 
   #theme-simple header.h-80 > div {
     position: relative;
     z-index: 2;
     padding: 42px 28px !important;
+    opacity: 1;
+    transform-origin: center;
+    animation: simple-brand-vanish 7.2s ease forwards;
+    transition:
+      opacity 0.38s ease,
+      filter 0.38s ease,
+      transform 0.38s ease;
+  }
+
+  #theme-simple header.h-80:hover::after,
+  #theme-simple header.h-80:focus-within::after {
+    opacity: 1;
+    animation: none;
+  }
+
+  #theme-simple header.h-80:hover > div,
+  #theme-simple header.h-80:focus-within > div {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+    animation: none;
   }
 
   #theme-simple header.h-80 img {
-    border: 4px solid rgba(255, 255, 255, 0.82);
-    box-shadow: 0 12px 30px rgba(47, 111, 159, 0.18);
+    border: 3px solid rgba(255, 255, 255, 0.70);
+    box-shadow:
+      0 12px 30px rgba(47, 111, 159, 0.16),
+      0 0 0 1px rgba(36, 50, 65, 0.08);
   }
 
   #theme-simple header.h-80 .font-serif {
@@ -180,11 +296,18 @@ const Style = () => {
     font-size: clamp(2rem, 4vw, 3.4rem);
     font-weight: 800;
     letter-spacing: -0.04em;
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.62),
+      0 8px 22px rgba(255, 255, 255, 0.44),
+      0 2px 12px rgba(47, 111, 159, 0.20);
   }
 
   #theme-simple header.h-80 .font-light,
   #theme-simple header.h-80 .text-xs {
     color: var(--simple-muted) !important;
+    text-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.58),
+      0 2px 10px rgba(255, 255, 255, 0.36);
   }
 
   #theme-simple nav.w-full {
@@ -195,6 +318,17 @@ const Style = () => {
     background: var(--simple-card) !important;
     box-shadow: var(--simple-shadow-soft);
     backdrop-filter: blur(18px);
+    animation: simple-fade-up 0.72s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transition:
+      border-color 0.22s ease,
+      box-shadow 0.22s ease,
+      transform 0.22s ease;
+  }
+
+  #theme-simple nav.w-full:hover {
+    border-color: rgba(47, 111, 159, 0.34) !important;
+    box-shadow: 0 16px 36px var(--simple-glow);
+    transform: translateY(-1px);
   }
 
   #theme-simple #nav-bar-inner {
@@ -251,7 +385,7 @@ const Style = () => {
 
   #theme-simple #posts-wrapper > div > div {
     position: relative;
-    min-height: 150px;
+    min-height: 132px;
     height: auto !important;
     margin: 0 0 18px !important;
     padding: 24px 26px !important;
@@ -260,10 +394,49 @@ const Style = () => {
     background: var(--simple-card);
     box-shadow: var(--simple-shadow-soft);
     overflow: hidden;
+    animation: simple-fade-up 0.68s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     transition:
       transform 0.24s ease,
       border-color 0.24s ease,
       box-shadow 0.24s ease;
+  }
+
+  #theme-simple #posts-wrapper > div > div:nth-child(1) {
+    animation-delay: 0.08s;
+  }
+
+  #theme-simple #posts-wrapper > div > div:nth-child(2) {
+    animation-delay: 0.14s;
+  }
+
+  #theme-simple #posts-wrapper > div > div:nth-child(3) {
+    animation-delay: 0.20s;
+  }
+
+  #theme-simple #posts-wrapper > div > div:nth-child(4) {
+    animation-delay: 0.26s;
+  }
+
+  #theme-simple #posts-wrapper > div > div::after,
+  #theme-simple #right-sidebar > *::after,
+  #theme-simple section.mt-2::after,
+  #theme-simple #article-wrapper::after {
+    content: "";
+    position: absolute;
+    inset: -38% auto -38% -42%;
+    width: 38%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.34), transparent);
+    opacity: 0;
+    transform: translateX(-135%) skewX(-18deg);
+  }
+
+  #theme-simple #posts-wrapper > div > div:hover::after,
+  #theme-simple #right-sidebar > *:hover::after,
+  #theme-simple section.mt-2:hover::after,
+  #theme-simple #article-wrapper:hover::after {
+    opacity: 1;
+    animation: simple-shine 0.85s ease;
   }
 
   #theme-simple #posts-wrapper > div > div:hover {
@@ -324,12 +497,25 @@ const Style = () => {
   }
 
   #theme-simple #right-sidebar > * {
+    position: relative;
+    overflow: hidden;
     margin-bottom: 16px;
     padding: 18px;
     border: 1px solid var(--simple-border);
     border-radius: var(--simple-radius-sm);
     background: var(--simple-card);
     box-shadow: var(--simple-shadow-soft);
+    animation: simple-fade-up 0.68s 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transition:
+      border-color 0.22s ease,
+      box-shadow 0.22s ease,
+      transform 0.22s ease;
+  }
+
+  #theme-simple #right-sidebar > *:hover {
+    border-color: rgba(47, 111, 159, 0.38);
+    box-shadow: 0 16px 36px var(--simple-glow);
+    transform: translateY(-2px);
   }
 
   #theme-simple #right-sidebar .catalog-item {
@@ -349,6 +535,8 @@ const Style = () => {
   }
 
   #theme-simple section.mt-2 {
+    position: relative;
+    overflow: hidden;
     max-width: var(--simple-article-width);
     margin: 0 auto 18px !important;
     padding: 26px 30px 22px;
@@ -356,6 +544,7 @@ const Style = () => {
     border-radius: var(--simple-radius);
     background: var(--simple-card);
     box-shadow: var(--simple-shadow-soft);
+    animation: simple-fade-up 0.68s 0.12s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   #theme-simple section.mt-2 h2 {
@@ -371,6 +560,8 @@ const Style = () => {
   }
 
   #theme-simple #article-wrapper {
+    position: relative;
+    overflow: hidden;
     max-width: var(--simple-article-width);
     margin: 0 auto;
     padding: 28px 30px;
@@ -378,6 +569,19 @@ const Style = () => {
     border-radius: var(--simple-radius);
     background: var(--simple-card-solid);
     box-shadow: var(--simple-shadow);
+    animation: simple-fade-up 0.72s 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    transition:
+      border-color 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+
+  #theme-simple #article-wrapper:hover {
+    border-color: rgba(47, 111, 159, 0.32);
+    box-shadow: 0 22px 58px rgba(45, 77, 108, 0.16);
+  }
+
+  .dark #theme-simple #article-wrapper:hover {
+    box-shadow: 0 22px 58px rgba(0, 0, 0, 0.42);
   }
 
   #theme-simple .notion {
@@ -541,6 +745,15 @@ const Style = () => {
     color: var(--simple-primary-deep);
   }
 
+  #theme-simple .notion-link,
+  #theme-simple .notion-page-link,
+  #theme-simple #right-sidebar .catalog-item {
+    transition:
+      color 0.18s ease,
+      text-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+
   #theme-simple footer.bg-black {
     width: min(var(--simple-page-width), calc(100vw - 48px));
     margin: 0 auto 28px;
@@ -548,6 +761,7 @@ const Style = () => {
     border-radius: var(--simple-radius);
     background: var(--simple-card) !important;
     box-shadow: var(--simple-shadow-soft);
+    animation: simple-fade-up 0.68s 0.24s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   #theme-simple footer .text-yellow-300 {
@@ -594,18 +808,26 @@ const Style = () => {
 
     #theme-simple header.h-80::after {
       background:
-        radial-gradient(ellipse 72% 76% at 50% 42%, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.80) 55%, rgba(255, 255, 255, 0.34) 100%),
-        linear-gradient(180deg, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0.16));
+        radial-gradient(ellipse 58% 68% at 50% 42%, rgba(255, 255, 255, 0.58) 0%, rgba(255, 255, 255, 0.34) 58%, rgba(255, 255, 255, 0.10) 100%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.10), transparent 72%);
     }
 
     .dark #theme-simple header.h-80::after {
       background:
-        radial-gradient(ellipse 72% 76% at 50% 42%, rgba(31, 37, 46, 0.92) 0%, rgba(31, 37, 46, 0.76) 55%, rgba(31, 37, 46, 0.38) 100%),
-        linear-gradient(180deg, rgba(21, 25, 31, 0.36), rgba(21, 25, 31, 0.20));
+        radial-gradient(ellipse 58% 68% at 50% 42%, rgba(21, 25, 31, 0.66) 0%, rgba(21, 25, 31, 0.42) 58%, rgba(21, 25, 31, 0.18) 100%),
+        linear-gradient(180deg, rgba(21, 25, 31, 0.20), transparent 72%);
     }
 
     #theme-simple header.h-80 > div {
       padding: 28px 16px !important;
+    }
+
+    #theme-simple header.h-80::after,
+    #theme-simple header.h-80 > div {
+      animation: none;
+      opacity: 1;
+      filter: none;
+      transform: none;
     }
 
     #theme-simple header.h-80 .flex.space-x-6 {
@@ -619,13 +841,49 @@ const Style = () => {
 
     #theme-simple nav.w-full {
       border-radius: 16px;
-      overflow: hidden;
+      overflow: visible;
     }
 
     #theme-simple #nav-bar-inner {
       height: auto !important;
       min-height: 56px;
       padding: 8px 48px 8px 12px;
+      overflow: visible;
+    }
+
+    #theme-simple #nav-menu-mobile {
+      position: relative;
+      width: 100%;
+      z-index: 30;
+    }
+
+    #theme-simple #nav-menu-mobile > div:first-child {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: var(--simple-text);
+    }
+
+    #theme-simple #nav-menu-mobile > .absolute {
+      left: -28px !important;
+      top: 48px;
+      z-index: 60;
+      width: calc(100vw - 28px) !important;
+      border-radius: 16px;
+      box-shadow: var(--simple-shadow);
+    }
+
+    #theme-simple #menu-wrap {
+      overflow: hidden;
+      border-color: var(--simple-border) !important;
+      border-radius: 16px;
+      background: var(--simple-card-solid) !important;
+    }
+
+    .dark #theme-simple #menu-wrap {
+      background: var(--simple-card-solid) !important;
     }
 
     #theme-simple #posts-wrapper > div > div,
@@ -635,8 +893,35 @@ const Style = () => {
       padding: 20px 16px !important;
     }
 
+    #theme-simple #posts-wrapper > div > div {
+      min-height: 0;
+    }
+
     #theme-simple #posts-wrapper > div > div > .flex {
       display: block;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #theme-simple,
+    #theme-simple *,
+    #theme-simple::before,
+    #theme-simple::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+
+    #theme-simple header.h-80::before {
+      transform: scale(1.018) !important;
+    }
+
+    #theme-simple header.h-80::after,
+    #theme-simple header.h-80 > div {
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
     }
   }
   `}</style>
