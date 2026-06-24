@@ -593,18 +593,13 @@ const Style = () => {
     border-radius: var(--simple-radius);
     background: var(--simple-card-solid);
     box-shadow: var(--simple-shadow);
-    animation: simple-fade-up 0.72s 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    transition:
-      border-color 0.22s ease,
-      box-shadow 0.22s ease;
+    animation: none;
+    transition: none;
   }
 
   #theme-simple #article-wrapper:hover {
-    animation: none;
-    border-color: rgba(47, 111, 159, 0.50);
-    box-shadow:
-      0 22px 58px rgba(45, 77, 108, 0.20),
-      0 0 0 1px rgba(47, 111, 159, 0.10);
+    border-color: var(--simple-border);
+    box-shadow: var(--simple-shadow);
   }
 
   .dark #theme-simple #article-wrapper:hover {
