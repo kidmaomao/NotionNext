@@ -696,23 +696,30 @@ const Style = () => {
     text-underline-offset: 3px;
   }
 
+  #theme-simple #article-wrapper .notion-link:has(.notion-page-title) {
+    border-bottom: 0 !important;
+    text-decoration: none;
+    opacity: 1;
+  }
+
   #theme-simple #article-wrapper .notion-link .notion-page-title {
     display: inline-flex;
-    align-items: center;
-    gap: 0.15em;
-    line-height: 1;
-    vertical-align: -0.08em;
+    align-items: baseline;
+    gap: 0.04em;
+    line-height: inherit;
+    vertical-align: baseline;
   }
 
   #theme-simple #article-wrapper .notion-link .notion-page-title-icon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1em;
-    height: 1em;
-    min-width: 1em;
+    width: 0.95em;
+    height: 0.95em;
+    min-width: 0.95em;
     margin: 0;
     border-radius: 3px;
+    vertical-align: -0.12em;
   }
 
   #theme-simple #article-wrapper .notion-link .notion-page-title-icon img {
@@ -723,9 +730,13 @@ const Style = () => {
   }
 
   #theme-simple #article-wrapper .notion-link .notion-page-title-text {
-    top: 0;
-    border-bottom: 0;
-    line-height: 1;
+    position: static;
+    top: auto;
+    display: inline;
+    border-bottom: 0 !important;
+    line-height: inherit;
+    font-weight: inherit;
+    text-decoration: none;
   }
 
   .dark #theme-simple .notion-link,
