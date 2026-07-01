@@ -696,6 +696,38 @@ const Style = () => {
     text-underline-offset: 3px;
   }
 
+  #theme-simple #article-wrapper .notion-link .notion-page-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15em;
+    line-height: 1;
+    vertical-align: -0.08em;
+  }
+
+  #theme-simple #article-wrapper .notion-link .notion-page-title-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    margin: 0;
+    border-radius: 3px;
+  }
+
+  #theme-simple #article-wrapper .notion-link .notion-page-title-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  #theme-simple #article-wrapper .notion-link .notion-page-title-text {
+    top: 0;
+    border-bottom: 0;
+    line-height: 1;
+  }
+
   .dark #theme-simple .notion-link,
   .dark #theme-simple .notion-page-link,
   .dark #theme-simple a {
