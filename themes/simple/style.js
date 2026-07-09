@@ -696,10 +696,42 @@ const Style = () => {
     text-underline-offset: 3px;
   }
 
-  #theme-simple #article-wrapper .notion-green,
-  #theme-simple #article-wrapper .notion-green_co {
+  #theme-simple #article-wrapper :is(.notion-gray, .notion-gray_co) {
+    color: #6b7280 !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-brown, .notion-brown_co) {
+    color: #8b5e34 !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-orange, .notion-orange_co) {
+    color: #c2410c !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-yellow, .notion-yellow_co) {
+    color: #a16207 !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
     color: #047857 !important;
     font-weight: 700;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-blue, .notion-blue_co) {
+    color: #0b6e99 !important;
+    font-weight: 700;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-purple, .notion-purple_co) {
+    color: #6d28d9 !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-pink, .notion-pink_co) {
+    color: #be185d !important;
+  }
+
+  #theme-simple #article-wrapper :is(.notion-red, .notion-red_co) {
+    color: #dc2626 !important;
   }
 
   #theme-simple #article-wrapper .notion-link:has(.notion-page-title) {
@@ -751,66 +783,79 @@ const Style = () => {
     text-shadow: 0 0 10px rgba(156, 219, 255, 0.20);
   }
 
-  .dark #theme-simple #article-wrapper .notion-gray {
+  .dark #theme-simple #article-wrapper :is(.notion-gray, .notion-gray_co) {
     color: #d5deea !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-brown {
+  .dark #theme-simple #article-wrapper :is(.notion-brown, .notion-brown_co) {
     color: #d8b58a !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-orange {
+  .dark #theme-simple #article-wrapper :is(.notion-orange, .notion-orange_co) {
     color: #ffbf80 !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-yellow {
+  .dark #theme-simple #article-wrapper :is(.notion-yellow, .notion-yellow_co) {
     color: #f6d77a !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-green,
-  .dark #theme-simple #article-wrapper .notion-green_co {
+  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
     color: #86efac !important;
     font-weight: 700;
   }
 
-  .dark #theme-simple #article-wrapper .notion-blue {
+  .dark #theme-simple #article-wrapper :is(.notion-blue, .notion-blue_co) {
     color: #8bd9ff !important;
+    font-weight: 700;
   }
 
-  .dark #theme-simple #article-wrapper .notion-purple {
+  .dark #theme-simple #article-wrapper :is(.notion-purple, .notion-purple_co) {
     color: #d9b8ff !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-pink {
+  .dark #theme-simple #article-wrapper :is(.notion-pink, .notion-pink_co) {
     color: #ffadd7 !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-red {
+  .dark #theme-simple #article-wrapper :is(.notion-red, .notion-red_co) {
     color: #ff8585 !important;
   }
 
   .dark #theme-simple #article-wrapper :is(
     .notion-gray,
+    .notion-gray_co,
     .notion-brown,
+    .notion-brown_co,
     .notion-orange,
+    .notion-orange_co,
     .notion-yellow,
+    .notion-yellow_co,
     .notion-green,
     .notion-green_co,
     .notion-blue,
+    .notion-blue_co,
     .notion-purple,
+    .notion-purple_co,
     .notion-pink,
-    .notion-red
+    .notion-pink_co,
+    .notion-red,
+    .notion-red_co
   ) {
     text-shadow:
       0 0 10px rgba(255, 255, 255, 0.08),
       0 1px 1px rgba(0, 0, 0, 0.52);
   }
 
-  .dark #theme-simple #article-wrapper .notion-blue::selection,
-  .dark #theme-simple #article-wrapper .notion-purple::selection,
-  .dark #theme-simple #article-wrapper .notion-red::selection,
-  .dark #theme-simple #article-wrapper .notion-green::selection,
-  .dark #theme-simple #article-wrapper .notion-green_co::selection {
+  .dark #theme-simple #article-wrapper :is(
+    .notion-green,
+    .notion-green_co,
+    .notion-blue,
+    .notion-blue_co,
+    .notion-purple,
+    .notion-purple_co,
+    .notion-red,
+    .notion-red_co
+  )::selection {
     color: #10141a;
     background: #f2f8ff;
     text-shadow: none;
