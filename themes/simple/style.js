@@ -800,7 +800,7 @@ const Style = () => {
   }
 
   .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
-    color: #86efac !important;
+    color: #9cffb2 !important;
     font-weight: 700;
   }
 
@@ -844,6 +844,13 @@ const Style = () => {
     text-shadow:
       0 0 10px rgba(255, 255, 255, 0.08),
       0 1px 1px rgba(0, 0, 0, 0.52);
+  }
+
+  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
+    text-shadow:
+      0 0 12px rgba(156, 255, 178, 0.52),
+      0 0 2px rgba(156, 255, 178, 0.68),
+      0 1px 1px rgba(0, 0, 0, 0.56);
   }
 
   .dark #theme-simple #article-wrapper :is(
