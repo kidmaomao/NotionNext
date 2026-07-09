@@ -696,6 +696,12 @@ const Style = () => {
     text-underline-offset: 3px;
   }
 
+  #theme-simple #article-wrapper .notion-green,
+  #theme-simple #article-wrapper .notion-green_co {
+    color: #047857 !important;
+    font-weight: 700;
+  }
+
   #theme-simple #article-wrapper .notion-link:has(.notion-page-title) {
     border-bottom: 0 !important;
     text-decoration: none;
@@ -761,7 +767,8 @@ const Style = () => {
     color: #f6d77a !important;
   }
 
-  .dark #theme-simple #article-wrapper .notion-green {
+  .dark #theme-simple #article-wrapper .notion-green,
+  .dark #theme-simple #article-wrapper .notion-green_co {
     color: #86efac !important;
     font-weight: 700;
   }
@@ -788,6 +795,7 @@ const Style = () => {
     .notion-orange,
     .notion-yellow,
     .notion-green,
+    .notion-green_co,
     .notion-blue,
     .notion-purple,
     .notion-pink,
@@ -801,7 +809,8 @@ const Style = () => {
   .dark #theme-simple #article-wrapper .notion-blue::selection,
   .dark #theme-simple #article-wrapper .notion-purple::selection,
   .dark #theme-simple #article-wrapper .notion-red::selection,
-  .dark #theme-simple #article-wrapper .notion-green::selection {
+  .dark #theme-simple #article-wrapper .notion-green::selection,
+  .dark #theme-simple #article-wrapper .notion-green_co::selection {
     color: #10141a;
     background: #f2f8ff;
     text-shadow: none;
