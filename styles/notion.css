@@ -27,6 +27,7 @@
   --notion-orange: rgb(217, 115, 13);
   --notion-brown: rgb(100, 71, 58);
   --notion-gray: rgb(155, 154, 151);
+  --notion-green: rgb(4, 120, 87);
 
   --notion-red_background: rgb(251, 228, 228);
   --notion-pink_background: rgb(244, 223, 235);
@@ -83,6 +84,7 @@ html.dark {
   --bg-color-0: rgba(200, 200, 200, 0.15);
   --bg-color-1: rgb(30, 30, 30);
   --bg-color-2: rgba(200, 200, 200, 0.15);
+  --notion-green: rgb(134, 239, 172);
 }
 
 .notion {
@@ -295,6 +297,11 @@ html.dark {
 .notion-gray,
 .notion-gray_co {
   color: var(--notion-gray);
+}
+.notion-green,
+.notion-green_co {
+  color: var(--notion-green);
+  font-weight: 600;
 }
 .notion-red_background {
   background-color: var(--notion-red_background);

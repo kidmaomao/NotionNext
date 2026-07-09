@@ -762,7 +762,8 @@ const Style = () => {
   }
 
   .dark #theme-simple #article-wrapper .notion-green {
-    color: #9fe6b8 !important;
+    color: #86efac !important;
+    font-weight: 700;
   }
 
   .dark #theme-simple #article-wrapper .notion-blue {
