@@ -712,9 +712,10 @@ const Style = () => {
     color: #a16207 !important;
   }
 
-  #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
-    color: #047857 !important;
+  #theme-simple #article-wrapper :is(.notion-green, .notion-green_co, .notion-teal, .notion-teal_co) {
+    color: #22a66a !important;
     font-weight: 700;
+    text-shadow: 0 0 1px rgba(34, 166, 106, 0.16);
   }
 
   #theme-simple #article-wrapper :is(.notion-blue, .notion-blue_co) {
@@ -799,7 +800,7 @@ const Style = () => {
     color: #f6d77a !important;
   }
 
-  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
+  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co, .notion-teal, .notion-teal_co) {
     color: #9cffb2 !important;
     font-weight: 700;
   }
@@ -832,6 +833,8 @@ const Style = () => {
     .notion-yellow_co,
     .notion-green,
     .notion-green_co,
+    .notion-teal,
+    .notion-teal_co,
     .notion-blue,
     .notion-blue_co,
     .notion-purple,
@@ -846,7 +849,7 @@ const Style = () => {
       0 1px 1px rgba(0, 0, 0, 0.52);
   }
 
-  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co) {
+  .dark #theme-simple #article-wrapper :is(.notion-green, .notion-green_co, .notion-teal, .notion-teal_co) {
     text-shadow:
       0 0 12px rgba(156, 255, 178, 0.52),
       0 0 2px rgba(156, 255, 178, 0.68),
@@ -856,6 +859,8 @@ const Style = () => {
   .dark #theme-simple #article-wrapper :is(
     .notion-green,
     .notion-green_co,
+    .notion-teal,
+    .notion-teal_co,
     .notion-blue,
     .notion-blue_co,
     .notion-purple,
