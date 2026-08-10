@@ -1,19 +1,146 @@
-jest.mock('@/lib/db/notion/getNotionAPI', () => ({}))
+jest.mock('@/lib/cache/cache_manager', () => ({
+  getDataFromCache: jest.fn(),
+  getOrSetDataWithCache: jest.fn(),
+  setDataToCache: jest.fn()
+}))
+jest.mock('@/lib/db/notion/getNotionAPI', () => ({
+  __esModule: true,
+  default: {
+    getBlocks: jest.fn(),
+    getPage: jest.fn(),
+    getSignedFileUrls: jest.fn()
+  }
+}))
 jest.mock('p-limit', () => () => fn => fn())
 jest.mock('notion-utils', () => ({
-  getBlockValue: jest.fn(entry => entry?.value?.value || entry?.value || entry)
+  getBlockValue: jest.fn(entry => entry?.value?.value || entry?.value || entry),
+  idToUuid: jest.fn(id => {
+    const raw = String(id).replace(/-/g, '').toLowerCase()
+    return raw.replace(
+      /^(........)(....)(....)(....)(............)$/,
+      '$1-$2-$3-$4-$5'
+    )
+  })
 }))
 
 import {
+  fetchNotionPageBlocks,
   formatNotionBlock,
   hasExpiredSignedUrls,
   preferStablePdfSignedUrls
 } from '@/lib/db/notion/getPostBlocks'
 import {
+  getOrSetDataWithCache,
+  setDataToCache
+} from '@/lib/cache/cache_manager'
+import notionAPI from '@/lib/db/notion/getNotionAPI'
+import {
   isExternalVideoEmbedUrl,
   isAppleMusicEmbedUrl,
   normalizeExternalMediaBlock
 } from '@/lib/db/notion/normalizeExternalMediaBlock'
+
+const compactMentionPageId = '3765bc0b889681a9bd95fe4635f2c9f4'
+const mentionPageId = '3765bc0b-8896-81a9-bd95-fe4635f2c9f4'
+
+function createArticleRecordMap() {
+  return {
+    block: {
+      article: {
+        value: {
+          id: 'article',
+          type: 'page',
+          properties: {
+            title: [['无限连击', [['p', compactMentionPageId]]]]
+          }
+        }
+      }
+    }
+  }
+}
+
+function createMentionPageRecord() {
+  return {
+    value: {
+      id: mentionPageId,
+      type: 'page',
+      properties: {
+        title: [['无限连击']]
+      }
+    }
+  }
+}
+
+describe('fetchNotionPageBlocks page mention hydration', () => {
+  beforeEach(() => {
+    getOrSetDataWithCache.mockReset()
+    setDataToCache.mockReset().mockResolvedValue(undefined)
+    notionAPI.getBlocks.mockReset()
+    notionAPI.getPage.mockReset()
+    notionAPI.getSignedFileUrls.mockReset()
+  })
+
+  it('hydrates a missing page mention record from the batch response', async () => {
+    getOrSetDataWithCache.mockResolvedValue(createArticleRecordMap())
+    notionAPI.getBlocks.mockResolvedValue({
+      recordMap: {
+        block: {
+          [mentionPageId]: createMentionPageRecord()
+        }
+      }
+    })
+
+    const result = await fetchNotionPageBlocks('article', 'test')
+
+    expect(notionAPI.getBlocks).toHaveBeenCalledWith([mentionPageId])
+    expect(notionAPI.getPage).not.toHaveBeenCalled()
+    expect(result.block[mentionPageId]).toEqual(createMentionPageRecord())
+    expect(setDataToCache).toHaveBeenCalledWith(
+      'page_block_article',
+      result,
+      null
+    )
+  })
+
+  it('falls back to getPage when the batch response is unusable', async () => {
+    getOrSetDataWithCache.mockResolvedValue(createArticleRecordMap())
+    notionAPI.getBlocks.mockResolvedValue({
+      recordMap: {
+        block: {
+          [mentionPageId]: {
+            value: {
+              role: 'none'
+            }
+          }
+        }
+      }
+    })
+    notionAPI.getPage.mockResolvedValue({
+      block: {
+        [mentionPageId]: createMentionPageRecord()
+      }
+    })
+
+    const result = await fetchNotionPageBlocks('article', 'test')
+
+    expect(notionAPI.getBlocks).toHaveBeenCalledWith([mentionPageId])
+    expect(notionAPI.getPage).toHaveBeenCalledWith(mentionPageId)
+    expect(result.block[mentionPageId]).toEqual(createMentionPageRecord())
+  })
+
+  it('does not refetch a page mention record that is already usable', async () => {
+    const recordMap = createArticleRecordMap()
+    recordMap.block[compactMentionPageId] = createMentionPageRecord()
+    getOrSetDataWithCache.mockResolvedValue(recordMap)
+
+    const result = await fetchNotionPageBlocks('article', 'test')
+
+    expect(notionAPI.getBlocks).not.toHaveBeenCalled()
+    expect(notionAPI.getPage).not.toHaveBeenCalled()
+    expect(setDataToCache).not.toHaveBeenCalled()
+    expect(result).toBe(recordMap)
+  })
+})
 
 describe('formatNotionBlock', () => {
   it('detects Apple Music single-track embed URLs', () => {

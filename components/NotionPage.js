@@ -2,11 +2,12 @@ import { siteConfig } from '@/lib/config'
 import { compressImage, mapImgUrl } from '@/lib/db/notion/mapImage'
 import NotionEmbed from '@/components/NotionEmbed'
 import NotionLink from '@/components/NotionLink'
+import { normalizeTitlelessQuoteBlocks } from '@/lib/notion/normalizeTitlelessQuoteBlocks'
 import { isBrowser, loadExternalResource } from '@/lib/utils'
 import mediumZoom from '@fisch0920/medium-zoom'
 import 'katex/dist/katex.min.css'
 import dynamic from 'next/dynamic'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { NotionRenderer } from 'react-notion-x'
 import OriginalityProof from './OriginalityProof'
 
@@ -23,6 +24,10 @@ const NotionPage = ({ post, className }) => {
   const SPOILER_TEXT_TAG = siteConfig('SPOILER_TEXT_TAG')
 
   const zoomRef = useRef(null)
+  const notionRecordMap = useMemo(
+    () => normalizeTitlelessQuoteBlocks(post?.blockMap),
+    [post?.blockMap]
+  )
   const IMAGE_ZOOM_IN_WIDTH = siteConfig('IMAGE_ZOOM_IN_WIDTH', 1200)
   // 页面首次打开时执行的勾子
   useEffect(() => {
@@ -116,7 +121,7 @@ const NotionPage = ({ post, className }) => {
       id='notion-article'
       className={`mx-auto overflow-hidden ${className || ''}`}>
       <NotionRenderer
-        recordMap={post?.blockMap}
+        recordMap={notionRecordMap}
         mapPageUrl={mapPageUrl}
         mapImageUrl={mapImgUrl}
         components={{
@@ -127,7 +132,6 @@ const NotionPage = ({ post, className }) => {
           Link: NotionLink,
           Modal,
           Pdf,
-          Quote: NotionQuote,
           Tweet
         }}
       />
@@ -297,40 +301,6 @@ const Modal = dynamic(
 
 const Tweet = ({ id }) => {
   return <TweetEmbed tweetId={id} />
-}
-
-// Custom Quote override: react-notion-x drops quotes without properties.title
-// (returns null from early guard). This renders them correctly — fixes #4140.
-const NotionQuote = ({ block, children }) => {
-  const title = block?.properties?.title
-  return (
-    <blockquote className='notion-quote'>
-      {title && <NotionText value={title} />}
-      {children}
-    </blockquote>
-  )
-}
-
-// Minimal inline text renderer for Notion rich-text arrays.
-// Each segment is [plainText, [[formatType, optionalValue], ...]].
-const NotionText = ({ value }) => {
-  if (!Array.isArray(value)) return null
-  return value.map((segment, i) => {
-    if (!Array.isArray(segment) || !segment[0]) return null
-    const [text, formats] = segment
-    let element = <>{text}</>
-    if (Array.isArray(formats)) {
-      for (const fmt of formats) {
-        const type = Array.isArray(fmt) ? fmt[0] : fmt
-        if (type === 'b') element = <strong>{element}</strong>
-        else if (type === 'i') element = <em>{element}</em>
-        else if (type === 's') element = <s>{element}</s>
-        else if (type === 'c') element = <code>{element}</code>
-        else if (type === 'a') element = <a href={Array.isArray(fmt) ? fmt[1] : '#'}>{element}</a>
-      }
-    }
-    return <span key={i}>{element}</span>
-  })
 }
 
 export default NotionPage
