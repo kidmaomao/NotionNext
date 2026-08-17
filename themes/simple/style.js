@@ -325,17 +325,14 @@ const Style = () => {
     animation: simple-fade-up 0.72s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     transition:
       border-color 0.22s ease,
-      box-shadow 0.22s ease,
-      transform 0.22s ease;
+      box-shadow 0.22s ease;
   }
 
   #theme-simple nav.w-full:hover {
-    animation: none;
     border-color: rgba(47, 111, 159, 0.50) !important;
     box-shadow:
       0 16px 36px var(--simple-glow),
       0 0 0 1px rgba(47, 111, 159, 0.12);
-    transform: translateY(-2px);
   }
 
   #theme-simple #nav-bar-inner {
@@ -417,7 +414,6 @@ const Style = () => {
     overflow: hidden;
     animation: simple-fade-up 0.68s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     transition:
-      transform 0.24s ease,
       border-color 0.24s ease,
       box-shadow 0.24s ease;
   }
@@ -462,8 +458,6 @@ const Style = () => {
   }
 
   #theme-simple #posts-wrapper > div > div:hover {
-    animation: none;
-    transform: translateY(-5px);
     border-color: rgba(47, 111, 159, 0.58) !important;
     background:
       linear-gradient(135deg, var(--simple-hover-surface), transparent 42%),
@@ -540,12 +534,10 @@ const Style = () => {
     animation: simple-fade-up 0.68s 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     transition:
       border-color 0.22s ease,
-      box-shadow 0.22s ease,
-      transform 0.22s ease;
+      box-shadow 0.22s ease;
   }
 
   #theme-simple #right-sidebar > *:hover {
-    animation: none;
     border-color: rgba(47, 111, 159, 0.52);
     background:
       linear-gradient(135deg, var(--simple-hover-surface), transparent 42%),
@@ -553,7 +545,6 @@ const Style = () => {
     box-shadow:
       0 16px 36px var(--simple-glow),
       0 0 0 1px rgba(47, 111, 159, 0.10);
-    transform: translateY(-3px);
   }
 
   #theme-simple #right-sidebar .catalog-item {
