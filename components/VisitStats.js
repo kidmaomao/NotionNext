@@ -1,11 +1,62 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import { siteConfig } from '@/lib/config'
+import styles from '@/styles/VisitStats.module.css'
 
 const VisitStatsContext = createContext({ status: 'loading', stats: null })
 const VISITOR_KEY = 'noginogi:visitor:v1'
+const CACHE_PREFIX = 'noginogi:visit-stats-cache:v1:'
+const CACHE_TTL = 5 * 60 * 1000
 const pending = new Map()
 let memoryVisitorId
+
+function validStats(stats, postId) {
+  if (!stats || typeof stats !== 'object') return false
+  const fields = ['siteViews', 'siteVisitors', 'todayViews', 'todayVisitors']
+  if (postId) fields.push('articleViews')
+  return fields.every(
+    field => Number.isSafeInteger(stats[field]) && stats[field] >= 0
+  )
+}
+
+function shanghaiDay(now) {
+  return new Date(now + 8 * 60 * 60 * 1000).toISOString().slice(0, 10)
+}
+
+function readCachedStats(key, postId) {
+  try {
+    const entry = JSON.parse(sessionStorage.getItem(CACHE_PREFIX + key))
+    const now = Date.now()
+    if (
+      entry &&
+      Number.isFinite(entry.savedAt) &&
+      now >= entry.savedAt &&
+      now - entry.savedAt < CACHE_TTL &&
+      entry.day === shanghaiDay(now) &&
+      validStats(entry.stats, postId)
+    )
+      return entry.stats
+  } catch {
+    /* 存储被禁用或缓存损坏时，照常向服务端查询。 */
+  }
+  return null
+}
+
+function saveCachedStats(key, stats) {
+  try {
+    const now = Date.now()
+    sessionStorage.setItem(
+      CACHE_PREFIX + key,
+      JSON.stringify({
+        savedAt: now,
+        day: stats.day || shanghaiDay(now),
+        stats
+      })
+    )
+  } catch {
+    /* 缓存只改善显示速度，不参与计数或访客去重。 */
+  }
+}
 
 function getVisitorId() {
   if (!memoryVisitorId) {
@@ -30,33 +81,29 @@ function getVisitorId() {
   return memoryVisitorId
 }
 
-function fetchStats(path, postId) {
-  const key = `${path}:${postId || ''}`
+function fetchStats(path, postId, readOnly = false) {
+  const key = `${readOnly ? 'read' : 'write'}:${path}:${postId || ''}`
   if (pending.has(key)) return pending.get(key)
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), 6000)
-  const promise = fetch('/api/visit-stats', {
-    method: 'POST',
+  const url = readOnly
+    ? `/api/visit-stats?postId=${encodeURIComponent(postId || '')}`
+    : '/api/visit-stats'
+  const promise = fetch(url, {
+    method: readOnly ? 'GET' : 'POST',
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ path, postId, visitorId: getVisitorId() }),
+    ...(readOnly
+      ? {}
+      : {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path, postId, visitorId: getVisitorId() })
+        }),
     signal: controller.signal
   })
     .then(async response => {
       if (!response.ok) throw new Error('statistics_unavailable')
       const stats = await response.json()
-      const fields = [
-        'siteViews',
-        'siteVisitors',
-        'todayViews',
-        'todayVisitors'
-      ]
-      if (postId) fields.push('articleViews')
-      if (
-        fields.some(
-          field => !Number.isSafeInteger(stats[field]) || stats[field] < 0
-        )
-      ) {
+      if (!validStats(stats, postId)) {
         throw new Error('statistics_unavailable')
       }
       return stats
@@ -85,12 +132,31 @@ export function VisitStatsProvider({ post, children }) {
   useEffect(() => {
     if (!enabled || !router.isReady) return
     let cancelled = false
-    setState({ key, status: 'loading', stats: null })
+    let receivedLatest = false
+    // 缓存仅用于先显示最近的真实数字；每次进入页面仍请求最新计数。
+    const cached = readCachedStats(key, postId)
+    setState({ key, status: cached ? 'ready' : 'loading', stats: cached })
+    // 首次打开也先读取已保存的数字；只读请求不增加浏览次数。
+    if (!cached)
+      fetchStats(path, postId, true).then(
+        stats => {
+          if (!cancelled && !receivedLatest) {
+            saveCachedStats(key, stats)
+            setState({ key, status: 'ready', stats })
+          }
+        },
+        () => {
+          /* 只读请求失败时等待计数请求，不覆盖后续真实结果。 */
+        }
+      )
     fetchStats(path, postId).then(
       stats => {
+        receivedLatest = true
+        saveCachedStats(key, stats)
         if (!cancelled) setState({ key, status: 'ready', stats })
       },
       () => {
+        receivedLatest = true
         if (!cancelled) setState({ key, status: 'error', stats: null })
       }
     )
@@ -107,14 +173,91 @@ export function VisitStatsProvider({ post, children }) {
   )
 }
 
+function FlipNumber({ value }) {
+  const formatted = value.toLocaleString('zh-CN')
+  const lastValue = useRef(formatted)
+  const sequence = useRef(0)
+  const [flip, setFlip] = useState({
+    previous: formatted,
+    current: formatted,
+    active: false,
+    sequence: 0
+  })
+  useEffect(() => {
+    const previous = lastValue.current
+    lastValue.current = formatted
+    if (previous === formatted) return
+    setFlip({
+      previous,
+      current: formatted,
+      active: true,
+      sequence: ++sequence.current
+    })
+    const timer = setTimeout(
+      () => setFlip(state => ({ ...state, active: false })),
+      520
+    )
+    return () => clearTimeout(timer)
+  }, [formatted])
+
+  const length = Math.max(flip.previous.length, flip.current.length)
+  const previous = flip.previous.padStart(length, ' ')
+  const current = flip.current.padStart(length, ' ')
+  return (
+    <span className={styles.number}>
+      <span className='sr-only'>{formatted}</span>
+      <span className={styles.digits} aria-hidden='true'>
+        {Array.from(current, (digit, index) => {
+          const old = previous[index]
+          const changed = flip.active && old !== digit
+          return (
+            <span
+              key={`${flip.sequence}:${index}`}
+              className={digit === ',' ? styles.separator : styles.digit}
+              data-flipping={changed ? 'true' : undefined}
+            >
+              {changed ? (
+                <>
+                  <span className={`${styles.half} ${styles.top}`}>
+                    <span>{digit}</span>
+                  </span>
+                  <span
+                    className={`${styles.half} ${styles.bottom} ${styles.oldBottom}`}
+                  >
+                    <span>{old}</span>
+                  </span>
+                  <span
+                    className={`${styles.half} ${styles.top} ${styles.oldTop}`}
+                  >
+                    <span>{old}</span>
+                  </span>
+                  <span
+                    className={`${styles.half} ${styles.bottom} ${styles.newBottom}`}
+                  >
+                    <span>{digit}</span>
+                  </span>
+                </>
+              ) : (
+                digit
+              )}
+            </span>
+          )
+        })}
+      </span>
+    </span>
+  )
+}
+
 function Count({ value, status }) {
   return (
     <span>
-      {status === 'ready' && Number.isSafeInteger(value)
-        ? value.toLocaleString('zh-CN')
-        : status === 'loading'
-          ? '…'
-          : '暂不可用'}
+      {status === 'ready' && Number.isSafeInteger(value) ? (
+        <FlipNumber value={value} />
+      ) : status === 'loading' ? (
+        '…'
+      ) : (
+        '暂不可用'
+      )}
     </span>
   )
 }
