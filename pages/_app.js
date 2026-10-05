@@ -20,6 +20,7 @@ import ExternalPlugins from '@/components/ExternalPlugins'
 import SEO from '@/components/SEO'
 import { zhCN } from '@clerk/localizations'
 import dynamic from 'next/dynamic'
+const NogiWikiWidget = dynamic(() => import('@/components/NogiWikiWidget'), { ssr: false })
 // import { ClerkProvider } from '@clerk/nextjs'
 const ClerkProvider = dynamic(() =>
   import('@clerk/nextjs').then(m => m.ClerkProvider)
@@ -90,6 +91,7 @@ const MyApp = ({ Component, pageProps }) => {
           <Component {...pageProps} />
         </GLayout>
         <ExternalPlugins {...pageProps} />
+        <NogiWikiWidget />
       </GlobalContextProvider>
     </AppErrorBoundary>
   )
