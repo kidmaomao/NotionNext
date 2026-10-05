@@ -1,7 +1,9 @@
 import { createContext, useContext, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
+import Link from 'next/link'
 import { siteConfig } from '@/lib/config'
 import styles from '@/styles/VisitStats.module.css'
+import VisitBehaviorTracker from './VisitBehaviorTracker'
 
 const VisitStatsContext = createContext({ status: 'loading', stats: null })
 const VISITOR_KEY = 'noginogi:visitor:v1'
@@ -168,6 +170,9 @@ export function VisitStatsProvider({ post, children }) {
   const value = state.key === key ? state : { status: 'loading', stats: null }
   return (
     <VisitStatsContext.Provider value={value}>
+      {enabled && router.isReady && (
+        <VisitBehaviorTracker path={path} postId={postId} title={post?.title} />
+      )}
       {children}
     </VisitStatsContext.Provider>
   )
@@ -311,6 +316,14 @@ export function SiteVisitStats() {
       <span>
         总浏览 <Count value={stats.siteViews} status={status} />
       </span>
+      {process.env.NEXT_PUBLIC_VISIT_ANALYTICS_ENABLE === 'true' && (
+        <Link
+          href='/privacy/analytics'
+          className='underline opacity-70 hover:opacity-100'
+        >
+          统计说明
+        </Link>
+      )}
     </div>
   )
 }
