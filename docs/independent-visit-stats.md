@@ -6,13 +6,13 @@
 
 在 **NotionNext 的 Vercel 项目** `notion-next-20250821` 中设置以下环境变量，然后重新部署。Twikoo 是另一个项目，其环境变量不会自动传给 NotionNext。
 
-| 变量 | 值 | 范围 |
-| --- | --- | --- |
-| `NEXT_PUBLIC_ANALYTICS_SELF_HOSTED_ENABLE` | `true` | Production |
-| `VISIT_STATS_MONGODB_URI` | MongoDB 连接字符串，可复用 Twikoo 的 MongoDB 服务 | Production，Secret |
-| `VISIT_STATS_MONGODB_DATABASE` | `notionnext_visits` | Production |
-| `VISIT_STATS_NAMESPACE` | `noginogi:visits:production:v1` | Production |
-| `VISIT_STATS_HASH_SECRET` | 随机生成的固定密钥 | Production，Secret |
+| 变量                                       | 值                                                | 范围               |
+| ------------------------------------------ | ------------------------------------------------- | ------------------ |
+| `NEXT_PUBLIC_ANALYTICS_SELF_HOSTED_ENABLE` | `true`                                            | Production         |
+| `VISIT_STATS_MONGODB_URI`                  | MongoDB 连接字符串，可复用 Twikoo 的 MongoDB 服务 | Production，Secret |
+| `VISIT_STATS_MONGODB_DATABASE`             | `notionnext_visits`                               | Production         |
+| `VISIT_STATS_NAMESPACE`                    | `noginogi:visits:production:v1`                   | Production         |
+| `VISIT_STATS_HASH_SECRET`                  | 随机生成的固定密钥                                | Production，Secret |
 
 只有开关使用 `NEXT_PUBLIC_`。数据库地址、密码和密钥不得放入 Notion 配置表、浏览器脚本、代码仓库或聊天回复。密钥用于生成匿名标识，长期保持不变；更换密钥会使同一浏览器被视为新访客。未设置密钥时使用连接字符串作为密钥，因此建议显式设置。
 
@@ -32,6 +32,8 @@ Preview 默认不写入统计。需要测试预览时，配置独立测试数据
 - 计数保存在数据库中，重新部署不会清空。统计数据没有经过缓存清理接口。
 
 开启后，Simple 文章信息栏切换为独立计数，同时停止原不蒜子统计脚本。未开启时保留既有行为。加载时显示占位提示；接口异常、未配置数据库或数据库权限不足时显示“暂不可用”，不把故障显示成 0 次。
+
+首次打开文章时，先通过只读请求取得数据库已保存的计数，同时在后台记录当前访问。较晚到达的只读结果不会覆盖已经更新的数字。同一标签页再次打开文章时，会先显示五分钟内保存的真实计数，再向服务端更新最新值。数字变化时使用约半秒的翻牌动画，未变化时不播放；系统开启减少动态效果时直接更新。缓存不参与计数和去重，上海日期跨日或缓存过期后不使用；刷新失败仍显示“暂不可用”。数据库使用批量读写减少网络往返，五分钟内重复访问在检查限流和已有去重记录后直接读取计数。
 
 旧不蒜子的累计次数不自动导入。若能取回原始数字，可另行制定一次性的初始化方案；启用本功能本身不会访问或清空旧统计服务。
 
