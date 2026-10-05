@@ -1,20 +1,45 @@
 import Head from 'next/head'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { authenticated, adminConfigured } from '@/lib/server/visitAdminAuth'
-import world from '@/lib/analytics/world-map.json'
+import regional from '@/lib/analytics/regional-map.json'
+import {
+  AREA_LABELS,
+  KIND_LABELS,
+  sessionStatus
+} from '@/lib/analytics/journeys'
 import styles from '@/styles/VisitorDashboard.module.css'
 
 const countryNames = new Intl.DisplayNames(['zh-CN'], { type: 'region' })
 const countryName = code => {
   try {
-    return code ? countryNames.of(code) : '位置未知'
+    return (
+      { CN: '中国大陆', HK: '香港', MO: '澳门', TW: '台湾' }[code] ||
+      (code ? countryNames.of(code) : '位置未知')
+    )
   } catch {
     return '位置未知'
   }
 }
+const cityNames = {
+  Guangzhou: '广州',
+  Shenzhen: '深圳',
+  Beijing: '北京',
+  Shanghai: '上海',
+  Jinan: '济南',
+  'Hong Kong': '香港',
+  Macao: '澳门',
+  Macau: '澳门',
+  Taipei: '台北',
+  Singapore: '新加坡',
+  Tokyo: '东京',
+  Seoul: '首尔'
+}
 const locationName = location =>
-  [countryName(location?.country), location?.city || location?.region]
+  [
+    countryName(location?.country),
+    cityNames[location?.city] || location?.city || location?.region
+  ]
     .filter(Boolean)
     .join(' · ')
 const number = value => Number(value || 0).toLocaleString('zh-CN')
@@ -163,101 +188,6 @@ function Login({ configured, onLogin }) {
   )
 }
 
-function WorldMap({ locations, countries, country, onCountry }) {
-  const [hover, setHover] = useState('')
-  const counts = new Map(countries.map(row => [row._id, row.visitors]))
-  const markers = locations.filter(
-    row =>
-      Number.isFinite(row._id?.latitude) && Number.isFinite(row._id?.longitude)
-  )
-  return (
-    <div className={styles.mapWrap}>
-      <svg
-        className={styles.map}
-        viewBox='0 0 1000 500'
-        role='img'
-        aria-label='访客的大致地区分布地图'
-      >
-        <defs>
-          <pattern
-            id='map-grid'
-            width='80'
-            height='80'
-            patternUnits='userSpaceOnUse'
-          >
-            <path
-              d='M80 0H0V80'
-              fill='none'
-              stroke='#dbe6e7'
-              strokeWidth='.6'
-            />
-          </pattern>
-        </defs>
-        <rect width='1000' height='500' fill='url(#map-grid)' />
-        {world.map((item, index) => (
-          <path
-            key={`${item.code}:${index}`}
-            d={item.path}
-            className={styles.country}
-            fill={
-              item.code === country
-                ? '#5db9a9'
-                : counts.has(item.code)
-                  ? '#bee5dc'
-                  : '#e5edec'
-            }
-            onMouseEnter={() =>
-              setHover(
-                `${countryName(item.code)} · ${counts.get(item.code) || 0} 位访客`
-              )
-            }
-            onMouseLeave={() => setHover('')}
-            onClick={() =>
-              /^[A-Z]{2}$/.test(item.code) &&
-              onCountry(item.code === country ? '' : item.code)
-            }
-          >
-            <title>
-              {countryName(item.code)} · {counts.get(item.code) || 0} 位访客
-            </title>
-          </path>
-        ))}
-        {markers.map((row, index) => (
-          <g
-            key={index}
-            transform={`translate(${((row._id.longitude + 180) * 1000) / 360},${((90 - row._id.latitude) * 500) / 180})`}
-          >
-            <circle
-              r={Math.min(20, 5 + Math.sqrt(row.visitors) * 2)}
-              fill='#14967e'
-              opacity='.16'
-            />
-            <circle r='4' fill='#168f78' stroke='white' strokeWidth='1.5'>
-              <title>
-                {locationName(row._id)} · {row.visitors} 位访客 · {row.views}{' '}
-                次打开
-              </title>
-            </circle>
-          </g>
-        ))}
-      </svg>
-      <div className={styles.mapTooltip}>
-        {hover ||
-          (country
-            ? `当前筛选：${countryName(country)}`
-            : '点击国家／地区筛选访客')}
-      </div>
-      <div className={styles.mapCaption}>
-        <span>
-          <i />
-          访客所在的大致地区
-        </span>
-        <span>地图：Natural Earth</span>
-      </div>
-    </div>
-  )
-}
-
 function Trend({ rows, days, from }) {
   const points = Array.from({ length: days }, (_, index) => {
     const day = new Date(new Date(from).getTime() + index * 86400000 + 28800000)
@@ -312,25 +242,205 @@ function Breakdown({ rows, direct }) {
   )
 }
 
-function VisitorDetail({ visitor, days, country, onClose, onExpired }) {
-  const [visits, setVisits] = useState(null)
+function RegionalMap({ locations, countries, area, onArea }) {
+  const [hover, setHover] = useState('')
+  const counts = new Map(countries.map(row => [row._id, row.visitors]))
+  const project = (longitude, latitude) => [
+    ((longitude - 72) * 1000) / 74,
+    ((56 - latitude) * 760) / 56
+  ]
+  const markers = locations.filter(
+    row =>
+      Number.isFinite(row._id?.latitude) &&
+      Number.isFinite(row._id?.longitude) &&
+      row._id.longitude >= 72 &&
+      row._id.longitude <= 146 &&
+      row._id.latitude >= 0 &&
+      row._id.latitude <= 56
+  )
+  return (
+    <div className={styles.mapWrap}>
+      <svg
+        className={styles.map}
+        viewBox='0 0 1000 760'
+        role='img'
+        aria-label='中国、港澳台与周边访客地图'
+      >
+        <defs>
+          <pattern
+            id='map-grid'
+            width='70'
+            height='70'
+            patternUnits='userSpaceOnUse'
+          >
+            <path
+              d='M70 0H0V70'
+              fill='none'
+              stroke='#364858'
+              strokeWidth='.7'
+            />
+          </pattern>
+        </defs>
+        <rect width='1000' height='760' fill='url(#map-grid)' />
+        {regional.countries.map(item => (
+          <path
+            key={item.code}
+            d={item.path}
+            className={styles.country}
+            fill={
+              item.code === area
+                ? '#315d76'
+                : counts.has(item.code)
+                  ? '#294653'
+                  : '#252e38'
+            }
+            onMouseEnter={() =>
+              setHover(
+                countryName(item.code) +
+                  ' · ' +
+                  (counts.get(item.code) || 0) +
+                  ' 位访客'
+              )
+            }
+            onMouseLeave={() => setHover('')}
+            onClick={() =>
+              onArea(
+                ['CN', 'HK', 'MO', 'TW'].includes(item.code)
+                  ? item.code
+                  : 'nearby'
+              )
+            }
+          >
+            <title>
+              {countryName(item.code)} · {counts.get(item.code) || 0} 位访客
+            </title>
+          </path>
+        ))}
+        <g className={styles.provinces}>
+          {regional.provinces.map(item => (
+            <path
+              key={item.code}
+              d={item.path}
+              onMouseEnter={() => setHover(item.name)}
+              onMouseLeave={() => setHover('')}
+            >
+              <title>{item.name}</title>
+            </path>
+          ))}
+        </g>
+        {[
+          ['中国大陆', 104, 36],
+          ['台湾', 123, 24],
+          ['日本', 138, 38],
+          ['韩国', 128, 36],
+          ['蒙古', 103, 47],
+          ['越南', 106, 16],
+          ['新加坡', 106, 2]
+        ].map(([label, lon, lat]) => (
+          <text
+            key={label}
+            x={project(lon, lat)[0]}
+            y={project(lon, lat)[1]}
+            className={styles.mapLabel}
+          >
+            {label}
+          </text>
+        ))}
+        {markers.map((row, index) => (
+          <g
+            key={index}
+            transform={
+              'translate(' +
+              project(row._id.longitude, row._id.latitude).join(',') +
+              ')'
+            }
+          >
+            <circle
+              r={Math.min(24, 8 + Math.sqrt(row.visitors) * 3)}
+              fill='#9cdbff'
+              opacity='.14'
+            />
+            <circle r='4.5' fill='#9cdbff' stroke='#15191f' strokeWidth='2'>
+              <title>
+                {locationName(row._id)} · {row.visitors} 位访客 · {row.views}{' '}
+                次打开
+              </title>
+            </circle>
+          </g>
+        ))}
+        <g className={styles.mapCallouts}>
+          {[
+            ['HK', '香港', 114.2, 22.3, 710, 510],
+            ['MO', '澳门', 113.5, 22.2, 518, 470]
+          ].map(([code, label, lon, lat, x, y]) => (
+            <g key={code} onClick={() => onArea(code)}>
+              <path
+                d={'M' + project(lon, lat).join(',') + 'L' + x + ',' + y}
+                stroke='#9cdbff'
+                strokeWidth='1'
+              />
+              <circle
+                cx={project(lon, lat)[0]}
+                cy={project(lon, lat)[1]}
+                r='4'
+                fill='#f2bd72'
+              />
+              <rect
+                x={x - 20}
+                y={y - 25}
+                width='108'
+                height='39'
+                rx='8'
+                fill='#17212b'
+                stroke='#506679'
+              />
+              <text x={x - 8} y={y}>
+                {label} {counts.get(code) || 0}
+              </text>
+            </g>
+          ))}
+        </g>
+      </svg>
+      <div className={styles.mapTooltip}>
+        {hover || '中国、港澳台及周边 · 点击地区筛选'}
+      </div>
+      <div className={styles.mapCaption}>
+        <span>
+          <i />
+          IP 推断的大致位置
+        </span>
+        <span>Natural Earth · 非精确定位</span>
+      </div>
+    </div>
+  )
+}
+
+function PageLabel({ path, title, seconds }) {
+  return (
+    <span className={styles.pageLabel}>
+      <span title={title || path}>{title || path}</span>
+      <small>
+        {path}
+        {seconds !== undefined ? ' · ' + duration(seconds) : ''}
+      </small>
+    </span>
+  )
+}
+function JourneyDetail({ journey, days, onClose, onExpired }) {
+  const [result, setResult] = useState(null)
   const [error, setError] = useState('')
-  const [truncated, setTruncated] = useState(false)
   useEffect(() => {
     const controller = new AbortController()
-    fetch(
-      `/api/visit-admin/data?days=${days}&visitor=${visitor._id}&country=${country}`,
-      { signal: controller.signal }
-    )
+    fetch('/api/visit-admin/data?days=' + days + '&session=' + journey._id, {
+      signal: controller.signal
+    })
       .then(async response => {
         if (response.status === 401) {
           onExpired()
           return
         }
         if (!response.ok) throw new Error('浏览路径暂时无法加载')
-        const result = await response.json()
-        setVisits(result.visits)
-        setTruncated(result.truncated)
+        setResult(await response.json())
       })
       .catch(e => {
         if (e.name !== 'AbortError') setError(e.message)
@@ -343,14 +453,19 @@ function VisitorDetail({ visitor, days, country, onClose, onExpired }) {
       controller.abort()
       document.removeEventListener('keydown', key)
     }
-  }, [visitor, days, country, onClose, onExpired])
+  }, [journey._id, days, onClose, onExpired])
+  const visits = result?.visits ? [...result.visits].reverse() : null
+  const latest = visits?.at(-1)
+  const status = sessionStatus(latest || journey)
+  const source = result?.metadata?.source || journey.source
+  const kind = result?.metadata?.kind || journey.kind
   return (
     <div className={styles.overlay} onClick={onClose}>
       <section
         className={styles.drawer}
         role='dialog'
         aria-modal='true'
-        aria-label='访客浏览路径'
+        aria-label='访客访问全过程'
         onClick={e => e.stopPropagation()}
       >
         <button
@@ -361,35 +476,81 @@ function VisitorDetail({ visitor, days, country, onClose, onExpired }) {
         >
           ×
         </button>
-        <span className={styles.eyebrow}>匿名访客</span>
-        <h2>访客 {visitor._id.slice(0, 8)}</h2>
+        <span className={styles.eyebrow}>VISITOR JOURNEY</span>
+        <h2>访客 {journey.visitor.slice(0, 8)}</h2>
         <p className={styles.muted}>
-          {locationName(visitor.location)} · {visitor.device} ·{' '}
-          {visitor.browser}
+          {locationName(journey.location)} · {journey.device} ·{' '}
+          {journey.browser}
         </p>
-        <div className={styles.detailMetrics}>
-          <div>
-            <strong>{number(visitor.views)}</strong>
-            <small>页面打开</small>
-          </div>
-          <div>
-            <strong>{duration(visitor.duration)}</strong>
-            <small>前台停留总计</small>
-          </div>
+        <div className={styles.visitTags}>
+          <span className={kind === 'returning' ? styles.returningTag : ''}>
+            {KIND_LABELS[kind]}
+          </span>
+          <span>{time(journey.at)} 开始</span>
+          <span>{status.label}</span>
         </div>
+        <div className={styles.journeySummary}>
+          <section>
+            <span>01 / 从哪里来</span>
+            <strong>{source.label}</strong>
+            <small>
+              {source.evidence}
+              {source.host ? ' · ' + source.host : ''}
+            </small>
+            {result?.metadata?.firstSeen && (
+              <small>首次识别于 {time(result.metadata.firstSeen)}</small>
+            )}
+          </section>
+          <section>
+            <span>02 / 落地页面</span>
+            <PageLabel
+              path={journey.landingPath}
+              title={journey.landingTitle}
+              seconds={journey.landingSeconds}
+            />
+            <small>第一篇页面的前台停留估算</small>
+          </section>
+          <section>
+            <span>03 / 最后页面与离开</span>
+            <PageLabel
+              path={latest?.path || journey.lastPath}
+              title={latest?.title || journey.lastTitle}
+            />
+            <small>{status.hint}</small>
+          </section>
+        </div>
+        {journey.flaggedPages > 0 && (
+          <div className={styles.alertBox}>
+            <strong>异常点击提示 · {journey.flaggedPages} 个页面</strong>
+            <p>
+              连续点击：2 秒内、40 像素范围连续点击 5 次。高频链接点击：至少 30
+              次且平均每秒至少 1 次，或单页累计达到 100
+              次。标记供排查，不代表恶意访问。
+            </p>
+          </div>
+        )}
         <h3>
-          浏览路径 <small>最近访问在上 · 北京时间</small>
+          04 / 浏览顺序 <small>按进入时间排列 · 北京时间</small>
         </h3>
         {error && (
           <p role='alert' className={styles.error}>
             {error}
           </p>
         )}
-        {!visits && !error && <p>正在读取浏览路径…</p>}
+        {!visits && !error && (
+          <p className={styles.muted}>正在读取完整浏览路径…</p>
+        )}
+        {result?.truncated && (
+          <p className={styles.muted}>
+            此会话较长，仅显示最近 200 个页面；落地页见上方。
+          </p>
+        )}
         <div className={styles.timeline}>
           {visits?.map((visit, index) => (
-            <article key={`${visit.at}:${index}`}>
-              <small>{time(visit.at)}</small>
+            <article key={visit.at + ':' + index}>
+              <small>
+                {String(index + 1).padStart(2, '0')} · {time(visit.at)}
+              </small>
               <a href={visit.path} target='_blank' rel='noreferrer'>
                 {visit.title || visit.path}
                 <Icon name='arrow' />
@@ -397,35 +558,96 @@ function VisitorDetail({ visitor, days, country, onClose, onExpired }) {
               <code>{visit.path}</code>
               <p>
                 前台停留 {duration(visit.activeSeconds)} <span>·</span> 滚动{' '}
-                {visit.scrollPercent}% <span>·</span> 点击 {visit.clicks} 次
+                {visit.scrollPercent}% <span>·</span> 链接点击 {visit.clicks} 次
               </p>
-              {visit.lastLink && (
-                <p>
-                  最后点击：<code>{visit.lastLink}</code>
-                </p>
+              {visit.lastLink && <p>最后点击：{visit.lastLink}</p>}
+              {(visit.anomalies || []).map(reason => (
+                <span className={styles.anomalyBadge} key={reason}>
+                  {reason}
+                </span>
+              ))}
+              {index === visits.length - 1 && (
+                <div className={styles.visitTags}>
+                  <span>{status.label}</span>
+                </div>
               )}
-              <div className={styles.visitTags}>
-                <span>{visit.referrer || '直接访问'}</span>
-                <span>{locationName(visit.location)}</span>
-                <span>会话 {visit.session.slice(0, 6)}</span>
-              </div>
             </article>
           ))}
         </div>
-        {truncated && (
-          <p className={styles.muted}>
-            显示最近 200 次访问，请缩短时间范围查看更多细节。
-          </p>
-        )}
       </section>
     </div>
   )
 }
-
+function ShareLinks() {
+  const [path, setPath] = useState('/')
+  const [copied, setCopied] = useState('')
+  const valid =
+    /^\/(?!\/)[^?#\s]*$/.test(path) && !/^\/(admin|api)(\/|$)/.test(path)
+  const copy = async source => {
+    if (!valid) return
+    try {
+      await navigator.clipboard.writeText(
+        'https://www.noginogi.sbs' +
+          path +
+          '?utm_source=' +
+          source +
+          '&utm_medium=social'
+      )
+      setCopied(source)
+    } catch {
+      setCopied('error')
+    }
+  }
+  return (
+    <section className={styles.panel}>
+      <div className={styles.panelHeading}>
+        <div>
+          <h2>社群分享链接</h2>
+          <p>聊天应用可能隐藏来源，使用带标记的链接可区分分享渠道。</p>
+        </div>
+      </div>
+      <div className={styles.shareLinks}>
+        <label htmlFor='share-path'>要分享的页面路径</label>
+        <input
+          id='share-path'
+          value={path}
+          onChange={e => {
+            setPath(e.target.value)
+            setCopied('')
+          }}
+          placeholder='/article/20260814'
+        />
+        <div>
+          {[
+            ['qq', 'QQ'],
+            ['wechat', '微信'],
+            ['group', '其他社群']
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              disabled={!valid}
+              onClick={() => {
+                void copy(value)
+              }}
+            >
+              {copied === value ? '已复制' : '复制' + label + '链接'}
+            </button>
+          ))}
+        </div>
+        {!valid && <small>请输入站内路径，例如 /article/20260814</small>}
+        {copied === 'error' && (
+          <small>
+            浏览器未允许复制，请手动添加 ?utm_source=qq&utm_medium=social
+          </small>
+        )}
+      </div>
+    </section>
+  )
+}
 export default function Visitors({ authenticated: initialAuth, configured }) {
   const [loggedIn, setLoggedIn] = useState(initialAuth)
   const [days, setDays] = useState(7)
-  const [country, setCountry] = useState('')
+  const [area, setArea] = useState('')
   const [page, setPage] = useState(1)
   const [tab, setTab] = useState('overview')
   const [data, setData] = useState(null)
@@ -433,6 +655,7 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
   const [error, setError] = useState('')
   const [refresh, setRefresh] = useState(0)
   const [selected, setSelected] = useState(null)
+  const [onlyFlagged, setOnlyFlagged] = useState(false)
   useEffect(() => {
     if (!loggedIn) return
     const controller = new AbortController()
@@ -440,7 +663,7 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
     setError('')
     setData(null)
     fetch(
-      `/api/visit-admin/data?days=${days}&country=${country}&page=${page}`,
+      '/api/visit-admin/data?days=' + days + '&area=' + area + '&page=' + page,
       { signal: controller.signal }
     )
       .then(async response => {
@@ -458,33 +681,38 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
         if (!controller.signal.aborted) setBusy(false)
       })
     return () => controller.abort()
-  }, [loggedIn, days, country, page, refresh])
-  const changeCountry = value => {
-    setCountry(value)
+  }, [loggedIn, days, area, page, refresh])
+  const changeArea = value => {
+    setArea(value)
     setPage(1)
     setSelected(null)
   }
-  async function logout() {
-    const response = await fetch('/api/visit-admin/session', {
-      method: 'DELETE'
-    })
-    if (response.ok) {
-      setLoggedIn(false)
-      setData(null)
-    }
-  }
-  const closeDetail = () => setSelected(null)
-  const expired = () => {
+  const closeDetail = useCallback(() => setSelected(null), [])
+  const expired = useCallback(() => {
     setLoggedIn(false)
     setSelected(null)
     setData(null)
+  }, [])
+  const logout = async () => {
+    const response = await fetch('/api/visit-admin/session', {
+      method: 'DELETE'
+    })
+    if (response.ok) expired()
   }
   const summary = data?.summary
+  const journeys = data?.sessions || []
+  const rows = onlyFlagged
+    ? journeys.filter(row => row.flaggedPages > 0)
+    : journeys
+  const newCount = data?.kinds?.find(row => row._id === 'new')?.views || 0
+  const returningCount =
+    data?.kinds?.find(row => row._id === 'returning')?.views || 0
   return (
     <>
       <Head>
-        <title>访客后台 | 洛奇记事本</title>
+        <title>访客后台 | noginogi</title>
         <meta name='robots' content='noindex,nofollow' />
+        <meta name='color-scheme' content='dark' />
       </Head>
       {!loggedIn ? (
         <Login configured={configured} onLogin={() => setLoggedIn(true)} />
@@ -494,13 +722,14 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
             <Link href='/' className={styles.brand}>
               <span>洛</span>
               <div>
-                洛奇记事本<small>访客统计</small>
+                noginogi<small>洛奇记事本 · 访客后台</small>
               </div>
             </Link>
             <div className={styles.workspace}>
-              <i /> www.noginogi.sbs
+              <i />
+              www.noginogi.sbs
             </div>
-            <span className={styles.navLabel}>分析</span>
+            <span className={styles.navLabel}>访问分析</span>
             <nav>
               <button
                 className={tab === 'overview' ? styles.activeNav : ''}
@@ -514,7 +743,7 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                 onClick={() => setTab('visitors')}
               >
                 <Icon name='people' />
-                访客与浏览路径
+                访问明细
               </button>
               <a href='/privacy/analytics' target='_blank' rel='noreferrer'>
                 <Icon name='lock' />
@@ -538,9 +767,13 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
           <main className={styles.main}>
             <header className={styles.header}>
               <div>
-                <span className={styles.eyebrow}>VISITOR ANALYTICS</span>
-                <h1>{tab === 'overview' ? '访客的足迹' : '访客与浏览路径'}</h1>
-                <p>了解访客从哪里来，以及他们在看什么。</p>
+                <span className={styles.eyebrow}>
+                  NOGINOGI / VISITOR ANALYTICS
+                </span>
+                <h1>
+                  {tab === 'overview' ? '访客的足迹' : '每一次访问，从来到离开'}
+                </h1>
+                <p>来源、落地页与浏览顺序，放在同一条记录里。</p>
               </div>
               <button
                 className={styles.refresh}
@@ -559,8 +792,8 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                   [30, '近 30 天']
                 ].map(([value, label]) => (
                   <button
-                    className={days === value ? styles.selectedPeriod : ''}
                     key={value}
+                    className={days === value ? styles.selectedPeriod : ''}
                     onClick={() => {
                       setDays(value)
                       setPage(1)
@@ -571,39 +804,28 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                   </button>
                 ))}
               </div>
-              <label>
-                <Icon name='globe' />
-                <select
-                  aria-label='国家或地区筛选'
-                  value={country}
-                  onChange={e => changeCountry(e.target.value)}
-                >
-                  <option value=''>全部国家／地区</option>
-                  {world
-                    .filter(row => /^[A-Z]{2}$/.test(row.code))
-                    .sort((a, b) =>
-                      countryName(a.code).localeCompare(
-                        countryName(b.code),
-                        'zh-CN'
-                      )
-                    )
-                    .map(row => (
-                      <option key={row.code} value={row.code}>
-                        {countryName(row.code)}
-                      </option>
-                    ))}
-                </select>
-              </label>
               <span className={styles.updated}>
-                {data ? `更新于 ${time(data.generatedAt)}` : '北京时间'}
+                {data ? '更新于 ' + time(data.generatedAt) : '北京时间'}
               </span>
+            </div>
+            <div className={styles.areaFilters} aria-label='地区筛选'>
+              {Object.entries(AREA_LABELS).map(([value, label]) => (
+                <button
+                  key={value}
+                  aria-pressed={area === value}
+                  className={area === value ? styles.activeArea : ''}
+                  onClick={() => changeArea(value)}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
             <div className={styles.notice}>
               {process.env.NODE_ENV === 'development' && (
                 <strong>本地测试环境 · </strong>
               )}
-              后台统计页面打开次数，包含刷新；文章上显示的浏览次数继续按 5
-              分钟去重。明细从功能启用后开始记录，保留 90 天。
+              页面打开包含刷新，文章浏览次数仍按 5 分钟去重。行为明细保留 90
+              天。
             </div>
             {error && (
               <p role='alert' className={styles.error}>
@@ -623,10 +845,10 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                       '按浏览器标识去重'
                     ],
                     [
-                      '访问会话',
-                      summary.sessions,
+                      '新客会话 / 熟客会话',
+                      newCount + ' / ' + returningCount,
                       'globe',
-                      '30 分钟未访问后新建'
+                      '同一访客可多次进入'
                     ],
                     [
                       '平均前台停留',
@@ -653,56 +875,63 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                       <section className={styles.panel}>
                         <div className={styles.panelHeading}>
                           <div>
-                            <h2>访客地图</h2>
-                            <p>IP 推断的大致地区，可能受到代理影响</p>
+                            <h2>中国与周边的访问</h2>
+                            <p>中国大陆、香港、澳门、台湾与周边地区</p>
                           </div>
                           <span className={styles.pill}>
-                            <i /> {data.countries.filter(row => row._id).length}{' '}
-                            个地区
+                            <i />
+                            区域地图
                           </span>
                         </div>
-                        <WorldMap
+                        <RegionalMap
                           locations={data.locations}
                           countries={data.countries}
-                          country={country}
-                          onCountry={changeCountry}
+                          area={area}
+                          onArea={changeArea}
                         />
                       </section>
                       <section className={styles.panel}>
                         <div className={styles.panelHeading}>
                           <h2>地区分布</h2>
-                          {country && (
+                          {area && (
                             <button
                               className={styles.textButton}
-                              onClick={() => changeCountry('')}
+                              onClick={() => changeArea('')}
                             >
-                              清除筛选
+                              查看全部
                             </button>
                           )}
                         </div>
                         <div className={styles.regions}>
-                          {data.countries.slice(0, 7).map((row, index) => (
-                            <button
-                              key={row._id || 'unknown'}
-                              onClick={() => row._id && changeCountry(row._id)}
-                            >
-                              <span className={styles.rank}>
-                                {String(index + 1).padStart(2, '0')}
-                              </span>
-                              <span>
-                                {countryName(row._id)}
-                                <small>{number(row.views)} 次打开</small>
-                              </span>
-                              <strong>
-                                {number(row.visitors)}
-                                <small>访客</small>
-                              </strong>
-                            </button>
-                          ))}
+                          {['CN', 'HK', 'MO', 'TW', 'nearby', 'other'].map(
+                            (key, index) => {
+                              const row = data.areas?.find(
+                                row => row._id === key
+                              )
+                              return (
+                                <button
+                                  key={key}
+                                  onClick={() => changeArea(key)}
+                                >
+                                  <span className={styles.rank}>
+                                    {String(index + 1).padStart(2, '0')}
+                                  </span>
+                                  <span>
+                                    {AREA_LABELS[key]}
+                                    <small>{number(row?.views)} 次打开</small>
+                                  </span>
+                                  <strong>
+                                    {number(row?.visitors)}
+                                    <small>访客</small>
+                                  </strong>
+                                </button>
+                              )
+                            }
+                          )}
                         </div>
-                        {!data.countries.length && (
-                          <p className={styles.empty}>还没有访客位置记录</p>
-                        )}
+                        <div className={styles.geoNote}>
+                          代理与运营商可能影响位置。其他地区访问仍保留在明细中。
+                        </div>
                       </section>
                     </div>
                     <div className={styles.contentGrid}>
@@ -715,19 +944,27 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                       </section>
                       <section className={styles.panel}>
                         <div className={styles.panelHeading}>
-                          <h2>访问来源</h2>
+                          <div>
+                            <h2>从哪里进入网站</h2>
+                            <p>按访问会话统计，以落地页来源为准</p>
+                          </div>
                         </div>
                         <Breakdown
-                          rows={data.sources}
-                          direct='直接访问／未提供来源'
+                          rows={data.sessionSources}
+                          direct='直接进入／来源未提供'
                         />
+                        <p className={styles.geoNote}>
+                          来源缺失时无法判断是否来自社群；带标记的分享链接可识别渠道。
+                        </p>
                       </section>
                     </div>
                     <div className={styles.contentGrid}>
                       <section className={styles.panel}>
                         <div className={styles.panelHeading}>
                           <h2>热门页面</h2>
-                          <span className={styles.muted}>按打开次数排序</span>
+                          <span className={styles.muted}>
+                            打开 / 访客 / 平均停留
+                          </span>
                         </div>
                         <div className={styles.tableWrap}>
                           <table>
@@ -764,7 +1001,7 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                         </div>
                         {!data.pages.length && (
                           <p className={styles.empty}>
-                            新访问产生后，热门页面将显示在这里
+                            新访问产生后，页面热度会显示在这里。
                           </p>
                         )}
                       </section>
@@ -791,70 +1028,123 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                 <section className={styles.panel}>
                   <div className={styles.panelHeading}>
                     <div>
-                      <h2>最近访客</h2>
-                      <p>点击访客，查看访问顺序和页面行为</p>
+                      <h2>访问明细</h2>
+                      <p>
+                        每行是一段访问会话，点击查看完整过程；相同编号表示同一浏览器。
+                      </p>
                     </div>
                     <span className={styles.pill}>第 {page} 页</span>
                   </div>
+                  <div className={styles.journeyToolbar}>
+                    <span>
+                      {summary.sessions} 段会话 · {data.flaggedSessions}{' '}
+                      段有异常点击提示
+                    </span>
+                    <label>
+                      <input
+                        type='checkbox'
+                        checked={onlyFlagged}
+                        onChange={e => setOnlyFlagged(e.target.checked)}
+                      />
+                      只看本页有标记的记录
+                    </label>
+                  </div>
                   <div className={styles.tableWrap}>
-                    <table>
+                    <table className={styles.journeyTable}>
                       <thead>
                         <tr>
-                          <th>匿名访客</th>
-                          <th>大致位置</th>
-                          <th>最近浏览</th>
-                          <th>打开</th>
-                          <th>前台停留</th>
-                          <th>最近访问</th>
+                          <th>访客 / 时间</th>
+                          <th>来源 / 新客熟客</th>
+                          <th>落地页面 / 停留</th>
+                          <th>最后页面 / 状态</th>
+                          <th>浏览 / 总停留</th>
+                          <th>点击标记</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {data.visitors.map(visitor => (
+                        {rows.map(journey => (
                           <tr
-                            key={visitor._id}
-                            onClick={() => setSelected(visitor)}
+                            key={journey._id}
                             className={styles.visitorRow}
+                            onClick={() => setSelected(journey)}
                           >
                             <td>
                               <button
+                                className={styles.visitorButton}
                                 onClick={e => {
                                   e.stopPropagation()
-                                  setSelected(visitor)
+                                  setSelected(journey)
                                 }}
-                                className={styles.visitorButton}
                               >
                                 <span className={styles.avatar}>
-                                  {visitor._id.slice(0, 2).toUpperCase()}
+                                  {journey.visitor.slice(0, 2).toUpperCase()}
                                 </span>
                                 <span>
-                                  访客 {visitor._id.slice(0, 8)}
-                                  <small>
-                                    {visitor.device} · {visitor.browser}
-                                  </small>
+                                  访客 {journey.visitor.slice(0, 8)}
+                                  <small>{time(journey.at)}</small>
                                 </span>
                               </button>
+                              <small>{locationName(journey.location)}</small>
                             </td>
-                            <td>{locationName(visitor.location)}</td>
                             <td>
-                              <span className={styles.lastPage}>
-                                {visitor.lastTitle || visitor.lastPath}
+                              <span className={styles.sourceLabel}>
+                                {journey.source.label}
+                              </span>
+                              <small>{journey.source.evidence}</small>
+                              <span
+                                className={
+                                  journey.kind === 'returning'
+                                    ? styles.returningBadge
+                                    : styles.kindBadge
+                                }
+                              >
+                                {KIND_LABELS[journey.kind]}
                               </span>
                             </td>
-                            <td>{visitor.views}</td>
-                            <td>{duration(visitor.duration)}</td>
-                            <td>{time(visitor.lastAt)}</td>
+                            <td>
+                              <PageLabel
+                                path={journey.landingPath}
+                                title={journey.landingTitle}
+                                seconds={journey.landingSeconds}
+                              />
+                            </td>
+                            <td>
+                              <PageLabel
+                                path={journey.lastPath}
+                                title={journey.lastTitle}
+                              />
+                              <small title={sessionStatus(journey).hint}>
+                                {sessionStatus(journey).label}
+                              </small>
+                            </td>
+                            <td>
+                              {journey.views} 个页面
+                              <small>{duration(journey.duration)}</small>
+                            </td>
+                            <td>
+                              {journey.flaggedPages > 0 ? (
+                                <span className={styles.anomalyBadge}>
+                                  {journey.flaggedPages} 页待查看
+                                </span>
+                              ) : (
+                                <span className={styles.muted}>无标记</span>
+                              )}
+                              <small>{journey.clicks} 次链接点击</small>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
-                  {!data.visitors.length && (
+                  {!rows.length && (
                     <p className={styles.empty}>
-                      目前还没有访问明细。功能启用后，新访客会出现在这里。
+                      {onlyFlagged
+                        ? '本页没有异常点击标记。'
+                        : '此范围还没有访问明细。'}
                     </p>
                   )}
                   <div className={styles.pagination}>
-                    <span>每页最多 30 位访客 · 显示所选日期范围内的活动</span>
+                    <span>每页 30 段会话 · 新客判定从已保存的匿名记录开始</span>
                     <div>
                       <button
                         disabled={page === 1}
@@ -863,7 +1153,7 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                         上一页
                       </button>
                       <button
-                        disabled={data.visitors.length < 30 || page >= 100}
+                        disabled={journeys.length < 30 || page >= 100}
                         onClick={() => setPage(n => n + 1)}
                       >
                         下一页
@@ -871,18 +1161,18 @@ export default function Visitors({ authenticated: initialAuth, configured }) {
                     </div>
                   </div>
                 </section>
+                {tab === 'visitors' && <ShareLinks />}
               </>
             )}
             <footer className={styles.footer}>
-              洛奇记事本 · 匿名访问统计{' '}
+              noginogi · 洛奇记事本
               <Link href='/privacy/analytics'>统计说明</Link>
             </footer>
           </main>
           {selected && (
-            <VisitorDetail
-              visitor={selected}
+            <JourneyDetail
+              journey={selected}
               days={days}
-              country={country}
               onClose={closeDetail}
               onExpired={expired}
             />

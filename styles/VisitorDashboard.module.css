@@ -1,7 +1,12 @@
+/* Shares the site’s noginogi / Simple dark colors. */
+.dashboard,
+.loginWrap {
+  color-scheme: dark;
+}
 .dashboard {
   min-height: 100vh;
-  background: #f5f7f8;
-  color: #243b43;
+  background: #15191f;
+  color: #f2f8ff;
   font-family:
     system-ui,
     -apple-system,
@@ -13,8 +18,8 @@
   width: 226px;
   position: fixed;
   inset: 0 auto 0 0;
-  background: #fff;
-  border-right: 1px solid #e6edef;
+  background: #1f252e;
+  border-right: 1px solid #35414e;
   padding: 34px 22px;
   display: flex;
   flex-direction: column;
@@ -23,15 +28,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #203d3f;
+  color: #f2f8ff;
   font-size: 17px;
   font-weight: 650;
 }
 .brand > span {
   width: 42px;
   height: 42px;
-  background: #187d6d;
-  color: #fff;
+  background: #9cdbff;
+  color: #10141a;
   border-radius: 13px;
   display: grid;
   place-items: center;
@@ -41,15 +46,15 @@
   display: block;
   font-size: 11px;
   font-weight: 400;
-  color: #8c9da0;
+  color: #b7c9d8;
   margin-top: 4px;
   letter-spacing: 2px;
 }
 .workspace {
   font-size: 11px;
-  color: #6d8287;
-  border: 1px solid #e5eeeb;
-  background: #f7faf9;
+  color: #b7c9d8;
+  border: 1px solid #35414e;
+  background: #17212b;
   border-radius: 8px;
   padding: 12px 8px;
   margin: 30px 0;
@@ -61,13 +66,13 @@
 .pill i {
   width: 5px;
   height: 5px;
-  background: #249b7c;
+  background: #9cdbff;
   border-radius: 50%;
   display: inline-block;
 }
 .navLabel {
   font-size: 11px;
-  color: #9aabad;
+  color: #b7c9d8;
   letter-spacing: 2px;
   margin: 0 10px 12px;
 }
@@ -83,26 +88,26 @@
   border: 0;
   background: transparent;
   padding: 12px;
-  color: #6e8289;
+  color: #b7c9d8;
   border-radius: 9px;
   text-align: left;
   cursor: pointer;
 }
 .sidebar nav .activeNav {
-  background: #eaf5f0;
-  color: #178371;
+  background: #243d4d;
+  color: #9cdbff;
   font-weight: 600;
 }
 .sidebar nav button:hover,
 .sidebar nav a:hover {
-  background: #f1f6f5;
+  background: #26323f;
 }
 .sidebarFooter {
   margin-top: auto;
   font-size: 12px;
   padding: 20px 8px 0;
-  border-top: 1px solid #edf2f1;
-  color: #899b9e;
+  border-top: 1px solid #35414e;
+  color: #b7c9d8;
 }
 .sidebarFooter span {
   display: flex;
@@ -117,7 +122,7 @@
   background: none;
   display: block;
   margin-top: 16px;
-  color: #506c73;
+  color: #b7c9d8;
   cursor: pointer;
 }
 .main {
@@ -134,7 +139,7 @@
 .eyebrow {
   font-size: 10px;
   font-weight: 650;
-  color: #78948c;
+  color: #b7c9d8;
   letter-spacing: 2px;
 }
 .header h1 {
@@ -146,18 +151,18 @@
 .header p,
 .panelHeading p {
   font-size: 12px;
-  color: #88999d;
+  color: #b7c9d8;
   margin: 0;
 }
 .refresh {
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid #dce5e5;
+  border: 1px solid #35414e;
   border-radius: 8px;
-  background: #fff;
+  background: #1f252e;
   padding: 10px 14px;
-  color: #5f7b7c;
+  color: #b7c9d8;
   font-size: 12px;
   cursor: pointer;
 }
@@ -171,7 +176,7 @@
 .periods {
   display: flex;
   padding: 4px;
-  background: #e9efef;
+  background: #10141a;
   border-radius: 9px;
 }
 .periods button {
@@ -179,14 +184,14 @@
   border: 0;
   padding: 8px 17px;
   font-size: 12px;
-  color: #7c8e94;
+  color: #b7c9d8;
   border-radius: 6px;
   cursor: pointer;
 }
 .periods .selectedPeriod {
-  background: #fff;
-  color: #277f6d;
-  box-shadow: 0 2px 4px #203d3f0b;
+  background: #1f252e;
+  color: #9cdbff;
+  box-shadow: 0 2px 4px #00000025;
   font-weight: 600;
 }
 .toolbar label {
@@ -194,9 +199,9 @@
   gap: 8px;
   align-items: center;
   font-size: 12px;
-  color: #6d8586;
-  background: #fff;
-  border: 1px solid #dfe8e6;
+  color: #b7c9d8;
+  background: #1f252e;
+  border: 1px solid #35414e;
   padding: 9px 12px;
   border-radius: 8px;
 }
@@ -205,18 +210,18 @@
 }
 .toolbar select {
   border: 0;
-  background: #fff;
+  background: #1f252e;
   color: inherit;
   max-width: 180px;
 }
 .updated {
   margin-left: auto;
   font-size: 11px;
-  color: #97a6aa;
+  color: #b7c9d8;
 }
 .notice {
   font-size: 11px;
-  color: #829496;
+  color: #b7c9d8;
   margin-bottom: 23px;
   line-height: 1.8;
 }
@@ -227,8 +232,8 @@
   margin-bottom: 22px;
 }
 .kpis section {
-  background: #fff;
-  border: 1px solid #e3ebeb;
+  background: #1f252e;
+  border: 1px solid #35414e;
   border-radius: 13px;
   padding: 22px;
 }
@@ -236,12 +241,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: #758d93;
+  color: #b7c9d8;
   font-size: 12px;
 }
 .kpis section svg {
-  color: #549788;
-  background: #eef7f3;
+  color: #9cdbff;
+  background: #273b49;
   padding: 6px;
   box-sizing: content-box;
   border-radius: 9px;
@@ -256,11 +261,11 @@
 }
 .kpis small {
   font-size: 10px;
-  color: #9aabad;
+  color: #b7c9d8;
 }
 .panel {
-  background: #fff;
-  border: 1px solid #e3ebeb;
+  background: #1f252e;
+  border: 1px solid #35414e;
   border-radius: 13px;
   overflow: hidden;
   margin-bottom: 22px;
@@ -283,12 +288,12 @@
   margin-top: 6px;
 }
 .pill {
-  background: #eff7f3;
-  border: 1px solid #deede5;
+  background: #243644;
+  border: 1px solid #35414e;
   border-radius: 20px;
   padding: 6px 10px;
   font-size: 10px;
-  color: #62947d;
+  color: #b7c9d8;
   display: flex;
   gap: 6px;
   align-items: center;
@@ -303,7 +308,7 @@
 .mapWrap {
   position: relative;
   margin: 0 15px 14px;
-  background: #f7faf9;
+  background: #17212b;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -311,26 +316,26 @@
   width: 100%;
   height: auto;
   display: block;
-  max-height: 350px;
+  max-height: none;
 }
 .country {
-  stroke: #fff;
+  stroke: #435466;
   stroke-width: 0.8;
   cursor: pointer;
   transition: fill 0.15s;
 }
 .country:hover {
-  fill: #72c6b2;
+  fill: #9cdbff;
 }
 .mapTooltip {
   position: absolute;
   top: 12px;
   left: 16px;
   font-size: 10px;
-  color: #79938c;
-  background: #fffffff0;
+  color: #b7c9d8;
+  background: #17212bf0;
   padding: 7px 10px;
-  border: 1px solid #e5ece9;
+  border: 1px solid #35414e;
   border-radius: 6px;
 }
 .mapCaption {
@@ -338,7 +343,7 @@
   justify-content: space-between;
   padding: 12px 15px;
   font-size: 9px;
-  color: #95a7a1;
+  color: #b7c9d8;
 }
 .mapCaption span:first-child {
   display: flex;
@@ -348,7 +353,7 @@
 .mapCaption i {
   width: 6px;
   height: 6px;
-  background: #1b967a;
+  background: #9cdbff;
   border-radius: 50%;
 }
 .regions {
@@ -360,7 +365,7 @@
   gap: 10px;
   background: none;
   border: 0;
-  border-bottom: 1px solid #f0f4f2;
+  border-bottom: 1px solid #35414e;
   width: 100%;
   text-align: left;
   padding: 13px 0;
@@ -376,19 +381,19 @@
 .regions small {
   display: block;
   font-size: 9px;
-  color: #9aabab;
+  color: #b7c9d8;
   margin-top: 5px;
   font-weight: 400;
 }
 .regions strong {
   font-size: 16px;
-  color: #426b5f;
+  color: #b7c9d8;
   text-align: right;
   font-weight: 600;
 }
 .rank {
   font-size: 10px;
-  color: #a4b6b2;
+  color: #b7c9d8;
 }
 .trend {
   display: flex;
@@ -407,7 +412,7 @@
 }
 .barColumn > span {
   font-size: 10px;
-  color: #78a092;
+  color: #b7c9d8;
   height: 18px;
 }
 .barTrack {
@@ -420,13 +425,13 @@
 .bar {
   width: 65%;
   max-width: 36px;
-  background: linear-gradient(#62b99d, #aad6c6);
+  background: linear-gradient(#9cdbff, #9cdbff);
   border-radius: 4px 4px 0 0;
   min-width: 2px;
 }
 .barColumn small {
   font-size: 9px;
-  color: #95a9a8;
+  color: #b7c9d8;
   margin-top: 12px;
 }
 .breakdown {
@@ -442,16 +447,16 @@
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: #6d8687;
+  color: #b7c9d8;
 }
 .breakdown strong {
   font-size: 11px;
   font-weight: 500;
-  color: #547b72;
+  color: #b7c9d8;
 }
 .meter {
   height: 4px;
-  background: #f0f5f3;
+  background: #283542;
   border-radius: 5px;
   margin-top: 9px;
   overflow: hidden;
@@ -459,7 +464,7 @@
 .meter i {
   display: block;
   height: 100%;
-  background: #b0d6c8;
+  background: #9cdbff;
   border-radius: 5px;
 }
 .tableWrap {
@@ -473,21 +478,21 @@
 }
 .tableWrap th {
   font-weight: 400;
-  color: #91a3a7;
-  background: #fafcfc;
+  color: #b7c9d8;
+  background: #192029;
   padding: 12px 20px;
-  border-bottom: 1px solid #edf3f1;
+  border-bottom: 1px solid #35414e;
   white-space: nowrap;
 }
 .tableWrap td {
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f4f2;
-  color: #607b7f;
+  border-bottom: 1px solid #35414e;
+  color: #b7c9d8;
   max-width: 270px;
   white-space: nowrap;
 }
 .tableWrap td:first-child {
-  color: #3b5f5d;
+  color: #f2f8ff;
 }
 .tableWrap td a {
   font-weight: 500;
@@ -499,7 +504,7 @@
 .tableWrap td small {
   display: block;
   font-size: 9px;
-  color: #a1afb2;
+  color: #b7c9d8;
   margin-top: 5px;
 }
 .tableWrap tr:last-child td {
@@ -509,7 +514,7 @@
   cursor: pointer;
 }
 .visitorRow:hover {
-  background: #f5faf7;
+  background: #26333f;
 }
 .visitorButton {
   background: none;
@@ -528,10 +533,10 @@
   height: 32px;
   display: grid;
   place-items: center;
-  border: 1px solid #e4eee9;
-  background: #edf6ef;
+  border: 1px solid #35414e;
+  background: #273b49;
   border-radius: 9px;
-  color: #77a087;
+  color: #b7c9d8;
   font-size: 10px;
   letter-spacing: 1px;
 }
@@ -546,18 +551,18 @@
   align-items: center;
   justify-content: space-between;
   padding: 15px 20px;
-  border-top: 1px solid #f0f4f2;
-  color: #9aaaac;
+  border-top: 1px solid #35414e;
+  color: #b7c9d8;
   font-size: 9px;
   gap: 12px;
 }
 .pagination button {
-  border: 1px solid #e2ebe6;
-  background: #fff;
+  border: 1px solid #35414e;
+  background: #1f252e;
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 10px;
-  color: #628477;
+  color: #b7c9d8;
   margin-left: 6px;
   cursor: pointer;
 }
@@ -567,8 +572,8 @@
 }
 .lifetime {
   padding: 18px 23px;
-  background: #f9fbfa;
-  border-top: 1px solid #edf3ef;
+  background: #192029;
+  border-top: 1px solid #35414e;
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
@@ -576,35 +581,35 @@
 }
 .lifetime > span {
   font-size: 10px;
-  color: #8ba197;
+  color: #b7c9d8;
   width: 100%;
 }
 .lifetime strong {
   font-size: 20px;
   font-weight: 500;
-  color: #648573;
+  color: #b7c9d8;
 }
 .lifetime small {
   display: block;
   font-size: 9px;
   font-weight: 400;
-  color: #9caca2;
+  color: #b7c9d8;
   margin-top: 5px;
 }
 .muted {
   font-size: 10px;
-  color: #96a7ab;
+  color: #b7c9d8;
 }
 .textButton {
   background: none;
   border: 0;
   font-size: 10px;
-  color: #3b967c;
+  color: #b7c9d8;
   cursor: pointer;
 }
 .footer {
   font-size: 10px;
-  color: #9baeb0;
+  color: #b7c9d8;
   padding: 5px 0 12px;
   display: flex;
   justify-content: space-between;
@@ -614,7 +619,7 @@
 }
 .empty {
   padding: 25px 20px;
-  color: #9aabad;
+  color: #b7c9d8;
   text-align: center;
   font-size: 11px;
   line-height: 1.8;
@@ -622,16 +627,16 @@
 .loading {
   padding: 60px;
   text-align: center;
-  color: #839b94;
-  background: #fff;
-  border: 1px solid #e2ede6;
+  color: #b7c9d8;
+  background: #1f252e;
+  border: 1px solid #35414e;
   border-radius: 13px;
   margin-bottom: 22px;
 }
 .error {
-  background: #fff4f0;
-  color: #b9684a;
-  border: 1px solid #f7dfd4;
+  background: #382b25;
+  color: #f2bd72;
+  border: 1px solid #35414e;
   padding: 12px 15px;
   font-size: 12px;
   border-radius: 8px;
@@ -640,19 +645,19 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: #18372f50;
+  background: #080c12b8;
   z-index: 1000;
   display: flex;
   justify-content: flex-end;
   backdrop-filter: blur(2px);
 }
 .drawer {
-  width: min(540px, 100%);
+  width: min(670px, 100%);
   height: 100%;
   overflow: auto;
-  background: #fff;
+  background: #1f252e;
   padding: 36px;
-  box-shadow: -10px 0 40px #0d302920;
+  box-shadow: -10px 0 40px #00000070;
   position: relative;
 }
 .close {
@@ -660,11 +665,11 @@
   top: 18px;
   right: 22px;
   border: 0;
-  background: #f1f6f3;
+  background: #2a323d;
   border-radius: 50%;
   width: 32px;
   height: 32px;
-  color: #6b8c7d;
+  color: #b7c9d8;
   font-size: 25px;
   cursor: pointer;
 }
@@ -679,7 +684,7 @@
 }
 .drawer h3 small {
   font-size: 9px;
-  color: #99aaa1;
+  color: #b7c9d8;
   display: block;
   font-weight: 400;
   margin-top: 8px;
@@ -687,8 +692,8 @@
 .detailMetrics {
   display: flex;
   gap: 50px;
-  border-top: 1px solid #edf3ee;
-  border-bottom: 1px solid #edf3ee;
+  border-top: 1px solid #35414e;
+  border-bottom: 1px solid #35414e;
   padding: 22px 0;
   margin-top: 25px;
 }
@@ -699,12 +704,12 @@
 }
 .detailMetrics small {
   font-size: 10px;
-  color: #93a59b;
+  color: #b7c9d8;
   display: block;
   margin-top: 5px;
 }
 .timeline article {
-  border-left: 1px solid #daebe3;
+  border-left: 1px solid #35414e;
   padding: 0 0 30px 22px;
   position: relative;
 }
@@ -715,14 +720,14 @@
   top: 5px;
   width: 7px;
   height: 7px;
-  background: #77bda4;
+  background: #9cdbff;
   border-radius: 50%;
-  border: 2px solid #fff;
+  border: 2px solid #1f252e;
   box-sizing: content-box;
 }
 .timeline article > small {
   font-size: 10px;
-  color: #91a89d;
+  color: #b7c9d8;
   display: block;
   margin-bottom: 9px;
 }
@@ -731,24 +736,24 @@
   align-items: center;
   justify-content: space-between;
   font-size: 14px;
-  color: #345b4f;
+  color: #f2f8ff;
   gap: 12px;
 }
 .timeline code {
   font-family: inherit;
   font-size: 10px;
-  color: #a1afa8;
+  color: #b7c9d8;
   overflow-wrap: anywhere;
 }
 .timeline p {
   font-size: 10px;
-  color: #849e93;
+  color: #b7c9d8;
   margin: 12px 0 0;
   line-height: 1.8;
 }
 .timeline p span {
   margin: 0 6px;
-  color: #bdc8c1;
+  color: #b7c9d8;
 }
 .visitTags {
   display: flex;
@@ -757,8 +762,8 @@
   margin-top: 12px;
 }
 .visitTags span {
-  background: #f3f8f4;
-  color: #8ca799;
+  background: #273541;
+  color: #b7c9d8;
   font-size: 9px;
   padding: 4px 7px;
   border-radius: 4px;
@@ -770,27 +775,27 @@
   padding: 30px;
   background: radial-gradient(
     ellipse at top,
-    #eaf5ee 0,
-    #f4f8f5 45%,
-    #f3f5f7 100%
+    #203448 0,
+    #15191f 45%,
+    #10141a 100%
   );
-  color: #305448;
+  color: #f2f8ff;
 }
 .loginCard {
   width: min(420px, 100%);
   padding: 40px;
-  background: #fff;
+  background: #1f252e;
   border-radius: 20px;
-  border: 1px solid #e3ede5;
-  box-shadow: 0 15px 60px #234f3910;
+  border: 1px solid #35414e;
+  box-shadow: 0 15px 60px #00000040;
 }
 .loginLogo {
   width: 50px;
   height: 50px;
   display: grid;
   place-items: center;
-  background: #eaf6ee;
-  color: #43866b;
+  background: #253c4c;
+  color: #9cdbff;
   border-radius: 14px;
   margin-bottom: 26px;
 }
@@ -801,7 +806,7 @@
 }
 .loginCard p {
   font-size: 12px;
-  color: #8b9d95;
+  color: #b7c9d8;
   line-height: 1.8;
 }
 .loginCard form {
@@ -810,21 +815,21 @@
 .loginCard label {
   display: block;
   font-size: 12px;
-  color: #647f72;
+  color: #b7c9d8;
   margin-bottom: 10px;
 }
 .loginCard input {
-  border: 1px solid #d5e4da;
+  border: 1px solid #35414e;
   padding: 12px 14px;
   border-radius: 8px;
   width: 100%;
-  background: #f9fcf9;
+  background: #151c24;
   outline: 0;
-  color: #345c46;
+  color: #f2f8ff;
 }
 .loginCard input:focus {
-  border-color: #79ab8b;
-  box-shadow: 0 0 0 3px #e8f6eb;
+  border-color: #9cdbff;
+  box-shadow: 0 0 0 3px #31546b;
 }
 .primary {
   display: flex;
@@ -832,8 +837,8 @@
   width: 100%;
   border: 0;
   border-radius: 8px;
-  background: #267451;
-  color: #fff;
+  background: #9cdbff;
+  color: #10141a;
   padding: 14px 17px;
   margin-top: 20px;
   font-size: 13px;
@@ -845,20 +850,20 @@
 }
 .loginCard > a {
   font-size: 11px;
-  color: #83988d;
+  color: #b7c9d8;
 }
 .loginCard > small {
   display: block;
   font-size: 10px;
-  color: #a8b6ae;
+  color: #b7c9d8;
   margin-top: 30px;
 }
 .loginCard .error {
-  color: #b9684a;
+  color: #f2bd72;
 }
 .dashboard button:focus-visible,
 .dashboard a:focus-visible {
-  outline: 2px solid #359d7e;
+  outline: 2px solid #9cdbff;
   outline-offset: 3px;
 }
 @media (min-width: 1550px) {
@@ -907,7 +912,7 @@
     position: relative;
     padding: 16px 20px;
     border-right: 0;
-    border-bottom: 1px solid #e5ede7;
+    border-bottom: 1px solid #35414e;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -1050,4 +1055,252 @@
   .sidebar nav button span {
     display: none;
   }
+}
+
+.brand > span,
+.primary {
+  color: #10141a;
+}
+.country {
+  stroke: #435466;
+}
+.provinces path {
+  fill: transparent;
+  stroke: #5b7485;
+  stroke-width: 0.75;
+  pointer-events: none;
+}
+.mapLabel {
+  fill: #afc7d8;
+  font-size: 20px;
+  text-anchor: middle;
+  pointer-events: none;
+}
+.mapCallouts {
+  cursor: pointer;
+}
+.mapCallouts text {
+  fill: #d4efff;
+  font-size: 18px;
+}
+.mapTooltip {
+  pointer-events: none;
+}
+.areaFilters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 17px;
+}
+.areaFilters button {
+  border: 1px solid #35414e;
+  border-radius: 7px;
+  padding: 8px 12px;
+  background: #1f252e;
+  color: #c3d0df;
+  font-size: 11px;
+  cursor: pointer;
+}
+.areaFilters .activeArea {
+  border-color: #83bcde;
+  color: #d4efff;
+  background: #243d4d;
+}
+.geoNote {
+  padding: 0 23px 20px;
+  color: #a6bbcd;
+  font-size: 11px;
+  line-height: 1.8;
+}
+.journeyToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 0 23px 16px;
+  font-size: 11px;
+  color: #b7c9d8;
+  flex-wrap: wrap;
+}
+.journeyToolbar label {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  cursor: pointer;
+}
+.journeyToolbar input {
+  accent-color: #9cdbff;
+}
+.journeyTable {
+  min-width: 1000px;
+}
+.journeyTable td {
+  white-space: normal;
+  min-width: 135px;
+}
+.journeyTable td:first-child {
+  min-width: 200px;
+}
+.pageLabel {
+  display: block;
+  max-width: 210px;
+}
+.pageLabel > span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #d4efff;
+}
+.pageLabel small {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  line-height: 1.5;
+}
+.sourceLabel {
+  display: block;
+  color: #d4efff;
+}
+.kindBadge,
+.returningBadge,
+.anomalyBadge {
+  display: inline-block;
+  padding: 4px 7px;
+  margin-top: 8px;
+  border-radius: 5px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.kindBadge {
+  background: #243d4d;
+  color: #9cdbff;
+}
+.returningBadge {
+  background: #2b3c32;
+  color: #9cffb2;
+}
+.anomalyBadge {
+  background: #443228;
+  color: #f2bd72;
+  margin-right: 6px;
+}
+.journeySummary {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0;
+}
+.journeySummary section {
+  padding: 16px 18px;
+  border: 1px solid #35414e;
+  border-radius: 10px;
+  background: #19212a;
+}
+.journeySummary section > span:first-child {
+  display: block;
+  font-size: 10px;
+  color: #91b8d0;
+  margin-bottom: 10px;
+}
+.journeySummary strong {
+  display: block;
+  font-size: 16px;
+  color: #d4efff;
+}
+.journeySummary small {
+  display: block;
+  font-size: 11px;
+  color: #b7c9d8;
+  margin-top: 7px;
+  line-height: 1.7;
+}
+.journeySummary .pageLabel {
+  max-width: 100%;
+}
+.journeySummary .pageLabel > span {
+  font-size: 14px;
+  white-space: normal;
+}
+.visitTags .returningTag {
+  background: #2b3c32;
+  color: #9cffb2;
+}
+.alertBox {
+  background: #302720;
+  border: 1px solid #6c5136;
+  border-radius: 9px;
+  padding: 15px;
+  color: #f2bd72;
+  font-size: 12px;
+}
+.alertBox p {
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 8px 0 0;
+}
+.shareLinks {
+  padding: 0 23px 23px;
+}
+.shareLinks label {
+  display: block;
+  font-size: 11px;
+  color: #b7c9d8;
+  margin-bottom: 10px;
+}
+.shareLinks input {
+  border: 1px solid #435466;
+  border-radius: 7px;
+  background: #151c24;
+  color: #d4efff;
+  padding: 11px;
+  width: min(100%, 440px);
+  font-size: 12px;
+}
+.shareLinks > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.shareLinks button {
+  background: #243d4d;
+  color: #d4efff;
+  padding: 9px 12px;
+  border: 1px solid #506679;
+  border-radius: 7px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.shareLinks button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.shareLinks small {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #f2bd72;
+}
+@media (max-width: 640px) {
+  .areaFilters {
+    gap: 6px;
+  }
+  .areaFilters button {
+    font-size: 10px;
+    padding: 7px 9px;
+  }
+  .journeyToolbar {
+    padding: 0 17px 15px;
+  }
+  .geoNote {
+    padding: 0 17px 17px;
+  }
+  .mapLabel {
+    font-size: 24px;
+  }
+}
+
+.brand small {
+  letter-spacing: 0.6px;
+  font-size: 10px;
+  white-space: nowrap;
 }
