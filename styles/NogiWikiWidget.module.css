@@ -1,0 +1,457 @@
+.widget {
+  --wiki-bg: #fffefa;
+  --wiki-text: #302d35;
+  --wiki-muted: #79747f;
+  --wiki-line: #e8e5de;
+  --wiki-soft: #f3f1e9;
+  --wiki-accent: #456453;
+  --wiki-accent-text: #fffefa;
+  --wiki-contour: #fff9ee;
+  position: fixed;
+  right: max(20px, env(safe-area-inset-right));
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  z-index: 40;
+  color: var(--wiki-text);
+  font-size: 14px;
+  line-height: 1.6;
+  isolation: isolate;
+}
+
+:global(html.dark) .widget {
+  --wiki-bg: #25242a;
+  --wiki-text: #f3eee5;
+  --wiki-muted: #b4adba;
+  --wiki-line: #444149;
+  --wiki-soft: #323138;
+  --wiki-accent: #bed3bf;
+  --wiki-accent-text: #203728;
+  --wiki-contour: #ede1cd;
+}
+
+.widget button,
+.widget input,
+.widget select {
+  font: inherit;
+}
+.widget button {
+  cursor: pointer;
+}
+.widget button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.widget button:focus-visible,
+.widget a:focus-visible,
+.widget input:focus-visible,
+.widget select:focus-visible {
+  outline: 2px solid var(--wiki-accent);
+  outline-offset: 3px;
+}
+
+.launcher {
+  display: block;
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  position: relative;
+  margin-left: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.launcher img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(1px 0 0 var(--wiki-contour))
+    drop-shadow(-1px 0 0 var(--wiki-contour))
+    drop-shadow(0 1px 0 var(--wiki-contour))
+    drop-shadow(0 -1px 0 var(--wiki-contour)) drop-shadow(0 4px 7px #17111d38);
+  transition: transform 0.2s ease;
+}
+
+:global(html.dark) .launcher img {
+  filter: drop-shadow(1.3px 0 0 var(--wiki-contour))
+    drop-shadow(-1.3px 0 0 var(--wiki-contour))
+    drop-shadow(0 1.3px 0 var(--wiki-contour))
+    drop-shadow(0 -1.3px 0 var(--wiki-contour)) drop-shadow(0 4px 9px #0009);
+}
+
+.tooltip {
+  position: absolute;
+  top: 26px;
+  right: 98px;
+  padding: 5px 10px;
+  background: var(--wiki-bg);
+  border: 1px solid var(--wiki-line);
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.launcher:focus-visible .tooltip {
+  opacity: 1;
+}
+@media (hover: hover) {
+  .launcher:hover img {
+    transform: translateY(-3px) rotate(-3deg);
+  }
+  .launcher:hover .tooltip {
+    opacity: 1;
+  }
+}
+
+.panel {
+  width: min(360px, calc(100vw - 32px));
+  height: min(560px, calc(100dvh - 204px - env(safe-area-inset-bottom)));
+  min-height: 240px;
+  margin-bottom: 12px;
+  background: var(--wiki-bg);
+  border: 1px solid var(--wiki-line);
+  border-radius: 18px;
+  box-shadow: 0 12px 40px #17111d26;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: appear 0.18s ease-out;
+}
+
+.header {
+  padding: 18px 20px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.eyebrow {
+  color: var(--wiki-muted);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+}
+.header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0;
+}
+.close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--wiki-soft);
+  color: var(--wiki-muted);
+  font-size: 24px !important;
+  line-height: 1;
+}
+.form {
+  padding: 12px 20px 16px;
+  border-bottom: 1px solid var(--wiki-line);
+  max-height: 48%;
+  flex-shrink: 0;
+  overflow: auto;
+}
+.modes {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px 10px;
+  border-bottom: 1px solid var(--wiki-line);
+  flex-shrink: 0;
+}
+.modes button {
+  flex: 1;
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 2px;
+  background: transparent;
+  color: var(--wiki-muted);
+  font-size: 12px;
+}
+.modes .activeMode {
+  background: var(--wiki-accent);
+  color: var(--wiki-accent-text);
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--wiki-muted);
+  font-size: 11px;
+}
+.option select,
+.option input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid var(--wiki-line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--wiki-text);
+  background: var(--wiki-soft);
+  font-size: 12px;
+}
+.numbers {
+  display: flex;
+  gap: 12px;
+}
+.numbers .option {
+  flex: 1;
+}
+.numbers input {
+  width: 48px;
+}
+.welcome .note {
+  margin-top: 8px;
+  font-size: 11px;
+}
+.categories {
+  display: flex;
+  gap: 3px;
+  margin: 0 0 12px;
+  flex-wrap: wrap;
+}
+.categories button {
+  border: 0;
+  background: transparent;
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: var(--wiki-muted);
+  font-size: 12px;
+}
+.categories .selected {
+  background: var(--wiki-soft);
+  color: var(--wiki-text);
+}
+.label {
+  position: absolute;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.inputRow {
+  display: flex;
+  gap: 8px;
+}
+.inputRow input {
+  background: var(--wiki-soft);
+  color: var(--wiki-text);
+  border: 1px solid var(--wiki-line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  width: 0;
+  min-width: 0;
+  flex: 1;
+}
+.inputRow input::placeholder {
+  color: var(--wiki-muted);
+  font-size: 12px;
+}
+.submit {
+  background: var(--wiki-accent);
+  color: var(--wiki-accent-text);
+  border: 0;
+  border-radius: 8px;
+  padding: 0 14px;
+  white-space: nowrap;
+}
+.results {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 18px 20px;
+  scrollbar-width: thin;
+}
+.welcome {
+  text-align: center;
+  padding: 12px 0;
+}
+.book {
+  font-size: 25px;
+  color: var(--wiki-accent);
+}
+.welcome h3 {
+  font-size: 16px;
+  font-weight: 500;
+  margin: 8px 0;
+}
+.welcome p {
+  color: var(--wiki-muted);
+  font-size: 13px;
+  margin: 0;
+}
+.examples {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 18px;
+}
+.examples button {
+  background: transparent;
+  border: 1px solid var(--wiki-line);
+  border-radius: 20px;
+  padding: 4px 10px;
+  color: var(--wiki-text);
+  font-size: 12px;
+}
+.resultText {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.85;
+}
+.loading {
+  font-size: 13px;
+  color: var(--wiki-muted);
+  margin: 0 0 12px;
+}
+.error {
+  color: #a64139;
+  padding: 10px;
+  border: 1px solid #a6413940;
+  border-radius: 8px;
+  background: #a641390a;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+:global(html.dark) .error {
+  color: #f0a69c;
+}
+.candidates {
+  margin-top: 18px;
+}
+.candidates > p {
+  color: var(--wiki-muted);
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+.candidates button {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 0;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--wiki-line);
+  color: var(--wiki-text);
+  font-size: 13px;
+}
+.candidates small {
+  color: var(--wiki-muted);
+  white-space: nowrap;
+}
+.candidateDescription {
+  display: block;
+  color: var(--wiki-muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.illustration {
+  display: block;
+  max-width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  margin: 16px auto;
+}
+.sources {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--wiki-line);
+}
+.sources h3 {
+  color: var(--wiki-muted);
+  font-size: 11px;
+  font-weight: 400;
+  margin: 0 0 4px;
+}
+.sources a {
+  display: block;
+  color: var(--wiki-accent);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.footer {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  border-top: 1px solid var(--wiki-line);
+  font-size: 11px;
+  color: var(--wiki-muted);
+}
+.pager {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pager button,
+.help {
+  background: transparent;
+  border: 0;
+  padding: 4px 0;
+  color: var(--wiki-accent);
+  font-size: 11px;
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 640px) {
+  .widget {
+    right: max(16px, env(safe-area-inset-right));
+    bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  .launcher {
+    width: 64px;
+    height: 64px;
+  }
+  .panel {
+    height: min(480px, calc(100dvh - 176px - env(safe-area-inset-bottom)));
+  }
+  .tooltip {
+    right: 74px;
+    top: 14px;
+  }
+  .inputRow input,
+  .option input,
+  .option select {
+    font-size: 16px;
+  }
+}
+@media (max-height: 480px) {
+  .panel {
+    height: calc(100dvh - 32px);
+    min-height: 0;
+    margin: 0;
+  }
+  .widget:has(.panel) {
+    bottom: 16px;
+  }
+  .widget:has(.panel) .launcher {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .launcher img,
+  .tooltip {
+    transition: none;
+  }
+  .panel {
+    animation: none;
+  }
+}
