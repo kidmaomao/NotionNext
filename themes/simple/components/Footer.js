@@ -1,6 +1,7 @@
 import { BeiAnGongAn } from '@/components/BeiAnGongAn'
 import DarkModeButton from '@/components/DarkModeButton'
 import { siteConfig } from '@/lib/config'
+import { SiteVisitStats } from '@/components/VisitStats'
 
 /**
  * 页脚
@@ -17,6 +18,9 @@ export default function Footer(props) {
   return (
     <footer className='relative w-full bg-black px-6 border-t'>
       <DarkModeButton className='text-center pt-4' />
+      <div className='text-yellow-300'>
+        <SiteVisitStats />
+      </div>
 
       <div className='text-yellow-300 container mx-auto max-w-4xl py-6 md:flex flex-wrap md:flex-no-wrap md:justify-between items-center text-sm'>
         <div className='text-center'>
@@ -29,7 +33,8 @@ export default function Footer(props) {
           {siteConfig('BEI_AN') && (
             <a
               href={siteConfig('BEI_AN_LINK')}
-              className='no-underline hover:underline ml-4'>
+              className='no-underline hover:underline ml-4'
+            >
               {siteConfig('BEI_AN')}
             </a>
           )}
@@ -38,7 +43,8 @@ export default function Footer(props) {
             Powered by
             <a
               href='https://github.com/tangly1024/NotionNext'
-              className=' hover:underline'>
+              className=' hover:underline'
+            >
               NotionNext {siteConfig('VERSION')}
             </a>
           </span>

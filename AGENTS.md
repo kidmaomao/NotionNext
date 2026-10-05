@@ -3,6 +3,7 @@
 本项目是 `kidmaomao/NotionNext`，基于 `notionnext-org/NotionNext` 做了个人修改，由用户独立维护。
 
 - 用户已明确：这些定制不准备合并回原作者项目。不要向上游仓库推送代码或创建 PR。
+- GitHub 的 ahead/behind 按提交历史计算。选择性导入修复后仍显示 behind 是正常情况；不要为了清零而整体 Sync fork，也不要对原作者仓库执行任何写操作。
 - `origin` 必须指向 `https://github.com/kidmaomao/NotionNext.git`。`upstream` 仅用于获取和比较原项目更新。本地已禁用 `upstream` 的推送地址，默认推送目标为 `origin`。
 - 先比较共同基线、上游更新和 Fork 定制，再决定同步范围。无文本冲突不代表没有功能、样式或配置变化。
 - 优先保留 Simple 主题样式、禁止内容卡片悬停位移的定制、`public/images/simple-hero-bg.webp`、个人 favicon、`themes/simple/config.js` 中的个人介绍，以及正文绿色文字样式。

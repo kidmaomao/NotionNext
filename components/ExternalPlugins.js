@@ -33,6 +33,11 @@ const ExternalPlugin = props => {
     NOTION_CONFIG
   )
   const ANALYTICS_VERCEL = siteConfig('ANALYTICS_VERCEL', null, NOTION_CONFIG)
+  const ANALYTICS_SELF_HOSTED_ENABLE = siteConfig(
+    'ANALYTICS_SELF_HOSTED_ENABLE',
+    false,
+    NOTION_CONFIG
+  )
   const ANALYTICS_BUSUANZI_ENABLE = siteConfig(
     'ANALYTICS_BUSUANZI_ENABLE',
     null,
@@ -249,7 +254,9 @@ const ExternalPlugin = props => {
       {ANALYTICS_ACKEE_TRACKER && <Ackee />}
       {ANALYTICS_GOOGLE_ID && <Gtag />}
       {ANALYTICS_VERCEL && <Analytics />}
-      {ANALYTICS_BUSUANZI_ENABLE && <Busuanzi />}
+      {ANALYTICS_BUSUANZI_ENABLE && !ANALYTICS_SELF_HOSTED_ENABLE && (
+        <Busuanzi />
+      )}
       {FACEBOOK_APP_ID && FACEBOOK_PAGE_ID && <Messenger />}
       {FIREWORKS && <Fireworks />}
       {SAKURA && <Sakura />}
@@ -452,7 +459,12 @@ const ExternalPlugin = props => {
 
       {/* UMAMI 统计 */}
       {UMAMI_ID && (
-        <script async defer src={UMAMI_HOST} data-website-id={UMAMI_ID}></script>
+        <script
+          async
+          defer
+          src={UMAMI_HOST}
+          data-website-id={UMAMI_ID}
+        ></script>
       )}
 
       {/* 谷歌统计 */}

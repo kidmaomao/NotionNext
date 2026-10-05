@@ -2,6 +2,8 @@
  * 站点统计插件
  */
 module.exports = {
+  ANALYTICS_SELF_HOSTED_ENABLE:
+    process.env.NEXT_PUBLIC_ANALYTICS_SELF_HOSTED_ENABLE ?? false, // 独立统计：Simple 文章计数和页脚访客统计；需配置服务端 MongoDB
   ANALYTICS_VERCEL: process.env.NEXT_PUBLIC_ANALYTICS_VERCEL || false, // vercel自带的统计 https://vercel.com/docs/concepts/analytics/quickstart https://github.com/tangly1024/NotionNext/issues/897
   ANALYTICS_BUSUANZI_ENABLE:
     process.env.NEXT_PUBLIC_ANALYTICS_BUSUANZI_ENABLE || true, // 展示网站阅读量、访问数 see http://busuanzi.ibruce.info/
@@ -33,8 +35,9 @@ module.exports = {
   // 微软 Clarity 站点分析
   CLARITY_ID: process.env.NEXT_PUBLIC_CLARITY_ID || null, // 只需要复制Clarity脚本中的ID部分，ID是一个十位的英文数字组合
 
-  UMAMI_HOST: process.env.NEXT_PUBLIC_UMAMI_HOST || 'https://cloud.umami.is/script.js', // umami的服务地址
-  UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID || '', // umami的id
+  UMAMI_HOST:
+    process.env.NEXT_PUBLIC_UMAMI_HOST || 'https://cloud.umami.is/script.js', // umami的服务地址
+  UMAMI_ID: process.env.NEXT_PUBLIC_UMAMI_ID || '' // umami的id
 
   // <---- 站点统计
 }
