@@ -29,7 +29,8 @@
 }
 
 .widget button,
-.widget input {
+.widget input,
+.widget select {
   font: inherit;
 }
 .widget button {
@@ -41,7 +42,8 @@
 }
 .widget button:focus-visible,
 .widget a:focus-visible,
-.widget input:focus-visible {
+.widget input:focus-visible,
+.widget select:focus-visible {
   outline: 2px solid var(--wiki-accent);
   outline-offset: 3px;
 }
@@ -104,7 +106,7 @@
 
 .panel {
   width: min(360px, calc(100vw - 32px));
-  height: min(500px, calc(100dvh - 204px - env(safe-area-inset-bottom)));
+  height: min(560px, calc(100dvh - 204px - env(safe-area-inset-bottom)));
   min-height: 240px;
   margin-bottom: 12px;
   background: var(--wiki-bg);
@@ -145,8 +147,64 @@
   line-height: 1;
 }
 .form {
-  padding: 0 20px 16px;
+  padding: 12px 20px 16px;
   border-bottom: 1px solid var(--wiki-line);
+  max-height: 48%;
+  flex-shrink: 0;
+  overflow: auto;
+}
+.modes {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px 10px;
+  border-bottom: 1px solid var(--wiki-line);
+  flex-shrink: 0;
+}
+.modes button {
+  flex: 1;
+  border: 0;
+  border-radius: 7px;
+  padding: 6px 2px;
+  background: transparent;
+  color: var(--wiki-muted);
+  font-size: 12px;
+}
+.modes .activeMode {
+  background: var(--wiki-accent);
+  color: var(--wiki-accent-text);
+}
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--wiki-muted);
+  font-size: 11px;
+}
+.option select,
+.option input {
+  min-width: 0;
+  flex: 1;
+  border: 1px solid var(--wiki-line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--wiki-text);
+  background: var(--wiki-soft);
+  font-size: 12px;
+}
+.numbers {
+  display: flex;
+  gap: 12px;
+}
+.numbers .option {
+  flex: 1;
+}
+.numbers input {
+  width: 48px;
+}
+.welcome .note {
+  margin-top: 8px;
+  font-size: 11px;
 }
 .categories {
   display: flex;
@@ -290,6 +348,12 @@
   color: var(--wiki-muted);
   white-space: nowrap;
 }
+.candidateDescription {
+  display: block;
+  color: var(--wiki-muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
 .illustration {
   display: block;
   max-width: 100%;
@@ -363,7 +427,9 @@
     right: 74px;
     top: 14px;
   }
-  .inputRow input {
+  .inputRow input,
+  .option input,
+  .option select {
     font-size: 16px;
   }
 }

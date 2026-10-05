@@ -1,7 +1,6 @@
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto'
+import { queryPayload } from '@/lib/nogi/wikiModes'
 
-const categories = new Set(['全部', '道具', '技能', '释放', '头衔', '料理'])
-const actions = new Set(['search', 'page', 'source', 'help'])
 const cookieName = 'nogi_wiki_session'
 const sessionPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
@@ -40,26 +39,6 @@ function getSession(req, res, key) {
   return id
 }
 
-function inputPayload(body) {
-  if (!body || typeof body !== 'object' || Array.isArray(body)) return null
-  const action = body.action || 'search'
-  if (!actions.has(action)) return null
-  if (action === 'help' || action === 'source') return { action }
-  if (action === 'page') {
-    return Number.isInteger(body.page) && body.page >= 1 && body.page <= 10000
-      ? { action, page: body.page }
-      : null
-  }
-  const category = body.category || '全部'
-  const query = typeof body.query === 'string' ? body.query.trim() : ''
-  return categories.has(category) &&
-    query &&
-    query.length <= 200 &&
-    !/^[／/]/.test(query)
-    ? { action, category, query }
-    : null
-}
-
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store')
   if (req.method !== 'POST') {
@@ -81,14 +60,12 @@ export default async function handler(req, res) {
       return res.status(403).json({ ok: false, error: '查询来源无效。' })
     }
   }
-  const payload = inputPayload(req.body)
+  const payload = queryPayload(req.body)
   if (!payload)
-    return res
-      .status(400)
-      .json({
-        ok: false,
-        error: '请选择分类，输入不超过200字的名称或有效页码。'
-      })
+    return res.status(400).json({
+      ok: false,
+      error: '请选择分类，输入不超过200字的名称或有效页码。'
+    })
   const key = process.env.NOGI_WIKI_API_KEY || ''
   let endpoint
   try {
@@ -144,19 +121,18 @@ export default async function handler(req, res) {
       const status = [400, 429, 504].includes(upstream.status)
         ? upstream.status
         : 503
-      return res
-        .status(status)
-        .json({
-          ok: false,
-          error:
-            [400, 429, 504].includes(status) && typeof data.error === 'string'
-              ? data.error
-              : '百科资料暂时无法读取，请稍后重试。'
-        })
+      return res.status(status).json({
+        ok: false,
+        error:
+          [400, 429, 504].includes(status) && typeof data.error === 'string'
+            ? data.error
+            : '百科资料暂时无法读取，请稍后重试。'
+      })
     }
     return res.status(200).json({
       ok: true,
       text: data.text,
+      mode: payload.mode,
       view: data.view,
       page: Number.isInteger(data.page) ? data.page : null,
       pages: Number.isInteger(data.pages) ? data.pages : null,

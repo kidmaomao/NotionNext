@@ -32,7 +32,8 @@ beforeEach(() => {
   fetch.mockResolvedValue({
     ok: true,
     status: 200,
-    json: async () => ({ ok: true, text: '百科条目', page: 1, pages: 2 })
+    json: () =>
+      Promise.resolve({ ok: true, text: '百科条目', page: 1, pages: 2 })
   })
 })
 afterAll(() => {
@@ -56,7 +57,9 @@ test('only the wiki payload is forwarded; caller session and commands are discar
   expect(options.headers.Authorization).toBe(`Bearer ${key}`)
   expect(JSON.parse(options.body)).toEqual({
     action: 'search',
+    mode: 'wiki',
     category: '全部',
+    wikiView: '完整资料',
     query: '女神像',
     session_id: expect.stringMatching(/^[0-9a-f-]{36}$/)
   })
@@ -108,12 +111,48 @@ test.each([
   { action: 'page', page: true },
   { query: '/洛奇 更新资料' },
   { category: [], query: 'a' },
-  { query: 'a'.repeat(201) }
+  { query: 'a'.repeat(201) },
+  { mode: '算命' },
+  { mode: 'update' },
+  { mode: ['wiki'], query: 'a' },
+  { mode: 'recipe', query: '羊毛', quantity: true },
+  { mode: 'library', category: '管理员' },
+  { mode: 'auction', query: '羊毛', history: 31 }
 ])('invalid query is rejected: %j', async body => {
   const res = response()
   await handler(request(body), res)
   expect(res.status).toHaveBeenCalledWith(400)
   expect(fetch).not.toHaveBeenCalled()
+})
+
+test('only allowed tool fields are forwarded, and each help request has a module', async () => {
+  await handler(
+    request({
+      mode: 'recipe',
+      query: '羊毛',
+      operation: '汇总',
+      quantity: 2,
+      runs: 4,
+      command: 'notice'
+    }),
+    response()
+  )
+  expect(JSON.parse(fetch.mock.calls[0][1].body)).toEqual({
+    action: 'search',
+    mode: 'recipe',
+    query: '羊毛',
+    operation: '汇总',
+    quantity: 2,
+    runs: 4,
+    session_id: expect.any(String)
+  })
+  await handler(request({ mode: 'coin', query: '' }), response())
+  expect(JSON.parse(fetch.mock.calls[1][1].body).mode).toBe('coin')
+  await handler(
+    request({ mode: 'library', category: '回音', query: '' }),
+    response()
+  )
+  expect(JSON.parse(fetch.mock.calls[2][1].body).category).toBe('回音')
 })
 
 test('cross-origin requests are rejected before reaching the plugin', async () => {
@@ -144,7 +183,7 @@ test('upstream authentication failure returns no internal details or LLM fallbac
   fetch.mockResolvedValue({
     ok: false,
     status: 401,
-    json: async () => ({ error: 'internal secret' })
+    json: () => Promise.resolve({ error: 'internal secret' })
   })
   const res = response()
   await handler(request(), res)

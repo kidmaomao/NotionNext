@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import styles from '@/styles/NogiWikiWidget.module.css'
-
-const categories = ['全部', '道具', '技能', '释放', '头衔', '料理']
-const examples = ['女神像', '重击', '猎鼠者']
+import {
+  libraryCategories,
+  modes,
+  recipeOperations,
+  tabs,
+  wikiCategories,
+  wikiViews
+} from '@/lib/nogi/wikiModes'
 
 function safeLinks(values) {
   return Array.isArray(values)
@@ -23,6 +28,13 @@ function safeLinks(values) {
 export default function NogiWikiWidget() {
   const [open, setOpen] = useState(false)
   const [category, setCategory] = useState('全部')
+  const [mode, setMode] = useState('wiki')
+  const [libraryCategory, setLibraryCategory] = useState('阿尔卡纳')
+  const [wikiView, setWikiView] = useState('完整资料')
+  const [operation, setOperation] = useState('成品')
+  const [quantity, setQuantity] = useState(1)
+  const [runs, setRuns] = useState(3)
+  const [history, setHistory] = useState(0)
   const [query, setQuery] = useState('')
   const [result, setResult] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -32,6 +44,32 @@ export default function NogiWikiWidget() {
   const panel = useRef(null)
   const request = useRef(null)
   const sequence = useRef(0)
+  const current = modes[mode]
+  const simulation = ['egg', 'relic', 'coin'].includes(mode)
+  const optionalQuery = mode === 'library' || simulation
+
+  function changeMode(next) {
+    sequence.current += 1
+    request.current?.abort()
+    setMode(next)
+    setQuery('')
+    setResult(null)
+    setError('')
+    setBusy(false)
+  }
+
+  function payload(overrides = {}) {
+    return {
+      action: 'search',
+      mode,
+      query: query.trim(),
+      ...(mode === 'wiki' ? { category, wikiView } : {}),
+      ...(mode === 'library' ? { category: libraryCategory } : {}),
+      ...(mode === 'recipe' ? { operation, quantity, runs } : {}),
+      ...(mode === 'auction' ? { history } : {}),
+      ...overrides
+    }
+  }
 
   function close() {
     sequence.current += 1
@@ -87,23 +125,34 @@ export default function NogiWikiWidget() {
 
   function submit(event) {
     event.preventDefault()
-    if (query.trim() && !busy)
-      search({ action: 'search', category, query: query.trim() })
+    if (query.trim() && !busy) search(payload())
+    else if (optionalQuery && !busy) search(payload())
   }
 
   function selectCandidate(candidate) {
-    if (
-      !categories.includes(candidate.category) ||
-      typeof candidate.query !== 'string'
-    )
-      return
-    setCategory(candidate.category)
+    if (typeof candidate.query !== 'string') return
+    const nextMode = candidate.mode || mode
+    if (!Object.hasOwn(modes, nextMode)) return
+    const overrides = { mode: nextMode, query: candidate.query }
+    if (nextMode === 'wiki') {
+      if (!wikiCategories.includes(candidate.category)) return
+      setCategory(candidate.category)
+      overrides.category = candidate.category
+    }
+    if (nextMode === 'library') {
+      if (!libraryCategories.includes(candidate.category)) return
+      setLibraryCategory(candidate.category)
+      overrides.category = candidate.category
+    }
+    if (nextMode === 'recipe') {
+      const nextOperation = candidate.operation || operation
+      if (!recipeOperations.includes(nextOperation)) return
+      setOperation(nextOperation)
+      overrides.operation = nextOperation
+    }
+    setMode(nextMode)
     setQuery(candidate.query)
-    search({
-      action: 'search',
-      category: candidate.category,
-      query: candidate.query
-    })
+    search(payload(overrides))
   }
 
   function handleKeys(event) {
@@ -112,7 +161,9 @@ export default function NogiWikiWidget() {
       close()
     } else if (event.key === 'Tab') {
       const controls = Array.from(
-        panel.current.querySelectorAll('button:not(:disabled), input, a[href]')
+        panel.current.querySelectorAll(
+          'button:not(:disabled), input, select, a[href]'
+        )
       )
       const first = controls[0]
       const last = controls[controls.length - 1]
@@ -140,7 +191,7 @@ export default function NogiWikiWidget() {
           <header className={styles.header}>
             <div>
               <span className={styles.eyebrow}>NOGINOGI</span>
-              <h2 id='nogi-wiki-title'>洛奇百科</h2>
+              <h2 id='nogi-wiki-title'>洛奇资料助手</h2>
             </div>
             <button
               className={styles.close}
@@ -151,25 +202,175 @@ export default function NogiWikiWidget() {
             </button>
           </header>
 
+          <nav className={styles.modes} aria-label='功能入口'>
+            {tabs.map(item => (
+              <button
+                key={item.id}
+                type='button'
+                aria-pressed={
+                  item.id === mode || (item.id === 'simulation' && simulation)
+                }
+                className={
+                  item.id === mode || (item.id === 'simulation' && simulation)
+                    ? styles.activeMode
+                    : ''
+                }
+                onClick={() =>
+                  changeMode(item.id === 'simulation' ? 'egg' : item.id)
+                }
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
           <form className={styles.form} onSubmit={submit}>
-            <div
-              className={styles.categories}
-              role='group'
-              aria-label='百科分类'
-            >
-              {categories.map(item => (
-                <button
-                  key={item}
-                  type='button'
-                  aria-pressed={category === item}
-                  className={category === item ? styles.selected : ''}
-                  onClick={() => setCategory(item)}
+            {mode === 'wiki' && (
+              <>
+                <div
+                  className={styles.categories}
+                  role='group'
+                  aria-label='百科分类'
+                >
+                  {wikiCategories.map(item => (
+                    <button
+                      key={item}
+                      type='button'
+                      aria-pressed={category === item}
+                      className={category === item ? styles.selected : ''}
+                      onClick={() => setCategory(item)}
+                      disabled={busy}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+                <label className={styles.option}>
+                  查看内容
+                  <select
+                    value={wikiView}
+                    onChange={event => setWikiView(event.target.value)}
+                    disabled={busy}
+                  >
+                    {wikiViews.map(item => (
+                      <option key={item}>{item}</option>
+                    ))}
+                  </select>
+                </label>
+              </>
+            )}
+            {mode === 'library' && (
+              <label className={styles.option}>
+                资料专题
+                <select
+                  value={libraryCategory}
+                  onChange={event => {
+                    setLibraryCategory(event.target.value)
+                    setResult(null)
+                  }}
                   disabled={busy}
                 >
-                  {item}
-                </button>
-              ))}
-            </div>
+                  {libraryCategories.map(item => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {mode === 'recipe' && (
+              <>
+                <div
+                  className={styles.categories}
+                  role='group'
+                  aria-label='配方查询方式'
+                >
+                  {recipeOperations.map(item => (
+                    <button
+                      key={item}
+                      type='button'
+                      aria-pressed={operation === item}
+                      className={operation === item ? styles.selected : ''}
+                      disabled={busy}
+                      onClick={() => setOperation(item)}
+                    >
+                      {item === '成品'
+                        ? '成品配方'
+                        : item === '材料'
+                          ? '材料反查'
+                          : '基础材料汇总'}
+                    </button>
+                  ))}
+                </div>
+                {operation !== '材料' && (
+                  <div className={styles.numbers}>
+                    <label className={styles.option}>
+                      制作数量
+                      <input
+                        type='number'
+                        min={1}
+                        max={1000}
+                        value={quantity}
+                        onChange={event =>
+                          setQuantity(Number(event.target.value))
+                        }
+                        disabled={busy}
+                      />
+                    </label>
+                    {operation === '汇总' && (
+                      <label className={styles.option}>
+                        每件制作次数
+                        <input
+                          type='number'
+                          min={1}
+                          max={1000}
+                          value={runs}
+                          onChange={event =>
+                            setRuns(Number(event.target.value))
+                          }
+                          disabled={busy}
+                        />
+                      </label>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+            {mode === 'auction' && (
+              <label className={styles.option}>
+                查询范围
+                <select
+                  value={history}
+                  onChange={event => setHistory(Number(event.target.value))}
+                  disabled={busy}
+                >
+                  <option value={0}>实时挂单</option>
+                  <option value={7}>近7天成交记录</option>
+                  <option value={30}>近30天成交记录</option>
+                </select>
+              </label>
+            )}
+            {simulation && (
+              <div
+                className={styles.categories}
+                role='group'
+                aria-label='模拟类型'
+              >
+                {[
+                  ['egg', '抽蛋'],
+                  ['relic', '遗物'],
+                  ['coin', '硬币']
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type='button'
+                    aria-pressed={mode === id}
+                    className={mode === id ? styles.selected : ''}
+                    onClick={() => changeMode(id)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
             <label className={styles.label} htmlFor='nogi-wiki-query'>
               查询名称
             </label>
@@ -181,14 +382,21 @@ export default function NogiWikiWidget() {
                 maxLength={200}
                 onChange={event => setQuery(event.target.value)}
                 autoComplete='off'
-                placeholder='输入名称或道具编号'
+                placeholder={current.placeholder}
+                disabled={busy}
               />
               <button
                 type='submit'
                 className={styles.submit}
-                disabled={busy || !query.trim()}
+                disabled={busy || (!optionalQuery && !query.trim())}
               >
-                {busy ? '查询中' : '查询'}
+                {busy
+                  ? '处理中'
+                  : simulation
+                    ? '开始模拟'
+                    : mode === 'library' && !query.trim()
+                      ? '浏览'
+                      : '查询'}
               </button>
             </div>
           </form>
@@ -201,7 +409,7 @@ export default function NogiWikiWidget() {
             )}
             {busy && (
               <p className={styles.loading} role='status'>
-                正在查找百科资料…
+                {simulation ? '正在进行模拟…' : '正在查找资料…'}
               </p>
             )}
             {!result && !busy && (
@@ -209,22 +417,21 @@ export default function NogiWikiWidget() {
                 <span className={styles.book} aria-hidden='true'>
                   ✦
                 </span>
-                <h3>想查点什么？</h3>
-                <p>
-                  道具属性、技能效果、释放与头衔，
-                  <br />
-                  输入名称即可查找。
-                </p>
+                <h3>{current.title}</h3>
+                <p>{current.description}</p>
+                {simulation && (
+                  <p className={styles.note}>仅模拟，不影响真实游戏结果。</p>
+                )}
                 <div className={styles.examples}>
-                  {examples.map(name => (
+                  {current.examples.map(name => (
                     <button
                       key={name}
                       onClick={() => {
                         setQuery(name)
-                        search({ action: 'search', category, query: name })
+                        search(payload({ query: name }))
                       }}
                     >
-                      {name}
+                      {name || `浏览${libraryCategory}`}
                       <span aria-hidden='true'> ↗</span>
                     </button>
                   ))}
@@ -244,8 +451,17 @@ export default function NogiWikiWidget() {
                           disabled={busy}
                           onClick={() => selectCandidate(item)}
                         >
-                          <span>{item.name}</span>
-                          <small>{item.category} →</small>
+                          <span>
+                            {item.name}
+                            {item.description && (
+                              <span className={styles.candidateDescription}>
+                                {item.description}
+                              </span>
+                            )}
+                          </span>
+                          <small>
+                            {item.category || item.label || '详情'} →
+                          </small>
                         </button>
                       ))}
                     </div>
@@ -290,7 +506,7 @@ export default function NogiWikiWidget() {
                 <button
                   disabled={busy || result.page <= 1}
                   onClick={() => {
-                    search({ action: 'page', page: result.page - 1 })
+                    search({ action: 'page', mode, page: result.page - 1 })
                   }}
                 >
                   上一页
@@ -301,20 +517,26 @@ export default function NogiWikiWidget() {
                 <button
                   disabled={busy || result.page >= result.pages}
                   onClick={() => {
-                    search({ action: 'page', page: result.page + 1 })
+                    search({ action: 'page', mode, page: result.page + 1 })
                   }}
                 >
                   下一页
                 </button>
               </div>
             ) : (
-              <span>资料来自 NogiNogi 百科</span>
+              <span>NogiNogi 百科资料库</span>
             )}
             <button
               disabled={busy}
               className={styles.help}
               onClick={() => {
-                search({ action: 'help' })
+                setResult({
+                  text: current.help,
+                  images: [],
+                  sources: [],
+                  candidates: []
+                })
+                setError('')
               }}
             >
               使用说明
@@ -340,7 +562,7 @@ export default function NogiWikiWidget() {
           alt=''
           draggable='false'
         />
-        <span className={styles.tooltip}>洛奇百科</span>
+        <span className={styles.tooltip}>洛奇资料助手</span>
       </button>
     </aside>
   )
