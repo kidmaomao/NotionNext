@@ -247,6 +247,20 @@ test('uses Shanghai date ranges and strictly bounded admin filters', () => {
   expect(() => analyticsRange({ days: 90 }, now)).toThrow()
   expect(() => analyticsRange({ country: ['CN', 'JP'] }, now)).toThrow()
   expect(() => analyticsRange({ page: 101 }, now)).toThrow()
+  expect(() => analyticsRange({ area: ['CN', 'HK'] }, now)).toThrow()
+  expect(() => analyticsRange({ area: 'US' }, now)).toThrow()
+  expect(() => analyticsRange({ session: { $ne: null } }, now)).toThrow()
+  expect(analyticsRange({ area: 'HK' }, now).area).toBe('HK')
+})
+test('new behavior fields are bounded and sharing parameters are not retained', () => {
+  expect(
+    validateEvent({ ...base, sourceTag: 'qq', rapidClicks: 1, leftPage: true })
+  ).toMatchObject({ sourceTag: 'qq', rapidClicks: 1, leftPage: true })
+  expect(
+    validateEvent({ ...base, sourceTag: 'private-person' }).sourceTag
+  ).toBe('')
+  expect(() => validateEvent({ ...base, rapidClicks: 101 })).toThrow()
+  expect(() => validateEvent({ ...base, rapidClicks: -1 })).toThrow()
 })
 test('recording events cannot be triggered across origins', async () => {
   const request = req()

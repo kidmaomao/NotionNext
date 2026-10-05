@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { sourceTagFromSearch } from '@/lib/analytics/journeys'
 
 const VISITOR_KEY = 'noginogi:visitor:v1'
 const SESSION_KEY = 'noginogi:analytics-session:v1'
@@ -45,9 +46,12 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
       postId,
       title: title || document.title,
       referrer: document.referrer,
+      sourceTag: sourceTagFromSearch(location.search),
       activeSeconds: 0,
       scrollPercent: 0,
       clicks: 0,
+      rapidClicks: 0,
+      leftPage: false,
       lastLink: ''
     }
     let activeMs = 0
@@ -57,6 +61,7 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
     let pending = false
     let dirty = true
     let lastSignature = ''
+    let clickTrail = []
     const accrue = () => {
       const now = Date.now()
       if (visible) activeMs += Math.max(0, Math.min(now - lastAt, 35000))
@@ -84,7 +89,7 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
       } catch {
         /* 会话存储失效时继续当前记录。 */
       }
-      const signature = `${event.activeSeconds}:${event.scrollPercent}:${event.clicks}`
+      const signature = `${event.activeSeconds}:${event.scrollPercent}:${event.clicks}:${event.rapidClicks}:${event.leftPage}`
       if (!dirty && signature === lastSignature) return
       if (pending && !beacon) return
       // 初次请求完成后再发送心跳，避免到达顺序改变访问时间。
@@ -123,6 +128,22 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
       if (!visible) send(true)
     }
     const click = e => {
+      const now = Date.now()
+      // 仅在内存中比较点击位置；不上传坐标、元素文字或输入内容。
+      clickTrail = clickTrail.filter(
+        point =>
+          now - point.at <= 2000 &&
+          Math.hypot(point.x - e.clientX, point.y - e.clientY) <= 40
+      )
+      // 键盘触发和自动触发的点击不参与连续点击判断。
+      if (e.isTrusted && e.detail > 0) {
+        clickTrail.push({ at: now, x: e.clientX, y: e.clientY })
+        if (clickTrail.length >= 5) {
+          event.rapidClicks = Math.min(100, event.rapidClicks + 1)
+          clickTrail = []
+          dirty = true
+        }
+      }
       const link =
         e.target instanceof Element ? e.target.closest('a[href]') : null
       if (!link) return
@@ -140,7 +161,10 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
         /* 无效链接 */
       }
     }
-    const pageHide = () => send(true)
+    const pageHide = () => {
+      event.leftPage = true
+      send(true)
+    }
     progress()
     send()
     const timer = setInterval(() => send(), 30000)
@@ -149,7 +173,7 @@ export default function VisitBehaviorTracker({ path, postId, title }) {
     document.addEventListener('visibilitychange', visibility)
     window.addEventListener('pagehide', pageHide)
     return () => {
-      send(true)
+      pageHide()
       clearInterval(timer)
       window.removeEventListener('scroll', progress)
       document.removeEventListener('click', click)
