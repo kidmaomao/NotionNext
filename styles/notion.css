@@ -784,6 +784,17 @@ svg.notion-page-icon {
   margin: auto;
 }
 
+/* Keep this collaboration article's cropped GIF previews at a readable size. */
+.notion-block-3fb5bc0b889681b88cc3c8e8b2666b00
+  .notion-asset-wrapper-image
+  img[src*='.gif'] {
+  align-self: center;
+  width: auto;
+  max-width: 100%;
+  max-height: 320px;
+  object-fit: contain !important;
+}
+
 .notion-asset-wrapper iframe {
   border: none;
   background: rgb(247, 246, 245);
