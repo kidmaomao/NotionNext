@@ -2250,3 +2250,10 @@ html.dark .notion-link-mention-provider {
 html.dark .notion-link-mention-link {
   color: inherit;
 }
+
+/* Keep the Gallery wrapper stretched inside Notion's column flex layout. */
+.notion-gallery-visibility-wrapper {
+  align-self: stretch;
+  width: 100%;
+  min-width: 100%;
+}

@@ -1,4 +1,5 @@
 import Comment from '@/components/Comment'
+import ArticleLock from '@/components/ArticleLock'
 import LazyImage from '@/components/LazyImage'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
@@ -423,7 +424,9 @@ const LayoutIndex = props => {
 const LayoutSlug = props => (
   <main className='min-h-screen px-5 py-10 md:px-10'>
     <article id='article-wrapper' className='opc-panel mx-auto max-w-3xl rounded-lg border p-6 md:p-10'>
-      {props.post ? (
+      {props.lock ? (
+        <ArticleLock {...props} />
+      ) : props.post ? (
         <>
           <NotionPage {...props} />
           <ShareBar post={props.post} />
