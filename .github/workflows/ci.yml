@@ -1,6 +1,9 @@
 # PR / main 基础质量门禁：减轻维护者手工验证，仅 Founder 需关注高影响路径 Review
 name: CI
 
+permissions:
+  contents: read
+
 on:
   pull_request:
     branches: [main]
