@@ -25,4 +25,8 @@ Simple 的样式、布局、禁止悬停位移、背景和 favicon、个人介�
 - Notion OAuth 从 `/api/auth/notion` 发起。
 - 原自有统计、访客后台和百科工具的环境变量继续沿用，无需更换数据库。
 
-验证以维护分支和 main 的 GitHub Actions、部署检查为准；未经验证的工作区变更不直接推广到 main。
+## 验证记录
+
+在 Vercel 预览部署中，使用冻结锁文件安装依赖，并依次运行 Lint、TypeScript 类型检查、完整单元测试和生产构建，全部成功。共 74 个测试套件、604 项测试通过；真实 Redis 集成测试 1 项因没有配置隔离测试 Redis 而跳过。预览部署 ID：`dpl_Hf9RoRJF9gWJ8D1uy4MFUAzYbQU8`，验证代码提交：`ea9ff4e012e16013b9c31d54f42f15a4028411dd`。
+
+GitHub Actions 在本次维护分支推送后未产生运行记录，因此以上验证使用 Vercel 的独立构建命令完成。预览站点需要登录，未生成公开绕过保护的分享链接。正式站点在更新 main 后另行检查。
