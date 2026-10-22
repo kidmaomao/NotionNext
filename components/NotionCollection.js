@@ -12,11 +12,22 @@ export default function NotionCollection(props) {
     })
     .find(view => view?.type === 'gallery')
   const className = galleryVisibilityClassName(collectionView)
+  const cover = collectionView?.format?.gallery_cover
+  const collectionId =
+    props.block?.collection_id || collectionView?.format?.collection_pointer?.id
+  const record = props.ctx?.recordMap?.collection?.[collectionId]
+  const collection = record?.value?.value || record?.value || record
+  const hasFilePreview =
+    cover?.type === 'property' &&
+    collection?.schema?.[cover.property]?.type === 'file'
 
-  if (!className) return <Collection {...props} />
+  if (!className && !hasFilePreview) return <Collection {...props} />
 
   return (
-    <div className={`${GALLERY_VISIBILITY_WRAPPER_CLASS} ${className}`}>
+    <div
+      data-notion-gallery-details={hasFilePreview || undefined}
+      className={`${GALLERY_VISIBILITY_WRAPPER_CLASS} ${className || ''}`}
+    >
       <Collection {...props} />
     </div>
   )

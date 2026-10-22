@@ -20,9 +20,12 @@ import NotionCollection, {
 } from '@/components/NotionCollection'
 
 const galleryProps = format => ({
-  block: { view_ids: ['view-id'] },
+  block: { collection_id: 'rewards', view_ids: ['view-id'] },
   ctx: {
     recordMap: {
+      collection: {
+        rewards: { value: { schema: { preview: { type: 'file' } } } }
+      },
       collection_view: {
         'view-id': { value: { type: 'gallery', format } }
       }
@@ -63,14 +66,29 @@ describe('NotionCollection gallery visibility wrapper', () => {
     )
   })
 
+  it('marks file-preview galleries so their card titles can open details', () => {
+    const { container } = render(
+      <NotionCollection
+        {...galleryProps({
+          show_page_icon: true,
+          gallery_cover: { type: 'property', property: 'preview' },
+          gallery_properties: [{ property: 'title', visible: true }]
+        })}
+      />
+    )
+    expect(container.firstChild).toHaveAttribute(
+      'data-notion-gallery-details',
+      'true'
+    )
+    expect(container.firstChild).toHaveClass(GALLERY_VISIBILITY_WRAPPER_CLASS)
+  })
+
   it('keeps the stretch rule that prevents the wrapper from collapsing into one column', () => {
     const css = fs.readFileSync(
       path.resolve(__dirname, '../../styles/notion.css'),
       'utf8'
     )
-    const rule = css.match(
-      /\.notion-gallery-visibility-wrapper\s*\{[^}]*\}/
-    )
+    const rule = css.match(/\.notion-gallery-visibility-wrapper\s*\{[^}]*\}/)
 
     expect(rule).not.toBeNull()
     expect(rule[0]).toContain('align-self: stretch')

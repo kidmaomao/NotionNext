@@ -228,7 +228,9 @@ const processGalleryImg = zoom => {
 
       const cards = document.getElementsByClassName('notion-collection-card')
       for (const e of cards) {
-        e.removeAttribute('href')
+        if (!e.closest('[data-notion-gallery-details]')) {
+          e.removeAttribute('href')
+        }
       }
     }
   }, 800)
