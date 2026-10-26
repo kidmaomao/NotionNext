@@ -54,33 +54,6 @@ const Style = () => {
     }
   }
 
-  @keyframes simple-hero-drift {
-    0% {
-      transform: scale(1.018) translate3d(0, 0, 0);
-    }
-    50% {
-      transform: scale(1.045) translate3d(-10px, 6px, 0);
-    }
-    100% {
-      transform: scale(1.018) translate3d(0, 0, 0);
-    }
-  }
-
-  @keyframes simple-aurora {
-    0% {
-      transform: translate3d(-6%, -4%, 0) rotate(0deg);
-      opacity: 0.72;
-    }
-    50% {
-      transform: translate3d(6%, 3%, 0) rotate(8deg);
-      opacity: 0.95;
-    }
-    100% {
-      transform: translate3d(-6%, -4%, 0) rotate(0deg);
-      opacity: 0.72;
-    }
-  }
-
   @keyframes simple-shine {
     from {
       transform: translateX(-135%) skewX(-18deg);
@@ -178,8 +151,7 @@ const Style = () => {
       radial-gradient(circle at 28% 44%, rgba(91, 163, 211, 0.20), transparent 34%),
       radial-gradient(circle at 68% 26%, rgba(241, 170, 82, 0.18), transparent 32%),
       radial-gradient(circle at 50% 72%, rgba(103, 198, 182, 0.12), transparent 30%);
-    filter: blur(38px);
-    animation: simple-aurora 18s ease-in-out infinite;
+    /* Static gradients preserve the glow without a continuously filtered layer. */
   }
 
   #theme-simple #container-wrapper {
@@ -227,7 +199,6 @@ const Style = () => {
     filter: saturate(0.94) contrast(0.98) brightness(1.02) blur(0.35px);
     opacity: 0.82;
     transform: scale(1.018);
-    animation: simple-hero-drift 24s ease-in-out infinite;
   }
 
   #theme-simple header.h-80::after {
@@ -321,7 +292,7 @@ const Style = () => {
     border-radius: 999px;
     background: var(--simple-card) !important;
     box-shadow: var(--simple-shadow-soft);
-    backdrop-filter: blur(18px);
+    backdrop-filter: none;
     animation: simple-fade-up 0.72s 0.08s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     transition:
       border-color 0.22s ease,
@@ -1042,6 +1013,8 @@ const Style = () => {
   @media (prefers-reduced-motion: reduce) {
     #theme-simple,
     #theme-simple *,
+    #theme-simple *::before,
+    #theme-simple *::after,
     #theme-simple::before,
     #theme-simple::after {
       animation-duration: 0.01ms !important;
