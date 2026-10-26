@@ -151,7 +151,9 @@ const Style = () => {
       radial-gradient(circle at 28% 44%, rgba(91, 163, 211, 0.20), transparent 34%),
       radial-gradient(circle at 68% 26%, rgba(241, 170, 82, 0.18), transparent 32%),
       radial-gradient(circle at 50% 72%, rgba(103, 198, 182, 0.12), transparent 30%);
-    /* Static gradients preserve the glow without a continuously filtered layer. */
+    /* Keep the softened glow static instead of filtering a moving layer. */
+    filter: blur(38px);
+    opacity: 0.72;
   }
 
   #theme-simple #container-wrapper {
