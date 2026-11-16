@@ -9,10 +9,11 @@ import SocialButton from './SocialButton'
  * @returns
  */
 export default function Header(props) {
-  const { siteInfo } = props
+  const { siteInfo, homeSections } = props
 
   return (
-    <header className='text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10'>
+    <header
+      className={`text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10${homeSections ? ' simple-home-header' : ''}`}>
       <div className='float-none inline-block py-12'>
         <SmartLink href='/'>
           {/* 可使用一张单图作为logo */}

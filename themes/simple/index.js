@@ -10,6 +10,7 @@ import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
 import BlogPostBar from './components/BlogPostBar'
+import HomeSections from './components/HomeSections'
 import CONFIG from './config'
 import { Style } from './style'
 import { VisitStatsProvider } from '@/components/VisitStats'
@@ -143,11 +144,11 @@ const LayoutBase = props => {
 
 /**
  * 博客首页
- * 首页就是列表
  * @param {*} props
  * @returns
  */
 const LayoutIndex = props => {
+  if (props.homeSections) return <HomeSections {...props.homeSections} />
   return <LayoutPostList {...props} />
 }
 /**

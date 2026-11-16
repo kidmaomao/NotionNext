@@ -10,6 +10,7 @@ module.exports = {
 
   // 自定义配置notion数据库字段名
   NOTION_PROPERTY_NAME: {
+    pinned: process.env.NEXT_PUBLIC_NOTION_PROPERTY_PINNED || '置顶',
     password: process.env.NEXT_PUBLIC_NOTION_PROPERTY_PASSWORD || 'password',
     type: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE || 'type', // 文章类型，
     type_post: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_POST || 'Post', // 当type文章类型与此值相同时，为博文。

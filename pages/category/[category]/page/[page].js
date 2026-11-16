@@ -21,7 +21,7 @@ export async function getStaticProps({ params: { category, page } }) {
   // 过滤状态类型
   props.posts = props.allPages
     ?.filter(page => page.type === 'Post' && page.status === 'Published')
-    .filter(post => post && post.category && post.category.includes(category))
+    .filter(post => post.category === category)
   // 处理文章页数
   props.postCount = props.posts.length
   const POSTS_PER_PAGE = siteConfig('POSTS_PER_PAGE', 12, props?.NOTION_CONFIG)
@@ -59,9 +59,7 @@ export async function getStaticPaths() {
     // 过滤状态类型
     const categoryPosts = allPages
       ?.filter(page => page.type === 'Post' && page.status === 'Published')
-      .filter(
-        post => post && post.category && post.category.includes(category.name)
-      )
+      .filter(post => post.category === category.name)
     // 处理文章页数
     const postCount = categoryPosts.length
     const totalPages = Math.ceil(

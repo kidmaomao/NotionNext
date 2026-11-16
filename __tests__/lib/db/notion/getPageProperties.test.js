@@ -2,7 +2,10 @@
  * @jest-environment node
  */
 
-import { adjustPageProperties } from '@/lib/db/notion/getPageProperties'
+import getPageProperties, {
+  adjustPageProperties
+} from '@/lib/db/notion/getPageProperties'
+import { getTextContent } from 'notion-utils'
 
 jest.mock('notion-utils', () => ({
   getDateValue: jest.fn(),
@@ -15,6 +18,24 @@ jest.mock('@/lib/db/notion/getNotionAPI', () => ({
     getUsers: jest.fn()
   }
 }))
+
+describe('getPageProperties', () => {
+  it.each([
+    ['Yes', true],
+    ['No', false],
+    [undefined, false]
+  ])('decodes the Notion 置顶 checkbox value %s', async (value, pinned) => {
+    getTextContent.mockImplementation(property => property[0][0])
+    const properties = value === undefined ? {} : { pin: [[value]] }
+    const post = await getPageProperties(
+      'post-id',
+      { properties, created_time: 1700000000000 },
+      { pin: { type: 'checkbox', name: '置顶' } }
+    )
+
+    expect(post.pinned).toBe(pinned)
+  })
+})
 
 describe('adjustPageProperties', () => {
   it('uses category mapping for pages only when the page category is mapped', () => {

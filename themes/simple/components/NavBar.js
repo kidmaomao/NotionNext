@@ -1,7 +1,9 @@
 import { siteConfig } from '@/lib/config'
+import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useSimpleGlobal } from '..'
+import { simpleCategoryHref, sortSimpleCategories } from '../homepage'
 import { MenuList } from './MenuList'
 
 /**
@@ -13,6 +15,7 @@ export default function NavBar(props) {
   const [showSearchInput, changeShowSearchInput] = useState(false)
   const router = useRouter()
   const { searchModal } = useSimpleGlobal()
+  const categories = sortSimpleCategories(props.categoryOptions)
 
   // 展示搜索框
   const toggleShowSearchInput = () => {
@@ -33,10 +36,12 @@ export default function NavBar(props) {
   }
 
   return (
-    <nav className='w-full bg-white md:pt-0  relative z-20 shadow border-t border-gray-100 dark:border-hexo-black-gray dark:bg-black'>
+    <nav
+      aria-label='网站导航'
+      className={`w-full bg-white md:pt-0 relative z-20 shadow border-t border-gray-100 dark:border-hexo-black-gray dark:bg-black${categories.length ? ' simple-nav-with-categories' : ''}`}>
       <div
         id='nav-bar-inner'
-        className='h-12 mx-auto max-w-9/10 justify-between items-center text-sm md:text-md md:justify-start'>
+        className='relative h-12 mx-auto max-w-9/10 justify-between items-center text-sm md:text-md md:justify-start'>
         {/* 左侧菜单 */}
         <div className='h-full w-full float-left text-center md:text-left flex flex-wrap items-stretch md:justify-start md:items-start space-x-4'>
           {showSearchInput && (
@@ -66,6 +71,20 @@ export default function NavBar(props) {
             onClick={toggleShowSearchInput}></i>
         </div>
       </div>
+      {categories.length > 0 && (
+        <ul className='simple-category-nav' aria-label='文章分类'>
+          {categories.map(({ name }) => (
+            <li key={name}>
+              <SmartLink
+                href={simpleCategoryHref(name)}
+                prefetch={false}
+                aria-current={props.category === name ? 'location' : undefined}>
+                {name}
+              </SmartLink>
+            </li>
+          ))}
+        </ul>
+      )}
     </nav>
   )
 }

@@ -15,6 +15,7 @@ import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
+import { buildSimpleHomepage } from '@/themes/simple/homepage'
 
 /**
  * 首页布局
@@ -34,10 +35,10 @@ export async function getStaticProps(req) {
   const { locale } = req
   const from = 'index'
   const props = await fetchGlobalAllData({ from, locale })
+  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   if (process.env.NODE_ENV === 'development') {
     const configTheme = BLOG.THEME
     const notionTheme = props?.NOTION_CONFIG?.THEME || null
-    const finalTheme = siteConfig('THEME', BLOG.THEME, props?.NOTION_CONFIG)
     const source = notionTheme ? 'notion:config' : 'blog/env:config'
     console.log(
       '[ThemeResolver][server-static-props]',
@@ -45,7 +46,7 @@ export async function getStaticProps(req) {
         route: '/',
         configTheme,
         notionTheme,
-        finalTheme,
+        finalTheme: theme,
         source
       })
     )
@@ -68,6 +69,10 @@ export async function getStaticProps(req) {
   props.posts = props.allPages?.filter(
     page => page.type === 'Post' && page.status === 'Published'
   )
+
+  if (typeof theme === 'string' && theme.split(',')[0].trim() === 'simple') {
+    props.homeSections = buildSimpleHomepage(props.posts, props.categoryOptions)
+  }
 
   // 处理分页
   const POST_LIST_STYLE = siteConfig(
