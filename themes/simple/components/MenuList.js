@@ -7,12 +7,30 @@ import CONFIG from '../config'
 import { MenuItemCollapse } from './MenuItemCollapse'
 import { MenuItemDrop } from './MenuItemDrop'
 
+function withoutCategoryOverview(links) {
+  return links.flatMap(link => {
+    const subMenus = link?.subMenus
+    if (!subMenus?.length) return link?.href === '/category' ? [] : [link]
+
+    const remaining = subMenus.filter(item => item.href !== '/category')
+    if (remaining.length === subMenus.length) return [link]
+    if (remaining.length === 0) return []
+
+    const [tag] = remaining
+    if (remaining.length === 1 && tag.href === '/tag') {
+      return [{ ...tag, name: tag.title, show: link.show, target: link.target }]
+    }
+
+    return [{ ...link, subMenus: remaining }]
+  })
+}
+
 /**
  * 菜单导航
  * @param {*} props
  * @returns
  */
-export const MenuList = ({ customNav, customMenu }) => {
+export const MenuList = ({ customNav, customMenu, categoryOptions }) => {
   const { locale } = useGlobal()
   const [isOpen, changeIsOpen] = useState(false)
   const toggleIsOpen = () => {
@@ -62,6 +80,10 @@ export const MenuList = ({ customNav, customMenu }) => {
   // 如果 开启自定义菜单，则覆盖Page生成的菜单
   if (siteConfig('CUSTOM_MENU')) {
     links = customMenu
+  }
+
+  if (categoryOptions?.length && links) {
+    links = withoutCategoryOverview(links)
   }
 
   if (!links || links.length === 0) {
