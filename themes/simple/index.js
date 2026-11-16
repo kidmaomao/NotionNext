@@ -21,9 +21,7 @@ const AlgoliaSearchModal = dynamic(
 )
 
 // 主题组件
-const BlogListScroll = dynamic(() => import('./components/BlogListScroll'), {
-  ssr: false
-})
+const BlogListScroll = dynamic(() => import('./components/BlogListScroll'))
 const BlogArchiveItem = dynamic(() => import('./components/BlogArchiveItem'), {
   ssr: false
 })
@@ -39,8 +37,8 @@ const ArticleAround = dynamic(() => import('./components/ArticleAround'), {
 })
 const ShareBar = dynamic(() => import('@/components/ShareBar'), { ssr: false })
 const TopBar = dynamic(() => import('./components/TopBar'), { ssr: false })
-const Header = dynamic(() => import('./components/Header'), { ssr: false })
-const NavBar = dynamic(() => import('./components/NavBar'), { ssr: false })
+const Header = dynamic(() => import('./components/Header'))
+const NavBar = dynamic(() => import('./components/NavBar'))
 const SideBar = dynamic(() => import('./components/SideBar'), { ssr: false })
 const JumpToTopButton = dynamic(() => import('./components/JumpToTopButton'), {
   ssr: false
@@ -50,9 +48,7 @@ const SearchInput = dynamic(() => import('./components/SearchInput'), {
   ssr: false
 })
 const WWAds = dynamic(() => import('@/components/WWAds'), { ssr: false })
-const BlogListPage = dynamic(() => import('./components/BlogListPage'), {
-  ssr: false
-})
+const BlogListPage = dynamic(() => import('./components/BlogListPage'))
 const RecommendPosts = dynamic(() => import('./components/RecommendPosts'), {
   ssr: false
 })
@@ -102,7 +98,6 @@ const LayoutBase = props => {
             <div id='container-inner ' className='w-full flex-grow min-h-fit'>
               <Transition
                 show={!onLoading}
-                appear={true}
                 enter='transition ease-in-out duration-700 transform order-first'
                 enterFrom='opacity-0 translate-y-16'
                 enterTo='opacity-100'

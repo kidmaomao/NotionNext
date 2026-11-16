@@ -1,7 +1,8 @@
 import { sortTypedPagesByPublishDate } from '@/lib/site/typedCollections'
 
-const categoryOrder = ['攻略', '汇总', '心得', '情报', '活动', '辟谣', '其他']
+const categoryOrder = ['攻略', '汇总', '心得', '情报', '活动', '其他']
 const categoryRanks = new Map(categoryOrder.map((name, index) => [name, index]))
+categoryRanks.set('辟谣', categoryOrder.length + 1)
 
 export function sortSimpleCategories(categories) {
   return [...(categories ?? [])].sort(
@@ -29,7 +30,7 @@ function toPostLink(post) {
 export function buildSimpleHomepage(publishedPosts, categoryOptions) {
   const orderedPosts = sortTypedPagesByPublishDate(publishedPosts)
   const categoryPosts = new Map(
-    sortSimpleCategories(categoryOptions).map(({ name }) => [name, []])
+    (categoryOptions ?? []).map(({ name }) => [name, []])
   )
   const pinnedPosts = []
   const uncategorized = []
@@ -49,5 +50,9 @@ export function buildSimpleHomepage(publishedPosts, categoryOptions) {
     groups.push({ name: '未分类', href: '/archive', posts: uncategorized })
   }
 
-  return { groups, pinnedPosts }
+  return {
+    groups: sortSimpleCategories(groups),
+    pinnedPosts,
+    latestPosts: orderedPosts.slice(0, 3).map(toPostLink)
+  }
 }

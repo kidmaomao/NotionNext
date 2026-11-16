@@ -527,6 +527,29 @@ const Style = () => {
     #theme-simple .simple-home-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    #theme-simple .simple-home-latest .simple-home-posts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #theme-simple .simple-home-latest .simple-home-posts li + li {
+      border-top: 0;
+      border-left: 1px solid var(--simple-border);
+    }
+
+    #theme-simple .simple-home-latest .simple-home-posts a {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+      gap: 4px;
+      height: 100%;
+      padding-inline: 12px;
+    }
+
+    #theme-simple .simple-home-latest .simple-home-posts li:first-child a {
+      padding-inline-start: 0;
+    }
   }
 
   #theme-simple .blog-item-title {

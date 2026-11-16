@@ -94,6 +94,23 @@ const getThemeExport = (mod, exportName) => {
   return null
 }
 
+// Register the Simple theme before the first Pages Router render so Next can
+// preload it when generating the initial HTML.
+const SimpleLayout = dynamic(() =>
+  import('./simple').then(theme => {
+    return function SimpleThemeLayout(props) {
+      const Layout =
+        getThemeExport(theme, props.layoutName) ||
+        getThemeExport(theme, 'LayoutSlug')
+      return Layout ? <Layout {...props} /> : null
+    }
+  })
+)
+
+const SimpleBaseLayout = props => (
+  <SimpleLayout {...props} layoutName='LayoutBase' />
+)
+
 const scheduleFixThemeDOM = (delay = 120) => {
   if (!isBrowser) return
   if (domFixTimer) {
@@ -191,6 +208,7 @@ const getCurrentTheme = (router, fallbackTheme) => {
  */
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
+  if (normalizedTheme === 'simple') return SimpleBaseLayout
   if (baseLayoutCache.has(normalizedTheme)) {
     return baseLayoutCache.get(normalizedTheme)
   }
@@ -222,10 +240,11 @@ export const DynamicLayout = props => {
 export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
   const themeQuery = getCurrentTheme(router, theme)
+  scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
+  if (themeQuery === 'simple') return SimpleLayout
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {
-    scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
     return layoutByThemeCache.get(cacheKey)
   }
 
@@ -236,7 +255,6 @@ export const useLayoutByTheme = ({ layoutName, theme }) => {
     loading: getLayoutLoading(layoutName)
   })
   layoutByThemeCache.set(cacheKey, DynamicLayoutComponent)
-  scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
   return DynamicLayoutComponent
 }
 

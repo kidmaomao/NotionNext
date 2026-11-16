@@ -15,7 +15,11 @@ function PostLinks({ posts }) {
   )
 }
 
-export default function HomeSections({ groups, pinnedPosts }) {
+export default function HomeSections({
+  groups,
+  pinnedPosts,
+  latestPosts = []
+}) {
   return (
     <main className='simple-home' aria-label='文章'>
       {pinnedPosts.length > 0 && (
@@ -24,6 +28,13 @@ export default function HomeSections({ groups, pinnedPosts }) {
             <i className='fa-solid fa-thumbtack' aria-hidden='true' /> 置顶
           </h2>
           <PostLinks posts={pinnedPosts} />
+        </section>
+      )}
+
+      {latestPosts.length > 0 && (
+        <section className='simple-home-panel simple-home-latest'>
+          <h2 className='simple-home-panel-heading'>NEW</h2>
+          <PostLinks posts={latestPosts} />
         </section>
       )}
 

@@ -12,7 +12,7 @@ function post(slug, category, date, pinned = false) {
   }
 }
 
-test('uses the whole catalog for pins and picks the latest three posts for each category', () => {
+test('picks the newest posts across the catalog and puts 辟谣 after the other groups', () => {
   const posts = [
     post('news', '情报', '2026-11-12'),
     post('older-guide', '攻略', '2026-10-12', true),
@@ -20,21 +20,30 @@ test('uses the whole catalog for pins and picks the latest three posts for each 
     post('third-guide', '攻略', '2026-11-02'),
     post('second-guide', '攻略', '2026-11-06'),
     post('new-category', '练习/指南', '2026-11-05'),
-    post('unclassified', '', '2026-11-01')
+    post('unclassified', '', '2026-11-01'),
+    post('debunk', '辟谣', '2026-10-01')
   ]
-  const categories = ['情报', '攻略', '练习/指南', '活动'].map(name => ({
-    name
-  }))
+  const categories = ['辟谣', '情报', '攻略', '练习/指南', '活动'].map(
+    name => ({
+      name
+    })
+  )
   const result = buildSimpleHomepage(posts, categories)
 
   expect(result.pinnedPosts).toEqual([
     { href: '/article/older-guide', title: 'older-guide', date: '2026-10-12' }
   ])
+  expect(result.latestPosts.map(entry => entry.title)).toEqual([
+    'newest-guide',
+    'news',
+    'second-guide'
+  ])
   expect(result.groups.map(group => group.name)).toEqual([
     '攻略',
     '情报',
     '练习/指南',
-    '未分类'
+    '未分类',
+    '辟谣'
   ])
   expect(result.groups[0].posts.map(entry => entry.title)).toEqual([
     'newest-guide',
