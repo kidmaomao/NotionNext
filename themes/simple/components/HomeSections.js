@@ -1,4 +1,33 @@
 import SmartLink from '@/components/SmartLink'
+import CalendarIcon from 'remixicon-react/CalendarLineIcon'
+import CompassIcon from 'remixicon-react/Compass3LineIcon'
+import FeatherIcon from 'remixicon-react/QuillPenLineIcon'
+import FolderIcon from 'remixicon-react/Folder2LineIcon'
+import SignalIcon from 'remixicon-react/SignalTowerLineIcon'
+import StackIcon from 'remixicon-react/StackLineIcon'
+
+const categoryIcons = new Map([
+  ['情报', [SignalIcon, '#a183d2']],
+  ['汇总', [StackIcon, '#73aa80']],
+  ['心得', [FeatherIcon, '#c97e99']],
+  ['攻略', [CompassIcon, '#72aadd']],
+  ['活动', [CalendarIcon, '#c89c50']]
+])
+
+function CategoryTitle({ name }) {
+  const [Icon, accent] = categoryIcons.get(name) ?? [FolderIcon, '#7ca4be']
+  return (
+    <h2 className='simple-home-category-title'>
+      <span
+        className='simple-home-category-icon'
+        style={{ '--category-accent': accent }}
+        aria-hidden='true'>
+        <Icon size={22} />
+      </span>
+      {name}
+    </h2>
+  )
+}
 
 function PostLinks({ posts }) {
   return (
@@ -42,7 +71,7 @@ export default function HomeSections({
         {groups.map(({ name, href, posts }) => (
           <section key={href} className='simple-home-panel'>
             <div className='simple-home-panel-heading'>
-              <h2>{name}</h2>
+              <CategoryTitle name={name} />
               <SmartLink
                 href={href}
                 prefetch={false}

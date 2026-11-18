@@ -433,11 +433,10 @@ const Style = () => {
 
   #theme-simple .simple-home-panel {
     min-width: 0;
-    padding: 14px 18px 6px;
+    padding: 14px 18px 5px;
     border: 1px solid var(--simple-border);
-    border-radius: var(--simple-radius);
+    border-radius: 14px;
     background: var(--simple-card);
-    box-shadow: var(--simple-shadow-soft);
   }
 
   #theme-simple .simple-home-pinned {
@@ -447,7 +446,7 @@ const Style = () => {
   #theme-simple .simple-home-panel-heading {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 8px;
     margin: 0;
     padding-bottom: 8px;
@@ -455,8 +454,8 @@ const Style = () => {
   }
 
   #theme-simple .simple-home-panel h2 {
-    color: var(--simple-primary-deep);
-    font-size: 1.08rem;
+    color: var(--simple-text);
+    font-size: 1.125rem;
     font-weight: 700;
     line-height: 1.35;
     overflow-wrap: anywhere;
@@ -464,6 +463,23 @@ const Style = () => {
 
   #theme-simple .simple-home-pinned h2 {
     justify-content: flex-start;
+  }
+
+  #theme-simple .simple-home-category-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #theme-simple .simple-home-category-icon {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    color: color-mix(in srgb, var(--category-accent) 55%, var(--simple-text));
+    background: color-mix(in srgb, var(--category-accent) 18%, var(--simple-card-solid));
   }
 
   #theme-simple .simple-home-more {
@@ -494,13 +510,15 @@ const Style = () => {
     min-height: 44px;
     padding: 10px 0;
     color: var(--simple-text);
-    font-size: 0.92rem;
+    font-size: 0.9375rem;
+    font-weight: 400;
     line-height: 1.55;
   }
 
   #theme-simple .simple-home-posts a span {
     min-width: 0;
     overflow-wrap: anywhere;
+    text-wrap: pretty;
   }
 
   #theme-simple .simple-home-posts time {
@@ -508,6 +526,20 @@ const Style = () => {
     color: var(--simple-muted);
     font-size: 0.77rem;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  #theme-simple .simple-home-latest .simple-home-posts a span {
+    font-weight: 650;
+  }
+
+  #theme-simple .simple-home-latest li:first-child a span::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    margin-top: 4px;
+    background: color-mix(in srgb, #34aa98 68%, var(--simple-text));
   }
 
   #theme-simple .simple-home-posts a:hover span,
@@ -527,10 +559,13 @@ const Style = () => {
     #theme-simple .simple-home-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+  }
 
+  @media (min-width: 960px) {
     #theme-simple .simple-home-latest .simple-home-posts {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(0, 1fr);
     }
 
     #theme-simple .simple-home-latest .simple-home-posts li + li {
@@ -541,7 +576,7 @@ const Style = () => {
     #theme-simple .simple-home-latest .simple-home-posts a {
       flex-direction: column;
       align-items: flex-start;
-      justify-content: flex-start;
+      justify-content: space-between;
       gap: 4px;
       height: 100%;
       padding-inline: 12px;
@@ -856,6 +891,58 @@ const Style = () => {
     color: var(--simple-text);
   }
 
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table {
+    display: table !important;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table td {
+    padding: 9px 7px;
+    border: 0 !important;
+    background: transparent;
+    color: var(--simple-text);
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table tr + tr td {
+    border-top: 1px solid var(--simple-border) !important;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table-header-row td {
+    background: var(--simple-faint);
+    font-weight: 650;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table-header-row td:first-child {
+    border-start-start-radius: 8px;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table-header-row td:last-child {
+    border-start-end-radius: 8px;
+  }
+
+  /* The server and date columns leave the remaining width for update details. */
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table td:first-child:nth-last-child(3) {
+    width: 25% !important;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table td:nth-child(2):nth-last-child(2) {
+    width: 21% !important;
+    padding-inline: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  #theme-simple[data-grouped-home] #announcement-content .notion-simple-table td:last-child:nth-child(3) {
+    width: auto !important;
+  }
+
   #theme-simple .notion-code {
     border: 1px solid var(--simple-border);
     border-radius: 14px;
@@ -1125,11 +1212,6 @@ const Style = () => {
 
     #theme-simple .simple-home-panel {
       padding-inline: 14px;
-    }
-
-    #theme-simple .simple-home-panel-heading {
-      justify-content: flex-start;
-      gap: 14px;
     }
 
     #theme-simple header.h-80::before {

@@ -1,14 +1,16 @@
 import { sortTypedPagesByPublishDate } from '@/lib/site/typedCollections'
 
-const categoryOrder = ['攻略', '汇总', '心得', '情报', '活动', '其他']
-const categoryRanks = new Map(categoryOrder.map((name, index) => [name, index]))
-categoryRanks.set('辟谣', categoryOrder.length + 1)
+const navigationOrder = ['攻略', '汇总', '心得', '情报', '活动', '其他']
+const homepageOrder = ['情报', '汇总', '心得', '攻略', '活动', '其他']
+const postsPerSection = 5
 
-export function sortSimpleCategories(categories) {
+export function sortSimpleCategories(categories, order = navigationOrder) {
+  const ranks = new Map(order.map((name, index) => [name, index]))
+  ranks.set('辟谣', order.length + 1)
   return [...(categories ?? [])].sort(
     (left, right) =>
-      (categoryRanks.get(left.name) ?? categoryOrder.length) -
-      (categoryRanks.get(right.name) ?? categoryOrder.length)
+      (ranks.get(left.name) ?? order.length) -
+      (ranks.get(right.name) ?? order.length)
   )
 }
 
@@ -39,7 +41,7 @@ export function buildSimpleHomepage(publishedPosts, categoryOptions) {
     if (post.pinned === true) pinnedPosts.push(toPostLink(post))
 
     const posts = categoryPosts.get(post.category) ?? uncategorized
-    if (posts.length < 3) posts.push(toPostLink(post))
+    if (posts.length < postsPerSection) posts.push(toPostLink(post))
   }
 
   const groups = [...categoryPosts]
@@ -51,8 +53,8 @@ export function buildSimpleHomepage(publishedPosts, categoryOptions) {
   }
 
   return {
-    groups: sortSimpleCategories(groups),
+    groups: sortSimpleCategories(groups, homepageOrder),
     pinnedPosts,
-    latestPosts: orderedPosts.slice(0, 3).map(toPostLink)
+    latestPosts: orderedPosts.slice(0, postsPerSection).map(toPostLink)
   }
 }

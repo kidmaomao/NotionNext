@@ -73,6 +73,7 @@ const LayoutBase = props => {
       <ThemeGlobalSimple.Provider value={{ searchModal }}>
         <div
           id='theme-simple'
+          data-grouped-home={props.homeSections ? '' : undefined}
           className={`${siteConfig('FONT_STYLE')} min-h-screen flex flex-col dark:text-gray-300  bg-white dark:bg-black scroll-smooth`}
         >
           <Style />
