@@ -3,15 +3,18 @@ import CalendarIcon from 'remixicon-react/CalendarLineIcon'
 import CompassIcon from 'remixicon-react/Compass3LineIcon'
 import FeatherIcon from 'remixicon-react/QuillPenLineIcon'
 import FolderIcon from 'remixicon-react/Folder2LineIcon'
+import ShoppingBagIcon from 'remixicon-react/ShoppingBagLineIcon'
 import SignalIcon from 'remixicon-react/SignalTowerLineIcon'
 import StackIcon from 'remixicon-react/StackLineIcon'
+import { postsPerSection } from '../homepage'
 
 const categoryIcons = new Map([
   ['情报', [SignalIcon, '#a183d2']],
   ['汇总', [StackIcon, '#73aa80']],
   ['心得', [FeatherIcon, '#c97e99']],
   ['攻略', [CompassIcon, '#72aadd']],
-  ['活动', [CalendarIcon, '#c89c50']]
+  ['活动', [CalendarIcon, '#c89c50']],
+  ['消费', [ShoppingBagIcon, '#d68b68']]
 ])
 
 function CategoryTitle({ name }) {
@@ -67,7 +70,9 @@ export default function HomeSections({
         </section>
       )}
 
-      <div className='simple-home-grid'>
+      <div
+        className='simple-home-grid'
+        style={{ '--simple-home-post-limit': postsPerSection }}>
         {groups.map(({ name, href, posts }) => (
           <section key={href} className='simple-home-panel'>
             <div className='simple-home-panel-heading'>

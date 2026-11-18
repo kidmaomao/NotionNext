@@ -2,7 +2,7 @@ import { sortTypedPagesByPublishDate } from '@/lib/site/typedCollections'
 
 const navigationOrder = ['攻略', '汇总', '心得', '情报', '活动', '其他']
 const homepageOrder = ['情报', '汇总', '心得', '攻略', '活动', '其他']
-const postsPerSection = 5
+export const postsPerSection = 5
 
 export function sortSimpleCategories(categories, order = navigationOrder) {
   const ranks = new Map(order.map((name, index) => [name, index]))

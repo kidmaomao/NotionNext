@@ -498,6 +498,15 @@ const Style = () => {
     list-style: none;
   }
 
+  #theme-simple .simple-home-grid .simple-home-posts {
+    --simple-home-link-height: max(44px, 2.75rem);
+    display: grid;
+    grid-template-rows: repeat(
+      var(--simple-home-post-limit),
+      minmax(calc(var(--simple-home-link-height) + 1px), auto)
+    );
+  }
+
   #theme-simple .simple-home-posts li + li {
     border-top: 1px solid var(--simple-border);
   }
@@ -507,7 +516,7 @@ const Style = () => {
     justify-content: space-between;
     align-items: baseline;
     gap: 12px;
-    min-height: 44px;
+    min-height: var(--simple-home-link-height, 44px);
     padding: 10px 0;
     color: var(--simple-text);
     font-size: 0.9375rem;
