@@ -1384,7 +1384,7 @@ const Style = () => {
   #theme-simple .journal-arrows button[aria-disabled=true] { opacity: .46; cursor: default; }
   #theme-simple .journal-track {
     display: grid; grid-auto-flow: column; grid-auto-columns: 30%; gap: clamp(12px,1.6vw,24px);
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 3px;
     list-style: none; margin: 0; padding: 4px 3px 10px;
     scrollbar-width: thin; scrollbar-color: var(--simple-border) transparent;
   }

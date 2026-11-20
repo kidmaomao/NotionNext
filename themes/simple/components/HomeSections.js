@@ -27,9 +27,12 @@ function CategoryRail({ name, href, posts }) {
 
   useEffect(() => {
     const list = track.current
+    const edgeTolerance =
+      (parseFloat(getComputedStyle(list).paddingInlineStart) || 0) + 1
     function update() {
-      const start = list.scrollLeft < 2
-      const end = list.scrollLeft + list.clientWidth >= list.scrollWidth - 2
+      const start = list.scrollLeft <= edgeTolerance
+      const end =
+        list.scrollLeft + list.clientWidth >= list.scrollWidth - edgeTolerance
       setEdges(previous =>
         previous.start === start && previous.end === end
           ? previous
