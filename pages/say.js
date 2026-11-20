@@ -21,7 +21,7 @@ function MomentComments({ note, provider }) {
     <div
       className='journal-say-comments'
       role='region'
-      aria-label={'评论，' + note.title}
+      aria-label={'评论，' + (note.title || note.date || '说说')}
     >
       {provider === 'twikoo' ? (
         <Twikoo containerId={'twikoo-' + note.anchor} threadPath={note.href} />

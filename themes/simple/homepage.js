@@ -34,7 +34,7 @@ export function buildSimpleTopicPosts(allPages) {
 }
 
 function toPostLink(post) {
-  return { href: post.href, title: post.title, date: publicationDay(post) }
+  return { href: post.href, title: post.title ?? '', date: publicationDay(post) }
 }
 
 function toCard(post) {
@@ -75,7 +75,7 @@ export function buildSimpleMoments(publishedPosts) {
         post.date?.start_date?.split('T')[1] ||
         ''
       ).slice(0, 5),
-      text: post.summary?.trim() || post.title,
+      text: post.summary?.trim() || post.title || '',
       end: post.date?.end_date || ''
     }))
     .sort(

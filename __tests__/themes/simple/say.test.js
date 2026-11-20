@@ -32,6 +32,8 @@ test('publishes only public short notes and orders same-day entries by time', as
         ...note,
         id: 'morning',
         href: '/morning',
+        title: undefined,
+        summary: '',
         date: { ...note.date, start_time: '08:00', end_date: '2026-11-20' }
       },
       { ...note, id: 'draft', status: 'Draft' },
@@ -84,6 +86,10 @@ test('publishes only public short notes and orders same-day entries by time', as
     'say-evening',
     'say-morning'
   ])
+  expect(props.moments[1]).toMatchObject({
+    title: '',
+    text: '直接写在正文里的提醒'
+  })
   const page = render(<SayPage {...props} />)
   expect(screen.getByText('集合地点变更')).toBeVisible()
   expect(screen.getByText('直接写在正文里的提醒')).toBeVisible()
