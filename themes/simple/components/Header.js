@@ -2,6 +2,7 @@ import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
+import { simpleCategoryHref } from '../homepage'
 import SocialButton from './SocialButton'
 
 /**
@@ -9,11 +10,38 @@ import SocialButton from './SocialButton'
  * @returns
  */
 export default function Header(props) {
-  const { siteInfo, homeSections } = props
+  const { siteInfo, homeSections, compact } = props
+  const moment = homeSections?.latestMoment
+
+  if (compact) {
+    return (
+      <header className='journal-masthead'>
+        <SmartLink href='/'>{siteInfo?.title || siteConfig('TITLE')}</SmartLink>
+        <SmartLink href='/archive' prefetch={false}>
+          按时间看
+        </SmartLink>
+      </header>
+    )
+  }
 
   return (
     <header
-      className={`text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10${homeSections ? ' simple-home-header' : ''}`}>
+      className={`text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10${homeSections ? ' simple-home-header' : ''}${moment ? ' journal-with-moment' : ''}`}
+    >
+      {moment && (
+        <aside className='journal-moment' aria-label='最近的说说'>
+          <SmartLink
+            className='journal-moment-label'
+            href={simpleCategoryHref('说说')}
+          >
+            最近的说说 <span aria-hidden='true'>↗</span>
+          </SmartLink>
+          <SmartLink className='journal-moment-text' href={moment.href}>
+            {moment.text}
+          </SmartLink>
+          {moment.date && <time dateTime={moment.date}>{moment.date}</time>}
+        </aside>
+      )}
       <div className='float-none inline-block py-12'>
         <SmartLink href='/'>
           {/* 可使用一张单图作为logo */}

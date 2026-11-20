@@ -2,6 +2,7 @@
 
 import {
   buildSimpleHomepage,
+  noticeHeadline,
   sortSimpleCategories
 } from '@/themes/simple/homepage'
 
@@ -102,4 +103,71 @@ test('keeps the existing category order in the site navigation', () => {
     '活动',
     '其他'
   ])
+})
+
+test('keeps article art, replaces solid Notion covers and excludes locked media', () => {
+  const cards = ['剧场', '布里列赫攻略', '隐藏图'].map(title => ({
+    ...post(title, '攻略', '2026-11-01'),
+    tags: ['副本']
+  }))
+  cards[0].pageCover = '/uploaded.webp'
+  cards[1].pageCover = 'https://www.notion.so/images/page-cover/solid_beige.png'
+  cards[2].password = 'protected'
+  cards[2].pageCover = '/secret.webp'
+  const { groups } = buildSimpleHomepage(cards, [{ name: '攻略' }])
+  expect(groups[0].posts.map(p => p.cover)).toEqual([
+    '/uploaded.webp',
+    '/images/bri-leith-cover.webp',
+    undefined
+  ])
+  expect(groups[0].posts[0].tags).toEqual(['副本'])
+})
+
+test('short notes expire from the hero after their end date in Hong Kong and remain in the archive', () => {
+  const locked = {
+    ...post('locked', '说说', '2026-11-19'),
+    password: 'protected',
+    summary: 'private'
+  }
+  const reminder = {
+    ...post('reminder', '说说', '2026-11-18'),
+    date: { start_date: '2026-11-18', end_date: '2026-11-20' },
+    summary: '今晚到期'
+  }
+  const older = post('previous', '说说', '2026-11-15')
+  const articles = [locked, reminder, older]
+  const categories = [{ name: '说说' }]
+  const active = buildSimpleHomepage(
+    articles,
+    categories,
+    Date.parse('2026-11-20T23:59:59+08:00')
+  )
+  expect(active.latestMoment.text).toBe('今晚到期')
+  const expired = buildSimpleHomepage(
+    articles,
+    categories,
+    Date.parse('2026-11-21T00:00:00+08:00')
+  )
+  expect(expired.latestMoment.text).toBe('previous')
+  expect(expired.groups[0].posts).toHaveLength(3)
+})
+
+test('notice preview reads only the first published paragraph in document order', () => {
+  const notice = {
+    blockMap: {
+      block: {
+        page: { value: { type: 'page', content: ['h', 'b', 'a'] } },
+        a: { value: { type: 'text', properties: { title: [['Later']] } } },
+        h: { value: { type: 'header' } },
+        b: {
+          value: {
+            type: 'text',
+            properties: { title: [['本周'], ['更新\n第二行']] }
+          }
+        }
+      }
+    }
+  }
+  expect(noticeHeadline(notice)).toBe('本周更新')
+  expect(noticeHeadline({ ...notice, password: 'protected' })).toBe('')
 })

@@ -5,12 +5,15 @@ import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
+import { uuidToId } from 'notion-utils'
 import dynamic from 'next/dynamic'
-import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
 import BlogPostBar from './components/BlogPostBar'
 import HomeSections from './components/HomeSections'
+import TopicIndex from './components/TopicIndex'
+import ArticleInfo from './components/ArticleInfo'
+import BlogArchiveItem from './components/BlogArchiveItem'
 import CONFIG from './config'
 import { Style } from './style'
 import { VisitStatsProvider } from '@/components/VisitStats'
@@ -22,13 +25,7 @@ const AlgoliaSearchModal = dynamic(
 
 // 主题组件
 const BlogListScroll = dynamic(() => import('./components/BlogListScroll'))
-const BlogArchiveItem = dynamic(() => import('./components/BlogArchiveItem'), {
-  ssr: false
-})
 const ArticleLock = dynamic(() => import('./components/ArticleLock'), {
-  ssr: false
-})
-const ArticleInfo = dynamic(() => import('./components/ArticleInfo'), {
   ssr: false
 })
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -67,6 +64,10 @@ const LayoutBase = props => {
   const { children, slotTop } = props
   const { onLoading, fullWidth } = useGlobal()
   const searchModal = useRef(null)
+  const isReading = props.post?.type === 'Post'
+  const journalLayout = Boolean(
+    props.homeSections || props.archivePosts || props.topicPosts || isReading
+  )
 
   return (
     <VisitStatsProvider post={props.post}>
@@ -74,6 +75,7 @@ const LayoutBase = props => {
         <div
           id='theme-simple'
           data-grouped-home={props.homeSections ? '' : undefined}
+          data-reading-post={isReading ? '' : undefined}
           className={`${siteConfig('FONT_STYLE')} min-h-screen flex flex-col dark:text-gray-300  bg-white dark:bg-black scroll-smooth`}
         >
           <Style />
@@ -81,7 +83,10 @@ const LayoutBase = props => {
           {siteConfig('SIMPLE_TOP_BAR', null, CONFIG) && <TopBar {...props} />}
 
           {/* 顶部LOGO */}
-          <Header {...props} />
+          <Header
+            {...props}
+            compact={isReading || Boolean(props.archivePosts)}
+          />
 
           {/* 导航栏 */}
           <NavBar {...props} />
@@ -96,15 +101,15 @@ const LayoutBase = props => {
               ' w-full flex-1 flex items-start max-w-9/10 mx-auto pt-12'
             }
           >
-            <div id='container-inner ' className='w-full flex-grow min-h-fit'>
+            <div id='container-inner' className='w-full flex-grow min-h-fit'>
               <Transition
                 show={!onLoading}
-                enter='transition ease-in-out duration-700 transform order-first'
-                enterFrom='opacity-0 translate-y-16'
+                enter='transition-opacity ease-out duration-200'
+                enterFrom='opacity-0'
                 enterTo='opacity-100'
-                leave='transition ease-in-out duration-300 transform'
-                leaveFrom='opacity-100 translate-y-0'
-                leaveTo='opacity-0 -translate-y-16'
+                leave='transition-opacity ease-in duration-150'
+                leaveFrom='opacity-100'
+                leaveTo='opacity-0'
                 unmount={false}
               >
                 {slotTop}
@@ -114,7 +119,7 @@ const LayoutBase = props => {
               <AdSlot type='native' />
             </div>
 
-            {fullWidth ? null : (
+            {fullWidth || journalLayout ? null : (
               <div
                 id='right-sidebar'
                 className='hidden xl:block flex-none sticky top-8 w-96 border-l dark:border-gray-800 pl-12 border-gray-100'
@@ -144,7 +149,8 @@ const LayoutBase = props => {
  * @returns
  */
 const LayoutIndex = props => {
-  if (props.homeSections) return <HomeSections {...props.homeSections} />
+  if (props.homeSections)
+    return <HomeSections {...props.homeSections} notice={props.notice} />
   return <LayoutPostList {...props} />
 }
 /**
@@ -201,18 +207,43 @@ const LayoutSearch = props => {
  */
 const LayoutArchive = props => {
   const { archivePosts } = props
+  const months = Object.keys(archivePosts)
   return (
-    <>
-      <div className='mb-10 pb-20 md:py-12 p-3  min-h-screen w-full'>
-        {Object.keys(archivePosts).map(archiveTitle => (
-          <BlogArchiveItem
-            key={archiveTitle}
-            archiveTitle={archiveTitle}
-            archivePosts={archivePosts}
-          />
-        ))}
+    <main className='journal-archive'>
+      <div className='journal-archive-heading'>
+        <div>
+          <h1>按时间看文章</h1>
+          <p>全部分类 · 按发文时间从新到旧</p>
+        </div>
+        {months.length > 1 && (
+          <label>
+            跳转月份{' '}
+            <select
+              defaultValue=''
+              onChange={event => {
+                if (event.target.value)
+                  window.location.hash = event.target.value
+              }}
+            >
+              <option value=''>选择月份</option>
+              {months.map(month => (
+                <option key={month} value={month}>
+                  {month}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
-    </>
+      {months.map(month => (
+        <BlogArchiveItem
+          key={month}
+          archiveTitle={month}
+          archivePosts={archivePosts}
+        />
+      ))}
+      {!months.length && <p>还没有发布文章。</p>}
+    </main>
   )
 }
 
@@ -231,10 +262,32 @@ const LayoutSlug = props => {
 
       {!lock && post && (
         <div
-          className={`px-2  ${fullWidth ? '' : 'xl:max-w-4xl 2xl:max-w-6xl'}`}
+          className={
+            post.type === 'Post'
+              ? 'journal-reading' + (fullWidth ? ' journal-reading-wide' : '')
+              : `px-2 ${fullWidth ? '' : 'xl:max-w-4xl 2xl:max-w-6xl'}`
+          }
         >
           {/* 文章信息 */}
           <ArticleInfo post={post} />
+          {post.type === 'Post' && post.toc?.length > 0 && (
+            <details className='journal-toc'>
+              <summary>
+                文章目录 <span>{post.toc.length}</span>
+              </summary>
+              <nav aria-label='文章目录'>
+                {post.toc.map(item => (
+                  <a
+                    key={item.id}
+                    href={'#' + uuidToId(item.id)}
+                    style={{ paddingInlineStart: (item.indentLevel || 0) * 14 }}
+                  >
+                    {item.text}
+                  </a>
+                ))}
+              </nav>
+            </details>
+          )}
 
           {/* 广告嵌入 */}
           {/* <AdSlot type={'in-article'} /> */}
@@ -300,66 +353,8 @@ const Layout404 = props => {
  * @param {*} props
  * @returns
  */
-const LayoutCategoryIndex = props => {
-  const { categoryOptions } = props
-  return (
-    <>
-      <div id='category-list' className='duration-200 flex flex-wrap'>
-        {categoryOptions?.map(category => {
-          return (
-            <SmartLink
-              key={category.name}
-              href={`/category/${category.name}`}
-              passHref
-              legacyBehavior
-            >
-              <div
-                className={
-                  'hover:text-black dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600 px-5 cursor-pointer py-2 hover:bg-gray-100'
-                }
-              >
-                <i className='mr-4 fas fa-folder' />
-                {category.name}({category.count})
-              </div>
-            </SmartLink>
-          )
-        })}
-      </div>
-    </>
-  )
-}
-
-/**
- * 标签列表
- * @param {*} props
- * @returns
- */
-const LayoutTagIndex = props => {
-  const { tagOptions } = props
-  return (
-    <>
-      <div id='tags-list' className='duration-200 flex flex-wrap'>
-        {tagOptions.map(tag => {
-          return (
-            <div key={tag.name} className='p-2'>
-              <SmartLink
-                key={tag}
-                href={`/tag/${encodeURIComponent(tag.name)}`}
-                passHref
-                className={`cursor-pointer inline-block rounded hover:bg-gray-500 hover:text-white duration-200  mr-2 py-1 px-2 text-xs whitespace-nowrap dark:hover:text-white text-gray-600 hover:shadow-xl dark:border-gray-400 notion-${tag.color}_background dark:bg-gray-800`}
-              >
-                <div className='font-light dark:text-gray-400'>
-                  <i className='mr-1 fas fa-tag' />{' '}
-                  {tag.name + (tag.count ? `(${tag.count})` : '')}{' '}
-                </div>
-              </SmartLink>
-            </div>
-          )
-        })}
-      </div>
-    </>
-  )
-}
+const LayoutCategoryIndex = TopicIndex
+const LayoutTagIndex = TopicIndex
 
 export {
   Layout404,

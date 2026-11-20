@@ -73,13 +73,14 @@ export default function NavBar(props) {
       </div>
       {categories.length > 0 && (
         <ul className='simple-category-nav' aria-label='文章分类'>
-          {categories.map(({ name }) => (
+          <li><SmartLink href='/archive' prefetch={false} aria-current={props.archivePosts ? 'page' : undefined}>按时间看</SmartLink></li>
+          {categories.map(({ name, count }) => (
             <li key={name}>
               <SmartLink
                 href={simpleCategoryHref(name)}
                 prefetch={false}
                 aria-current={props.category === name ? 'location' : undefined}>
-                {name}
+                {name}{count > 0 && <sup>{count}</sup>}
               </SmartLink>
             </li>
           ))}
