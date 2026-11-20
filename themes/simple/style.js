@@ -1548,7 +1548,7 @@ const Style = () => {
     transition: background .18s ease, box-shadow .18s ease; touch-action: manipulation;
   }
   #theme-simple .journal-arrows button:first-child { left: 9px; }
-  #theme-simple .journal-arrows button:last-child { right: 9px; }
+  #theme-simple .journal-arrows button:last-child { right: clamp(12px,2.4vw,32px); }
   #theme-simple .journal-arrows button span { transform: translateY(-.07em); }
   #theme-simple .journal-arrows button:disabled { visibility: hidden; pointer-events: none; }
   #theme-simple .journal-arrows button:hover { background: #283c52; }
@@ -1580,6 +1580,7 @@ const Style = () => {
   #theme-simple .journal-card:focus-visible .journal-card-title { animation: journal-title-spring .5s both; }
   #theme-simple .journal-reading .notion-h, #theme-simple .journal-reading .notion-h > [id],
   #theme-simple .journal-month h2 { scroll-margin-top: 80px; }
+  #theme-simple .journal-reading .notion-header-anchor { scroll-margin-top: 22px; }
   #theme-simple .journal-toc-dock {
     position: fixed; z-index: 35; right: max(10px,env(safe-area-inset-right)); top: clamp(80px,30vh,19rem);
     display: flex; flex-direction: row-reverse; align-items: flex-start;

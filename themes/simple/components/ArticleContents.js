@@ -17,8 +17,9 @@ export default function ArticleContents({ items }) {
     function update() {
       frame = 0
       let current = headings[0]
+      const readingLine = Math.min(window.innerHeight * 0.42, 360)
       for (const heading of headings) {
-        if (heading.getBoundingClientRect().top > 100) break
+        if (heading.getBoundingClientRect().top > readingLine) break
         current = heading
       }
       setActive(current?.id || '')
