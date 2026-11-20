@@ -1,8 +1,8 @@
 import LazyImage from '@/components/LazyImage'
 import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
+import { useEffect, useState } from 'react'
 import CONFIG from '../config'
-import { simpleCategoryHref } from '../homepage'
 import SocialButton from './SocialButton'
 
 /**
@@ -12,34 +12,37 @@ import SocialButton from './SocialButton'
 export default function Header(props) {
   const { siteInfo, homeSections, compact } = props
   const moment = homeSections?.latestMoment
+  const [arrived, setArrived] = useState(false)
+  const isHome = Boolean(homeSections)
+  useEffect(() => {
+    setArrived(isHome)
+  }, [isHome])
 
   if (compact) {
     return (
       <header className='journal-masthead'>
         <SmartLink href='/'>{siteInfo?.title || siteConfig('TITLE')}</SmartLink>
-        <SmartLink href='/archive' prefetch={false}>
-          按时间看
-        </SmartLink>
       </header>
     )
   }
 
   return (
     <header
-      className={`text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10${homeSections ? ' simple-home-header' : ''}${moment ? ' journal-with-moment' : ''}`}
+      data-arrived={(isHome && arrived) || undefined}
+      className={`text-center justify-between items-center px-6 bg-white h-80 dark:bg-black relative z-10${homeSections ? ' simple-home-header' : ''}${homeSections ? ' journal-with-moment' : ''}`}
     >
-      {moment && (
+      {homeSections && (
         <aside className='journal-moment' aria-label='最近的说说'>
-          <SmartLink
-            className='journal-moment-label'
-            href={simpleCategoryHref('说说')}
-          >
+          <SmartLink className='journal-moment-label' href='/say'>
             最近的说说 <span aria-hidden='true'>↗</span>
           </SmartLink>
-          <SmartLink className='journal-moment-text' href={moment.href}>
-            {moment.text}
+          <SmartLink
+            className='journal-moment-text'
+            href={moment ? '/say#' + moment.anchor : '/say'}
+          >
+            {moment?.text || '还没有新的说说。'}
           </SmartLink>
-          {moment.date && <time dateTime={moment.date}>{moment.date}</time>}
+          {moment?.date && <time dateTime={moment.date}>{moment.date}</time>}
         </aside>
       )}
       <div className='float-none inline-block py-12'>

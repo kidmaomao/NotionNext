@@ -2,6 +2,7 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { DynamicLayout } from '@/themes/theme'
+import { buildSimpleTopicPosts } from '@/themes/simple/homepage'
 
 /**
  * 标签下的文章列表
@@ -10,7 +11,7 @@ import { DynamicLayout } from '@/themes/theme'
  */
 const Tag = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  return <DynamicLayout theme={theme} layoutName='LayoutPostList' {...props} />
+  return <DynamicLayout key={props.tag} theme={theme} layoutName={props.topicPosts ? 'LayoutTagIndex' : 'LayoutPostList'} {...props} />
 }
 
 export async function getStaticProps({ params: { tag }, locale }) {
@@ -41,6 +42,10 @@ export async function getStaticProps({ params: { tag }, locale }) {
   }
 
   props.tag = tag
+  if (siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)?.split(',')[0].trim() === 'simple') {
+    props.topicPosts = buildSimpleTopicPosts(props.allPages)
+    delete props.posts
+  }
   delete props.allPages
   return {
     props,

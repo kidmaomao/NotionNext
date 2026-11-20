@@ -1,26 +1,11 @@
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
-import CalendarIcon from 'remixicon-react/CalendarLineIcon'
-import CompassIcon from 'remixicon-react/Compass3LineIcon'
-import FeatherIcon from 'remixicon-react/QuillPenLineIcon'
-import FolderIcon from 'remixicon-react/Folder2LineIcon'
-import ShoppingBagIcon from 'remixicon-react/ShoppingBagLineIcon'
-import SignalIcon from 'remixicon-react/SignalTowerLineIcon'
-import StackIcon from 'remixicon-react/StackLineIcon'
+import { categoryAppearance } from './CategoryIcon'
 import Announcement from './Announcement'
 import { noticeHeadline } from '../homepage'
 
-const categoryIcons = new Map([
-  ['情报', [SignalIcon, '#a183d2']],
-  ['汇总', [StackIcon, '#73aa80']],
-  ['心得', [FeatherIcon, '#c97e99']],
-  ['攻略', [CompassIcon, '#72aadd']],
-  ['活动', [CalendarIcon, '#c89c50']],
-  ['消费', [ShoppingBagIcon, '#d68b68']]
-])
-
 function CategoryRail({ name, href, posts }) {
-  const [Icon, accent] = categoryIcons.get(name) ?? [FolderIcon, '#7ca4be']
+  const [Icon, accent] = categoryAppearance(name)
   const id = useId()
   const track = useRef(null)
   const [edges, setEdges] = useState({ start: true, end: true })
@@ -41,21 +26,26 @@ function CategoryRail({ name, href, posts }) {
     }
     update()
     list.addEventListener('scroll', update, { passive: true })
-    const observer = new ResizeObserver(update)
-    observer.observe(list)
+    const observer =
+      typeof ResizeObserver === 'function' && new ResizeObserver(update)
+    observer && observer.observe(list)
     return () => {
       list.removeEventListener('scroll', update)
-      observer.disconnect()
+      observer && observer.disconnect()
     }
   }, [posts])
 
   function slide(direction) {
     const list = track.current
-    const step =
-      list.firstElementChild.offsetWidth +
-      parseFloat(getComputedStyle(list).columnGap)
+    const gap = parseFloat(getComputedStyle(list).columnGap) || 0
+    const step = list.firstElementChild.offsetWidth + gap
+    if (!step) return
+    const visibleCards = Math.max(
+      1,
+      Math.floor((list.clientWidth + gap) / step)
+    )
     list.scrollBy({
-      left: step * direction,
+      left: step * visibleCards * direction,
       behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
         ? 'instant'
         : 'smooth'
@@ -84,79 +74,81 @@ function CategoryRail({ name, href, posts }) {
           >
             {href === '/archive' ? '文章归档' : '查看全部'}
           </SmartLink>
-          {!(edges.start && edges.end) && (
-            <div className='journal-arrows'>
-              <button
-                type='button'
-                aria-label={name + '，上一张'}
-                aria-controls={id}
-                aria-disabled={edges.start}
-                onClick={() => !edges.start && slide(-1)}
-              >
-                ‹
-              </button>
-              <button
-                type='button'
-                aria-label={name + '，下一张'}
-                aria-controls={id}
-                aria-disabled={edges.end}
-                onClick={() => !edges.end && slide(1)}
-              >
-                ›
-              </button>
-            </div>
-          )}
         </div>
       </div>
-      <ul
-        ref={track}
-        id={id}
-        tabIndex={0}
-        onKeyDown={event => {
-          if (event.target !== event.currentTarget) return
-          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            event.preventDefault()
-            slide(event.key === 'ArrowLeft' ? -1 : 1)
-          }
-        }}
-        aria-label={name + '文章'}
-        className='journal-track'
-      >
-        {posts.map(post => (
-          <li key={post.href}>
-            <SmartLink
-              href={post.href}
-              prefetch={false}
-              className='journal-card'
+      <div className='journal-rail-viewport'>
+        <ul
+          ref={track}
+          id={id}
+          tabIndex={0}
+          onKeyDown={event => {
+            if (event.target !== event.currentTarget) return
+            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+              event.preventDefault()
+              slide(event.key === 'ArrowLeft' ? -1 : 1)
+            }
+          }}
+          aria-label={name + '文章'}
+          className='journal-track'
+        >
+          {posts.map((post, index) => (
+            <li key={post.href} style={{ '--card-index': index }}>
+              <SmartLink
+                href={post.href}
+                prefetch={false}
+                className='journal-card'
+              >
+                <span className='journal-art'>
+                  <Icon aria-hidden='true' className='journal-watermark' />
+                  {post.cover && (
+                    <img
+                      key={post.cover}
+                      src={post.cover}
+                      alt=''
+                      loading='lazy'
+                      decoding='async'
+                      onError={event => {
+                        event.currentTarget.hidden = true
+                      }}
+                    />
+                  )}
+                  <span className='journal-card-title'>{post.title}</span>
+                </span>
+                <span className='journal-card-meta'>
+                  {post.date && (
+                    <time dateTime={post.date}>
+                      {post.date.replace(/-/g, '.')}
+                    </time>
+                  )}
+                  {!!post.tags?.length && <span>{post.tags.join(' · ')}</span>}
+                </span>
+              </SmartLink>
+            </li>
+          ))}
+        </ul>
+        {!(edges.start && edges.end) && (
+          <div className='journal-arrows'>
+            <button
+              type='button'
+              aria-label={name + '，上一张'}
+              aria-controls={id}
+              disabled={edges.start}
+              onClick={() => !edges.start && slide(-1)}
             >
-              <span className='journal-art'>
-                <Icon aria-hidden='true' className='journal-watermark' />
-                {post.cover && (
-                  <img
-                    key={post.cover}
-                    src={post.cover}
-                    alt=''
-                    loading='lazy'
-                    decoding='async'
-                    onError={event => {
-                      event.currentTarget.hidden = true
-                    }}
-                  />
-                )}
-                <span className='journal-card-title'>{post.title}</span>
-              </span>
-              <span className='journal-card-meta'>
-                {post.date && (
-                  <time dateTime={post.date}>
-                    {post.date.replace(/-/g, '.')}
-                  </time>
-                )}
-                {!!post.tags?.length && <span>{post.tags.join(' · ')}</span>}
-              </span>
-            </SmartLink>
-          </li>
-        ))}
-      </ul>
+              <span aria-hidden='true'>‹</span>
+            </button>
+            <button
+              type='button'
+              aria-label={name + '，下一张'}
+              aria-controls={id}
+              disabled={edges.end}
+              onClick={() => !edges.end && slide(1)}
+            >
+              <span aria-hidden='true'>›</span>
+            </button>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
@@ -182,8 +174,36 @@ export default function HomeSections({
   latestPosts = [],
   notice
 }) {
+  const home = useRef(null)
+  useEffect(() => {
+    if (
+      !window.IntersectionObserver ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    )
+      return
+    const rows = Array.from(home.current.querySelectorAll('.journal-rail'))
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue
+          entry.target.dataset.reveal = 'in'
+          observer.unobserve(entry.target)
+        }
+      },
+      { threshold: 0.06 }
+    )
+    for (const row of rows) {
+      row.dataset.reveal =
+        row.getBoundingClientRect().top >= window.innerHeight ? 'pending' : 'in'
+      if (row.dataset.reveal === 'pending') observer.observe(row)
+    }
+    return () => {
+      observer.disconnect()
+      rows.forEach(row => delete row.dataset.reveal)
+    }
+  }, [groups])
   return (
-    <main className='simple-home' aria-label='文章'>
+    <main ref={home} className='simple-home' aria-label='文章'>
       {notice?.blockMap && !notice.password && (
         <details className='journal-notice'>
           <summary>

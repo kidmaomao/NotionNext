@@ -5,7 +5,7 @@ import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
-import { uuidToId } from 'notion-utils'
+import ArticleContents from './components/ArticleContents'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
@@ -62,11 +62,11 @@ export const useSimpleGlobal = () => useContext(ThemeGlobalSimple)
  */
 const LayoutBase = props => {
   const { children, slotTop } = props
-  const { onLoading, fullWidth } = useGlobal()
+  const { onLoading, fullWidth, isLiteMode } = useGlobal()
   const searchModal = useRef(null)
   const isReading = props.post?.type === 'Post'
   const journalLayout = Boolean(
-    props.homeSections || props.archivePosts || props.topicPosts || isReading
+    props.homeSections || props.archivePosts || props.topicPosts || props.moments || isReading
   )
 
   return (
@@ -76,16 +76,18 @@ const LayoutBase = props => {
           id='theme-simple'
           data-grouped-home={props.homeSections ? '' : undefined}
           data-reading-post={isReading ? '' : undefined}
+          data-lite={isLiteMode || undefined}
           className={`${siteConfig('FONT_STYLE')} min-h-screen flex flex-col dark:text-gray-300  bg-white dark:bg-black scroll-smooth`}
         >
           <Style />
+          {onLoading && <div role='progressbar' aria-label='正在载入页面' className='journal-route-progress' />}
 
           {siteConfig('SIMPLE_TOP_BAR', null, CONFIG) && <TopBar {...props} />}
 
           {/* 顶部LOGO */}
           <Header
             {...props}
-            compact={isReading || Boolean(props.archivePosts)}
+            compact={isReading || Boolean(props.archivePosts || props.topicPosts || props.moments)}
           />
 
           {/* 导航栏 */}
@@ -271,22 +273,7 @@ const LayoutSlug = props => {
           {/* 文章信息 */}
           <ArticleInfo post={post} />
           {post.type === 'Post' && post.toc?.length > 0 && (
-            <details className='journal-toc'>
-              <summary>
-                文章目录 <span>{post.toc.length}</span>
-              </summary>
-              <nav aria-label='文章目录'>
-                {post.toc.map(item => (
-                  <a
-                    key={item.id}
-                    href={'#' + uuidToId(item.id)}
-                    style={{ paddingInlineStart: (item.indentLevel || 0) * 14 }}
-                  >
-                    {item.text}
-                  </a>
-                ))}
-              </nav>
-            </details>
+            <ArticleContents key={post.id} items={post.toc} />
           )}
 
           {/* 广告嵌入 */}

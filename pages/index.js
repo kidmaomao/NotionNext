@@ -16,6 +16,7 @@ import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
 import { buildSimpleHomepage } from '@/themes/simple/homepage'
+import { readMomentPreview } from '@/lib/site/momentPreview'
 
 /**
  * 首页布局
@@ -72,6 +73,14 @@ export async function getStaticProps(req) {
 
   if (typeof theme === 'string' && theme.split(',')[0].trim() === 'simple') {
     props.homeSections = buildSimpleHomepage(props.posts, props.categoryOptions)
+    const note = props.homeSections.latestMoment
+    if (note) {
+      const source = props.posts.find(post => post.href === note.href)
+      if (!source?.summary?.trim()) {
+        const preview = await readMomentPreview(note, source, props.allPages)
+        note.text = preview.text.slice(0, 240)
+      }
+    }
   }
 
   // 处理分页

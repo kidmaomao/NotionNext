@@ -1,11 +1,9 @@
-import Collapse from '@/components/Collapse'
+import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useRouter } from 'next/router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import CONFIG from '../config'
-import { MenuItemCollapse } from './MenuItemCollapse'
-import { MenuItemDrop } from './MenuItemDrop'
 
 function withoutCategoryOverview(links) {
   return links.flatMap(link => {
@@ -25,111 +23,129 @@ function withoutCategoryOverview(links) {
   })
 }
 
-/**
- * 菜单导航
- * @param {*} props
- * @returns
- */
-export const MenuList = ({ customNav, customMenu, categoryOptions }) => {
+function Entry({ link, path, target }) {
+  const label = (
+    <>
+      {link.icon && <i className={link.icon} aria-hidden='true' />}
+      {link.name || link.title}
+    </>
+  )
+  if (link.subMenus?.length) {
+    return (
+      <details className='journal-nav-group'>
+        <summary>
+          {label}
+          <span aria-hidden='true'>⌄</span>
+        </summary>
+        <div className='journal-nav-popover'>
+          {link.subMenus.map(item => (
+            <Entry
+              key={item.href || item.title}
+              link={item}
+              path={path}
+              target={link.target}
+            />
+          ))}
+        </div>
+      </details>
+    )
+  }
+  return (
+    <SmartLink
+      href={link.href}
+      prefetch={false}
+      target={link.target || target}
+      aria-current={path === link.href ? 'page' : undefined}
+    >
+      {label}
+    </SmartLink>
+  )
+}
+
+export const MenuList = ({ customNav, customMenu }) => {
   const { locale } = useGlobal()
-  const [isOpen, changeIsOpen] = useState(false)
-  const toggleIsOpen = () => {
-    changeIsOpen(!isOpen)
-  }
-  const closeMenu = e => {
-    changeIsOpen(false)
-  }
   const router = useRouter()
-  const collapseRef = useRef(null)
-
+  const nav = useRef(null)
   useEffect(() => {
-    router.events.on('routeChangeStart', closeMenu)
-  })
+    const menus = nav.current
+    const close = () =>
+      menus?.querySelectorAll('details[open]').forEach(item => {
+        item.open = false
+      })
+    const outside = event => {
+      if (!menus?.contains(event.target)) close()
+    }
+    const escape = event => {
+      if (event.key !== 'Escape') return
+      const active = document.activeElement?.closest('details[open]')
+      if (active && menus?.contains(active)) {
+        active.open = false
+        active.querySelector('summary')?.focus()
+      } else close()
+    }
+    router.events.on('routeChangeStart', close)
+    document.addEventListener('pointerdown', outside)
+    document.addEventListener('keydown', escape)
+    return () => {
+      router.events.off('routeChangeStart', close)
+      document.removeEventListener('pointerdown', outside)
+      document.removeEventListener('keydown', escape)
+    }
+  }, [router.events])
 
-  let links = [
+  const defaults = [
     {
       icon: 'fas fa-search',
       name: locale.NAV.SEARCH,
       href: '/search',
       show: siteConfig('SIMPLE_MENU_SEARCH', null, CONFIG)
     },
-    {
-      icon: 'fas fa-archive',
-      name: locale.NAV.ARCHIVE,
-      href: '/archive',
-      show: siteConfig('SIMPLE_MENU_ARCHIVE', null, CONFIG)
-    },
-    {
-      icon: 'fas fa-folder',
-      name: locale.COMMON.CATEGORY,
-      href: '/category',
-      show: siteConfig('SIMPLE_MENU_CATEGORY', null, CONFIG)
-    },
-    {
-      icon: 'fas fa-tag',
-      name: locale.COMMON.TAGS,
-      href: '/tag',
-      show: siteConfig('SIMPLE_MENU_TAG', null, CONFIG)
-    }
+    ...(customNav || [])
   ]
-
-  if (customNav) {
-    links = links.concat(customNav)
-  }
-
-  // 如果 开启自定义菜单，则覆盖Page生成的菜单
-  if (siteConfig('CUSTOM_MENU')) {
-    links = customMenu
-  }
-
-  if (categoryOptions?.length && links) {
-    links = withoutCategoryOverview(links)
-  }
-
-  if (!links || links.length === 0) {
-    return null
-  }
-
+  const links = withoutCategoryOverview(
+    (siteConfig('CUSTOM_MENU') ? customMenu : defaults) || []
+  ).filter(link => link?.show)
+  const primary = [
+    { href: '/', name: '首页', icon: 'fas fa-home' },
+    { href: '/tag', name: '文章标签', icon: 'fas fa-tag' },
+    { href: '/say', name: '说说', icon: 'far fa-comment-dots' },
+    { href: '/archive', name: '按时间看', icon: 'far fa-clock' }
+  ].map(link => ({
+    ...link,
+    ...(links.find(item => item.href === link.href && !item.subMenus?.length) ||
+      {}),
+    ...(link.href === '/archive' ? { name: '按时间看' } : {})
+  }))
+  const others = links.filter(
+    link =>
+      !primary.some(item => item.href === link.href && !link.subMenus?.length)
+  )
+  const path = router.asPath.split(/[?#]/)[0]
+  const entries = list =>
+    list.map(link => (
+      <Entry key={link.name || link.href} link={link} path={path} />
+    ))
   return (
-    <>
-      {/* 大屏模式菜单 */}
-      <div id='nav-menu-pc' className='hidden md:flex my-auto'>
-        {links?.map((link, index) => (
-          <MenuItemDrop key={index} link={link} />
-        ))}
+    <div ref={nav} className='journal-nav-links'>
+      <div className='journal-nav-desktop'>
+        {entries(primary)}
+        {others.length > 0 && (
+          <details className='journal-nav-group'>
+            <summary>
+              更多 <span aria-hidden='true'>⌄</span>
+            </summary>
+            <div className='journal-nav-popover'>{entries(others)}</div>
+          </details>
+        )}
       </div>
-      {/* 移动端小屏菜单 */}
-      <div
-        id='nav-menu-mobile'
-        className='flex md:hidden my-auto justify-start'>
-        <div
-          onClick={toggleIsOpen}
-          className='cursor-pointer hover:text-red-400 transition-all duration-200'>
-          <i
-            className={`${isOpen && 'rotate-90'} transition-all duration-200 fa fa-bars mr-3`}
-          />
-          <span>{!isOpen ? 'MENU' : 'CLOSE'}</span>
+      <details className='journal-nav-mobile journal-nav-group'>
+        <summary>
+          <i className='fas fa-bars' aria-hidden='true' /> 菜单
+        </summary>
+        <div className='journal-nav-popover'>
+          {entries([...primary, ...others])}
         </div>
-
-        <Collapse
-          collapseRef={collapseRef}
-          className='absolute w-full top-12 left-0'
-          isOpen={isOpen}>
-          <div
-            id='menu-wrap'
-            className='bg-white dark:border-hexo-black-gray border'>
-            {links?.map((link, index) => (
-              <MenuItemCollapse
-                key={index}
-                link={link}
-                onHeightChange={param =>
-                  collapseRef.current?.updateCollapseHeight(param)
-                }
-              />
-            ))}
-          </div>
-        </Collapse>
-      </div>
-    </>
+      </details>
+    </div>
   )
 }

@@ -1,4 +1,5 @@
 import {
+  getPublishedTypedPages,
   publicationDay,
   sortTypedPagesByPublishDate
 } from '@/lib/site/typedCollections'
@@ -21,6 +22,15 @@ export function simpleCategoryHref(name) {
   return `/category/${encodeURIComponent(name)}`
 }
 
+export function buildSimpleTopicPosts(allPages) {
+  const posts = getPublishedTypedPages({ allPages, type: 'Post' })
+  return sortTypedPagesByPublishDate(posts).map(post => ({
+    ...toPostLink(post),
+    category: post.category || '',
+    tags: post.tags || []
+  }))
+}
+
 function toPostLink(post) {
   return { href: post.href, title: post.title, date: publicationDay(post) }
 }
@@ -40,6 +50,25 @@ function toCard(post) {
   return card
 }
 
+export function buildSimpleMoments(publishedPosts) {
+  return sortTypedPagesByPublishDate(publishedPosts)
+    .filter(post => post.category === '说说' && !post.password)
+    .map(post => ({
+      ...toPostLink(post),
+      anchor: 'say-' + (post.id || post.href).replace(/[^\p{L}\p{N}_-]/gu, '-'),
+      time: (
+        post.date?.start_time ||
+        post.date?.start_date?.split('T')[1] ||
+        ''
+      ).slice(0, 5),
+      text: post.summary?.trim() || post.title,
+      end: post.date?.end_date || ''
+    }))
+    .sort(
+      (a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time)
+    )
+}
+
 export function buildSimpleHomepage(
   publishedPosts,
   categoryOptions,
@@ -51,20 +80,15 @@ export function buildSimpleHomepage(
   )
   const pinnedPosts = []
   const uncategorized = []
-  let latestMoment = null
+  const latestMoment =
+    buildSimpleMoments(publishedPosts).find(
+      note =>
+        !note.end ||
+        Date.parse(note.end.slice(0, 10) + 'T23:59:59.999+08:00') >= now
+    ) || null
 
   for (const post of orderedPosts) {
     if (post.pinned === true) pinnedPosts.push(toPostLink(post))
-    if (!latestMoment && post.category === '说说' && !post.password) {
-      const end = post.date?.end_date
-      if (!end || Date.parse(end.slice(0, 10) + 'T23:59:59.999+08:00') >= now) {
-        latestMoment = {
-          ...toPostLink(post),
-          text: post.summary?.trim() || post.title
-        }
-      }
-    }
-
     const posts = categoryPosts.get(post.category) ?? uncategorized
     if (posts.length < postsPerSection) posts.push(toCard(post))
   }

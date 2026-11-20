@@ -362,6 +362,8 @@ const getSEOMeta = (props, router, locale) => {
         slug: '',
         type: 'website'
       }
+    case '/say':
+      return { title: `说说 | ${siteInfo?.title}`, description: '洛奇近况、临时提醒，还有游戏里的小事。', image: siteInfo?.pageCover, slug: 'say', type: 'website' }
     case '/archive':
       return {
         title: `${locale.NAV.ARCHIVE} | ${siteInfo?.title}`,

@@ -1,91 +1,58 @@
 import { siteConfig } from '@/lib/config'
-import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useSimpleGlobal } from '..'
-import { simpleCategoryHref, sortSimpleCategories } from '../homepage'
 import { MenuList } from './MenuList'
 
-/**
- * 菜单导航
- * @param {*} props
- * @returns
- */
 export default function NavBar(props) {
-  const [showSearchInput, changeShowSearchInput] = useState(false)
+  const [searching, setSearching] = useState(false)
   const router = useRouter()
   const { searchModal } = useSimpleGlobal()
-  const categories = sortSimpleCategories(props.categoryOptions)
-
-  // 展示搜索框
-  const toggleShowSearchInput = () => {
-    if (siteConfig('ALGOLIA_APP_ID')) {
-      searchModal.current.openSearch()
-    } else {
-      changeShowSearchInput(!showSearchInput)
+  function submit(event) {
+    event.preventDefault()
+    const term = event.currentTarget.elements.s.value.trim()
+    if (term) {
+      setSearching(false)
+      router.push('/search/' + encodeURIComponent(term))
     }
   }
-
-  const onKeyUp = e => {
-    if (e.keyCode === 13) {
-      const search = document.getElementById('simple-search').value
-      if (search) {
-        router.push({ pathname: '/search/' + search })
-      }
-    }
-  }
-
   return (
-    <nav
-      aria-label='网站导航'
-      className={`w-full bg-white md:pt-0 relative z-20 shadow border-t border-gray-100 dark:border-hexo-black-gray dark:bg-black${categories.length ? ' simple-nav-with-categories' : ''}`}>
-      <div
-        id='nav-bar-inner'
-        className='relative h-12 mx-auto max-w-9/10 justify-between items-center text-sm md:text-md md:justify-start'>
-        {/* 左侧菜单 */}
-        <div className='h-full w-full float-left text-center md:text-left flex flex-wrap items-stretch md:justify-start md:items-start space-x-4'>
-          {showSearchInput && (
-            <input
-              autoFocus
-              id='simple-search'
-              onKeyUp={onKeyUp}
-              className='float-left w-full outline-none h-full px-4'
-              aria-label='Submit search'
-              type='search'
-              name='s'
-              autoComplete='off'
-              placeholder='Type then hit enter to search...'
-            />
-          )}
-          {!showSearchInput && <MenuList {...props} />}
-        </div>
-
-        <div className='absolute right-12 h-full text-center px-2 flex items-center text-blue-400  cursor-pointer'>
-          {/* <!-- extra links --> */}
-          <i
-            className={
-              showSearchInput
-                ? 'fa-regular fa-circle-xmark'
-                : 'fa-solid fa-magnifying-glass' + ' align-middle'
-            }
-            onClick={toggleShowSearchInput}></i>
-        </div>
-      </div>
-      {categories.length > 0 && (
-        <ul className='simple-category-nav' aria-label='文章分类'>
-          <li><SmartLink href='/archive' prefetch={false} aria-current={props.archivePosts ? 'page' : undefined}>按时间看</SmartLink></li>
-          {categories.map(({ name, count }) => (
-            <li key={name}>
-              <SmartLink
-                href={simpleCategoryHref(name)}
-                prefetch={false}
-                aria-current={props.category === name ? 'location' : undefined}>
-                {name}{count > 0 && <sup>{count}</sup>}
-              </SmartLink>
-            </li>
-          ))}
-        </ul>
+    <nav aria-label='网站导航' className='journal-nav'>
+      {searching ? (
+        <form
+          role='search'
+          onSubmit={submit}
+          onKeyDown={e => {
+            if (e.key === 'Escape') setSearching(false)
+          }}
+        >
+          <input
+            autoFocus
+            name='s'
+            type='search'
+            aria-label='搜索文章'
+            placeholder='输入关键词，回车搜索'
+            autoComplete='off'
+          />
+        </form>
+      ) : (
+        <MenuList {...props} />
       )}
+      <button
+        type='button'
+        className='journal-nav-search'
+        aria-label={searching ? '关闭搜索' : '搜索文章'}
+        onClick={() =>
+          siteConfig('ALGOLIA_APP_ID')
+            ? searchModal.current?.openSearch()
+            : setSearching(!searching)
+        }
+      >
+        <i
+          aria-hidden='true'
+          className={searching ? 'fas fa-times' : 'fas fa-search'}
+        />
+      </button>
     </nav>
   )
 }
