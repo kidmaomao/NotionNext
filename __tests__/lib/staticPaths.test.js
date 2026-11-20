@@ -10,6 +10,8 @@ jest.mock('@/lib/build/prefetch', () => ({
   getPriorityPages: jest.fn(),
   prefetchAllBlockMaps: jest.fn()
 }))
+jest.mock('p-limit', () => () => fn => fn())
+jest.mock('@/lib/db/notion/getPostBlocks', () => ({}))
 
 jest.mock('@/lib/utils/buildMode', () => ({
   isExport: jest.fn()
@@ -132,5 +134,17 @@ describe('staticPaths build helpers', () => {
         fallback: 'blocking'
       })
     })
+  })
+
+  it('prerenders the public feedback menu destination for the first visitor', () => {
+    const { getPriorityPages: selectPages } = jest.requireActual('@/lib/build/prefetch')
+    const feedback = { id: 'live', type: 'Page', status: 'Published', slug: 'feedback' }
+    const post = { id: 'post', type: 'Post', status: 'Published', slug: 'article/news' }
+    expect(selectPages([
+      post, feedback,
+      { ...feedback, id: 'draft', status: 'Draft' },
+      { ...feedback, id: 'locked', password: 'protected' },
+      { ...feedback, id: 'other', slug: 'other' }
+    ])).toEqual([post, feedback])
   })
 })

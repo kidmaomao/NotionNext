@@ -53,7 +53,7 @@ test('publishes only public short notes and orders same-day entries by time', as
       ? {
           block: {
             morning: {
-              value: { id, type: 'page', content: ['a', 'pic', 'private'] }
+              value: { id, type: 'page', content: ['a', 'pic', 'unsized', 'wide', 'private'] }
             },
             a: {
               value: {
@@ -64,10 +64,24 @@ test('publishes only public short notes and orders same-day entries by time', as
             pic: {
               value: {
                 type: 'image',
+                format: { block_width: 148 },
                 properties: {
                   source: [['https://example.com/game.webp']],
                   caption: [['游戏截图']]
                 }
+              }
+            },
+            unsized: {
+              value: {
+                type: 'image',
+                properties: { source: [['/small.png']], caption: [['未设置尺寸']] }
+              }
+            },
+            wide: {
+              value: {
+                type: 'image',
+                format: { block_page_width: true, block_width: 148 },
+                properties: { source: [['/wide.png']], caption: [['通栏配图']] }
               }
             },
             private: {
@@ -93,7 +107,9 @@ test('publishes only public short notes and orders same-day entries by time', as
   const page = render(<SayPage {...props} />)
   expect(screen.getByText('集合地点变更')).toBeVisible()
   expect(screen.getByText('直接写在正文里的提醒')).toBeVisible()
-  expect(screen.getByRole('img', { name: '游戏截图' })).toBeVisible()
+  expect(screen.getByRole('img', { name: '游戏截图' })).toHaveStyle({ width: '148px' })
+  expect(screen.getByRole('img', { name: '未设置尺寸' })).toHaveClass('journal-say-thumbnail')
+  expect(screen.getByRole('img', { name: '通栏配图' })).toHaveStyle({ width: '100%' })
   expect(screen.queryByText('嵌套页面不进入说说')).toBeNull()
   expect(getPostBlocks).toHaveBeenCalledTimes(2)
   expect(screen.getByText('21:10')).toBeVisible()

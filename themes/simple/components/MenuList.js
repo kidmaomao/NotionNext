@@ -1,6 +1,7 @@
 import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { isFeedbackPath } from '@/lib/site/feedback'
 import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
 import CONFIG from '../config'
@@ -53,7 +54,7 @@ function Entry({ link, path, target }) {
   return (
     <SmartLink
       href={link.href}
-      prefetch={false}
+      prefetch={isFeedbackPath(link.href)}
       target={link.target || target}
       aria-current={path === link.href ? 'page' : undefined}
     >

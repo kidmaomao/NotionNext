@@ -3,10 +3,12 @@ import replaceSearchResult from '@/components/Mark'
 import NotionPage from '@/components/NotionPage'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { isFeedbackPath } from '@/lib/site/feedback'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import ArticleContents from './components/ArticleContents'
 import dynamic from 'next/dynamic'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
 import BlogPostBar from './components/BlogPostBar'
@@ -264,9 +266,19 @@ const LayoutArchive = props => {
 const LayoutSlug = props => {
   const { post, lock, validPassword, prev, next, recommendPosts } = props
   const { fullWidth } = useGlobal()
+  const feedback = isFeedbackPath(post?.href || post?.slug)
+  const commentScript =
+    feedback && !lock && post.comment !== 'Hide' &&
+    siteConfig('COMMENT_TWIKOO_ENV_ID', '', props.NOTION_CONFIG) &&
+    siteConfig('COMMENT_TWIKOO_CDN_URL', '', props.NOTION_CONFIG)
 
   return (
     <>
+      {commentScript && (
+        <Head>
+          <link rel='preload' as='script' href={commentScript} />
+        </Head>
+      )}
       {lock && <ArticleLock validPassword={validPassword} />}
 
       {!lock && post && (
@@ -306,7 +318,7 @@ const LayoutSlug = props => {
           )}
 
           {/* 评论区 */}
-          <Comment frontMatter={post} />
+          <Comment frontMatter={post} eager={feedback} />
         </div>
       )}
     </>

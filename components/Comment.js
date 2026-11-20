@@ -13,9 +13,10 @@ import Artalk from './Artalk'
  * @param {*} param0
  * @returns
  */
-const Comment = ({ frontMatter, className }) => {
+const Comment = ({ frontMatter, className, eager = false }) => {
   const router = useRouter()
-  const [shouldLoad, setShouldLoad] = useState(false)
+  const [inView, setInView] = useState(false)
+  const shouldLoad = eager || inView
   const commentRef = useRef(null)
 
   const COMMENT_ARTALK_SERVER = siteConfig('COMMENT_ARTALK_SERVER')
@@ -32,11 +33,12 @@ const Comment = ({ frontMatter, className }) => {
     siteConfig('COMMENT_NOTION_ENABLE') === 'true'
 
   useEffect(() => {
+    if (eager) return
     // Check if the component is visible in the viewport
     const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          setShouldLoad(true)
+          setInView(true)
           observer.unobserve(entry.target)
         }
       })
@@ -51,7 +53,7 @@ const Comment = ({ frontMatter, className }) => {
         observer.unobserve(commentRef.current)
       }
     }
-  }, [frontMatter])
+  }, [frontMatter, eager])
 
   useEffect(() => {
     if (!isBrowser || !router.isReady) {

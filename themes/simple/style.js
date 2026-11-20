@@ -1759,7 +1759,8 @@ const Style = () => {
   #theme-simple :is(.journal-say-bubble,.journal-say-empty) { background: var(--simple-card); padding: clamp(16px,3vw,28px); border: 1px solid var(--simple-border); border-radius: 5px 22px 22px; }
   #theme-simple .journal-say-bubble p { white-space: pre-line; line-height: 1.8; overflow-wrap: anywhere; }
   #theme-simple .journal-say-bubble figure { margin: 12px 0 0; }
-  #theme-simple .journal-say-bubble img { max-width: 100%; max-height: 28rem; object-fit: contain; border-radius: 12px; }
+  #theme-simple .journal-say-bubble > figure > img { display: block; max-width: 100%; height: auto; border-radius: 12px; }
+  #theme-simple .journal-say-bubble .journal-say-thumbnail { max-width: min(100%, 20rem); max-height: 16rem; }
   #theme-simple .journal-say-bubble figcaption { margin-top: 4px; color: var(--simple-muted); font-size: .82rem; }
   #theme-simple .journal-say-bubble > a { display: inline-block; margin-top: 10px; color: var(--simple-primary-deep); font-size: .85rem; }
   #theme-simple .journal-topic-grid {

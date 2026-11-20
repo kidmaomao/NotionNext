@@ -73,6 +73,8 @@ export default function SayPage({ moments, momentCommentProvider }) {
                       <img
                         src={image.src}
                         alt={image.caption || '说说配图'}
+                        className={image.width ? undefined : 'journal-say-thumbnail'}
+                        style={image.width ? { width: image.width } : undefined}
                         loading='lazy'
                         decoding='async'
                       />
