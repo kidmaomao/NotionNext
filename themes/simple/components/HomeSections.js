@@ -163,10 +163,7 @@ function LatestPosts({ posts }) {
           <div key={day} className='journal-update-day'>
             <dt>
               {day ? (
-                <time dateTime={day}>
-                  <span>{day.slice(0, 4)}.</span>
-                  {day.slice(5).replace('-', '.')}
-                </time>
+                <time dateTime={day}>{day.replace(/-/g, '.')}</time>
               ) : (
                 '日期未记录'
               )}

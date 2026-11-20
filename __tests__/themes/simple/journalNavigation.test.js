@@ -82,6 +82,7 @@ test('groups the latest article links by publication day and omits a second arch
   expect([...section.querySelectorAll('time')].map(time => time.dateTime)).toEqual([
     '2026-11-02', '2025-11-02'
   ])
+  expect(within(section).getByText('2026.11.02', { selector: 'time' })).toBeVisible()
   expect(within(section).getAllByRole('list')[0].children).toHaveLength(2)
   expect(
     within(section).getAllByRole('link').map(link => link.getAttribute('href'))

@@ -569,7 +569,7 @@ const Style = () => {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
-  #theme-simple .journal-update-day time span { color: var(--simple-muted); font-size: .8rem; font-weight: 450; }
+  #theme-simple .journal-update-day time { font-size: 1.125rem; font-weight: 700; }
   #theme-simple .journal-update-day dd { min-width: 0; margin: 0; }
   #theme-simple .journal-update-articles {
     display: grid;
