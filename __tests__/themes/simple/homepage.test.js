@@ -31,6 +31,7 @@ test('shows the newest five articles overall and per homepage section in reading
     post('notes', '心得', '2026-10-04'),
     post('event', '活动', '2026-10-03'),
     post('other', '其他', '2026-10-02'),
+    post('shop', '消费', '2026-10-01'),
     post('new-category', '练习/指南', '2026-11-05'),
     post('unclassified', '', '2026-11-01'),
     post('debunk', '辟谣', '2026-10-01')
@@ -44,6 +45,7 @@ test('shows the newest five articles overall and per homepage section in reading
     '心得',
     '活动',
     '练习/指南',
+    '消费',
     '空栏目'
   ].map(name => ({
     name
@@ -61,8 +63,6 @@ test('shows the newest five articles overall and per homepage section in reading
     'third-guide'
   ])
   expect(result.latestPosts[0].icon).toBe('🧭')
-  expect(result.textPosts).toHaveLength(posts.length)
-  expect(result.textPosts.slice(0, 5).map(p => p.title)).toEqual(result.latestPosts.map(p => p.title))
   expect(result.groups.map(group => group.name)).toEqual([
     '情报',
     '汇总',
@@ -70,6 +70,7 @@ test('shows the newest five articles overall and per homepage section in reading
     '攻略',
     '活动',
     '其他',
+    '消费',
     '练习/指南',
     '未分类',
     '辟谣'
@@ -161,7 +162,6 @@ test('short notes expire from the hero after their end date in Hong Kong and sta
   expect(expired.latestMoment.text).toBe('previous')
   expect(expired.groups).toEqual([])
   expect(expired.latestPosts).toEqual([])
-  expect(expired.textPosts).toEqual([])
   expect(expired.pinnedPosts).toEqual([])
 })
 

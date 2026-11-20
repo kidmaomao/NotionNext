@@ -9,8 +9,7 @@ import { categoryAppearance } from './CategoryIcon'
 import Announcement from './Announcement'
 import { noticeHeadline } from '../homepage'
 
-function CategoryRail({ name, href, posts }) {
-  const [Icon, accent] = categoryAppearance(name)
+function CategoryRail({ name, posts }) {
   const id = useId()
   const track = useRef(null)
   const [edges, setEdges] = useState({ start: true, end: true })
@@ -58,74 +57,50 @@ function CategoryRail({ name, href, posts }) {
   }
 
   return (
-    <section
-      className='journal-rail'
-      style={{ '--category-accent': accent }}
-      aria-labelledby={id + '-title'}
-    >
-      <div className='journal-row-heading'>
-        <h2 id={id + '-title'} className='simple-home-category-title'>
-          <span className='simple-home-category-icon' aria-hidden='true'>
-            <Icon size={20} />
-          </span>
-          {name}
-        </h2>
-        <div className='journal-rail-tools'>
-          <SmartLink
-            href={href}
-            prefetch={false}
-            className='simple-home-more'
-            aria-label={href === '/archive' ? '文章归档' : '查看全部' + name}
+    <div className='journal-rail-viewport'>
+      <ul
+        ref={track}
+        id={id}
+        tabIndex={0}
+        onKeyDown={event => {
+          if (event.target !== event.currentTarget) return
+          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            event.preventDefault()
+            slide(event.key === 'ArrowLeft' ? -1 : 1)
+          }
+        }}
+        aria-label={name + '文章'}
+        className='journal-track'
+      >
+        {posts.map((post, index) => (
+          <li key={post.href} style={{ '--card-index': index }}>
+            <JournalArticleCard post={post} category={name} />
+          </li>
+        ))}
+      </ul>
+      {!(edges.start && edges.end) && (
+        <div className='journal-arrows'>
+          <button
+            type='button'
+            aria-label={name + '，上一张'}
+            aria-controls={id}
+            disabled={edges.start}
+            onClick={() => !edges.start && slide(-1)}
           >
-            {href === '/archive' ? '文章归档' : '查看全部'}
-          </SmartLink>
+            <span aria-hidden='true'>‹</span>
+          </button>
+          <button
+            type='button'
+            aria-label={name + '，下一张'}
+            aria-controls={id}
+            disabled={edges.end}
+            onClick={() => !edges.end && slide(1)}
+          >
+            <span aria-hidden='true'>›</span>
+          </button>
         </div>
-      </div>
-      <div className='journal-rail-viewport'>
-        <ul
-          ref={track}
-          id={id}
-          tabIndex={0}
-          onKeyDown={event => {
-            if (event.target !== event.currentTarget) return
-            if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-              event.preventDefault()
-              slide(event.key === 'ArrowLeft' ? -1 : 1)
-            }
-          }}
-          aria-label={name + '文章'}
-          className='journal-track'
-        >
-          {posts.map((post, index) => (
-            <li key={post.href} style={{ '--card-index': index }}>
-              <JournalArticleCard post={post} category={name} />
-            </li>
-          ))}
-        </ul>
-        {!(edges.start && edges.end) && (
-          <div className='journal-arrows'>
-            <button
-              type='button'
-              aria-label={name + '，上一张'}
-              aria-controls={id}
-              disabled={edges.start}
-              onClick={() => !edges.start && slide(-1)}
-            >
-              <span aria-hidden='true'>‹</span>
-            </button>
-            <button
-              type='button'
-              aria-label={name + '，下一张'}
-              aria-controls={id}
-              disabled={edges.end}
-              onClick={() => !edges.end && slide(1)}
-            >
-              <span aria-hidden='true'>›</span>
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
+      )}
+    </div>
   )
 }
 
@@ -144,9 +119,43 @@ function PostLinks({ posts }) {
   )
 }
 
-const textPageSize = 20
+function HomeCategory({ name, href, posts, textView }) {
+  const headingId = useId()
+  const [Icon, accent] = categoryAppearance(name)
+  return (
+    <section
+      className={textView ? 'simple-home-panel' : 'journal-rail'}
+      style={{ '--category-accent': accent }}
+      aria-labelledby={headingId}
+    >
+      <div
+        className={textView ? 'simple-home-panel-heading' : 'journal-row-heading'}
+      >
+        <h2 id={headingId} className='simple-home-category-title'>
+          <span className='simple-home-category-icon' aria-hidden='true'>
+            <Icon size={20} />
+          </span>
+          {name}
+        </h2>
+        <SmartLink
+          href={href}
+          prefetch={false}
+          className='simple-home-more'
+          aria-label={href === '/archive' ? '文章归档' : '查看全部' + name}
+        >
+          {href === '/archive' ? '文章归档' : '查看全部'}
+        </SmartLink>
+      </div>
+      {textView ? (
+        <PostLinks posts={posts} />
+      ) : (
+        <CategoryRail name={name} posts={posts} />
+      )}
+    </section>
+  )
+}
 
-function LatestPosts({ posts, textView, onViewChange, hasMore, onMore }) {
+function LatestPosts({ posts, textView, onViewChange }) {
   return (
     <section
       id='latest-articles'
@@ -154,19 +163,10 @@ function LatestPosts({ posts, textView, onViewChange, hasMore, onMore }) {
       aria-labelledby='latest-articles-heading'
     >
       <div className='journal-home-list-heading'>
-        <h2 id='latest-articles-heading'>
-          {textView ? '文章列表' : '最新文章'}
-        </h2>
+        <h2 id='latest-articles-heading'>最新文章</h2>
         <ArticleViewSwitch textView={textView} onViewChange={onViewChange} />
       </div>
-      <ArticleRows posts={posts} showIcons={!textView} />
-      {hasMore && (
-        <div className='journal-list-pager'>
-          <button type='button' onClick={onMore}>
-            显示更多文章
-          </button>
-        </div>
-      )}
+      <ArticleRows posts={posts} showIcons />
     </section>
   )
 }
@@ -175,12 +175,10 @@ export default function HomeSections({
   groups,
   pinnedPosts,
   latestPosts = [],
-  textPosts = latestPosts,
   notice
 }) {
   const home = useRef(null)
   const [textView, changeView] = useArticleView()
-  const [visibleCount, setVisibleCount] = useState(textPageSize)
   useEffect(() => {
     if (
       textView ||
@@ -247,21 +245,17 @@ export default function HomeSections({
 
       {latestPosts.length > 0 && (
         <LatestPosts
-          posts={textView ? textPosts.slice(0, visibleCount) : latestPosts}
+          posts={latestPosts}
           textView={textView}
           onViewChange={changeView}
-          hasMore={textView && visibleCount < textPosts.length}
-          onMore={() => setVisibleCount(count => count + textPageSize)}
         />
       )}
 
-      {!textView && (
-        <div className='journal-rails'>
-          {groups.map(group => (
-            <CategoryRail key={group.href} {...group} />
-          ))}
-        </div>
-      )}
+      <div className={textView ? 'simple-home-grid' : 'journal-rails'}>
+        {groups.map(group => (
+          <HomeCategory key={group.href} {...group} textView={textView} />
+        ))}
+      </div>
     </main>
   )
 }

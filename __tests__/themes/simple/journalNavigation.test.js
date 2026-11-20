@@ -125,28 +125,40 @@ test('combines category and tag filters using the same published articles', () =
   expect(within(list).getAllByRole('link')).toHaveLength(2)
 })
 
-test('remembers the chronological text view and can restore the category cards', () => {
+test('keeps the latest articles and shows each category as a text module or a card rail', () => {
+  const groups = articles.map(post => ({
+    name: post.category,
+    href: '/category/' + post.category,
+    posts: [post]
+  }))
   const props = {
-    groups: [{ name: '攻略', href: '/category/攻略', posts: articles }],
-    pinnedPosts: [], latestPosts: articles,
-    textPosts: Array.from({ length: 24 }, (_, index) => ({
-      ...articles[0], href: '/article/' + index, title: '攻略 ' + index
-    }))
+    groups,
+    pinnedPosts: [],
+    latestPosts: articles
   }
   const home = render(<HomeSections {...props} />)
+  const latest = screen.getByRole('region', { name: '最新文章' })
+  const latestRows = latest.querySelector('.journal-updates').outerHTML
   expect(screen.getByRole('button', { name: '方块' })).toHaveAttribute('aria-pressed', 'true')
   fireEvent.click(screen.getByRole('button', { name: '纯文字' }))
-  const list = screen.getByRole('region', { name: '文章列表' })
-  expect(within(list).getAllByRole('link')).toHaveLength(20)
-  expect(list.querySelector('img,.journal-title-icon,.journal-card')).toBeNull()
-  expect(screen.queryByRole('list', { name: '攻略文章' })).toBeNull()
-  fireEvent.click(within(list).getByRole('button', { name: '显示更多文章' }))
-  expect(within(list).getAllByRole('link')).toHaveLength(24)
+  expect(screen.getByRole('region', { name: '最新文章' })).toBe(latest)
+  expect(latest.querySelector('.journal-updates').outerHTML).toBe(latestRows)
+  for (const { name, href, posts } of groups) {
+    const section = screen.getByRole('region', { name })
+    const list = within(section).getByRole('list')
+    expect(within(list).getAllByRole('link')).toHaveLength(1)
+    expect(within(list).getByText(posts[0].title).closest('a')).toHaveAttribute('href', posts[0].href)
+    expect(within(list).getByText(posts[0].date, { selector: 'time' })).toBeVisible()
+    expect(list.querySelector('img,.journal-title-icon,.journal-card')).toBeNull()
+    expect(within(section).getByRole('link', { name: '查看全部' + name })).toHaveAttribute('href', href)
+  }
   home.unmount()
   render(<HomeSections {...props} />)
   expect(screen.getByRole('button', { name: '纯文字' })).toHaveAttribute('aria-pressed', 'true')
   fireEvent.click(screen.getByRole('button', { name: '方块' }))
-  expect(screen.getByRole('list', { name: '攻略文章' })).toBeVisible()
+  for (const { name } of groups) {
+    expect(screen.getByRole('list', { name: name + '文章' }).querySelector('.journal-card')).toBeVisible()
+  }
   window.localStorage.clear()
 })
 

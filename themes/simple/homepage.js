@@ -7,7 +7,7 @@ import {
 } from '@/lib/site/typedCollections'
 
 const navigationOrder = ['攻略', '汇总', '心得', '情报', '活动', '其他']
-const homepageOrder = ['情报', '汇总', '心得', '攻略', '活动', '其他']
+const homepageOrder = ['情报', '汇总', '心得', '攻略', '活动', '其他', '消费']
 export const postsPerSection = 5
 
 export function sortSimpleCategories(categories, order = navigationOrder) {
@@ -121,7 +121,6 @@ export function buildSimpleHomepage(
     groups: sortSimpleCategories(groups, homepageOrder),
     pinnedPosts,
     latestMoment,
-    textPosts: orderedPosts.map(toPostLink),
     latestPosts: orderedPosts.slice(0, postsPerSection).map(post => ({
       ...toPostLink(post),
       icon: post.pageIcon || ''

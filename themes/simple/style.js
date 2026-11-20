@@ -424,10 +424,22 @@ const Style = () => {
     color: var(--simple-primary) !important;
   }
 
-  #theme-simple .simple-home {
+  #theme-simple .simple-home,
+  #theme-simple .simple-home-grid {
     display: grid;
     gap: 14px;
     min-width: 0;
+  }
+
+  #theme-simple .simple-home-grid {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 12px;
+  }
+
+  @media (min-width: 768px) {
+    #theme-simple .simple-home-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   #theme-simple .simple-home-panel {
@@ -527,6 +539,10 @@ const Style = () => {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
   }
+
+  #theme-simple .simple-home-grid .simple-home-posts a { font-size: 1rem; }
+  #theme-simple .simple-home-grid .simple-home-posts time,
+  #theme-simple .simple-home-grid .simple-home-more { font-size: .875rem; }
 
   #theme-simple .simple-home-posts a:hover span,
   #theme-simple .simple-home-more:hover {
@@ -1503,7 +1519,7 @@ const Style = () => {
   #theme-simple .journal-notice .notion-simple-table { display: block; max-width: 100%; overflow-x: auto; }
   #theme-simple .journal-rails { display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(24px,4vw,48px); margin-top: 12px; }
   #theme-simple .journal-rail, #theme-simple .journal-track > li { min-width: 0; }
-  #theme-simple .journal-row-heading, #theme-simple .journal-rail-tools, #theme-simple .journal-arrows { display: flex; align-items: center; gap: 10px; }
+  #theme-simple .journal-row-heading, #theme-simple .journal-arrows { display: flex; align-items: center; gap: 10px; }
   #theme-simple .journal-row-heading { justify-content: space-between; gap: 16px; margin-bottom: 10px; }
   #theme-simple .journal-row-heading h2 { font-size: clamp(1.25rem,2.2vw,1.75rem); font-weight: 750; color: var(--simple-text); }
   #theme-simple .journal-arrows { gap: 4px; }
@@ -1557,7 +1573,7 @@ const Style = () => {
   }
   #theme-simple .journal-card:focus-visible .journal-art::before, #theme-simple .journal-card:focus-visible .journal-cover { filter: none; }
   #theme-simple .journal-card:focus-visible .journal-art::after { opacity: .72; }
-  #theme-simple :is(.journal-track a,.journal-rail-tools button,.journal-notice summary,.journal-toc summary,.journal-month a,.journal-topics a,.journal-topics button):focus-visible { outline: 2px solid var(--simple-primary); outline-offset: 2px; }
+  #theme-simple :is(.journal-track a,.journal-notice summary,.journal-toc summary,.journal-month a,.journal-topics a,.journal-topics button):focus-visible { outline: 2px solid var(--simple-primary); outline-offset: 2px; }
   #theme-simple .journal-masthead { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: min(var(--simple-page-width),calc(100% - 48px)); margin: 14px auto; }
   #theme-simple .journal-masthead a:first-child { color: var(--simple-text); font-size: 1.1rem; font-weight: 750; }
   #theme-simple .journal-masthead a:last-child { color: var(--simple-primary-deep); font-size: .9rem; }
