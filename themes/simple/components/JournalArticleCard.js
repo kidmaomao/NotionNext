@@ -24,6 +24,19 @@ export default function JournalArticleCard({
 }) {
   const [Icon, accent] = categoryAppearance(category)
   const tags = (post.tags || []).slice(0, 2)
+  const coverImage = post.cover && (
+    <img
+      key={post.cover}
+      className='journal-cover'
+      src={post.cover}
+      alt=''
+      loading='lazy'
+      decoding='async'
+      onError={event => {
+        event.currentTarget.hidden = true
+      }}
+    />
+  )
   return (
     <SmartLink
       href={post.href}
@@ -32,20 +45,11 @@ export default function JournalArticleCard({
       style={{ '--category-accent': accent }}
     >
       <span className='journal-art'>
+        {coverImage}
+        <span className='journal-glass-rim' aria-hidden='true'>
+          {coverImage}
+        </span>
         <Icon aria-hidden='true' className='journal-watermark' />
-        {post.cover && (
-          <img
-            key={post.cover}
-            className='journal-cover'
-            src={post.cover}
-            alt=''
-            loading='lazy'
-            decoding='async'
-            onError={event => {
-              event.currentTarget.hidden = true
-            }}
-          />
-        )}
         <span className='journal-card-title'>
           {post.icon && (
             <span className='journal-title-icon' aria-hidden='true'>
