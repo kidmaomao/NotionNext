@@ -1460,9 +1460,9 @@ const Style = () => {
   #theme-simple .journal-notice > summary::-webkit-details-marker { display: none; }
   #theme-simple .journal-notice-pin, #theme-simple .journal-notice-chevron { display: grid; place-items: center; }
   #theme-simple .journal-notice-pin {
-    width: 42px; height: 44px; border-radius: 12px 12px 12px 4px;
+    width: 44px; height: 44px; border-radius: 12px;
     color: var(--notice-ink); background: color-mix(in srgb, var(--simple-accent) 18%, var(--simple-card-solid));
-    border: 1px solid color-mix(in srgb, var(--simple-accent) 35%, var(--simple-border)); transform: rotate(-5deg);
+    border: 1px solid color-mix(in srgb, var(--simple-accent) 35%, var(--simple-border));
   }
   #theme-simple .journal-notice-copy { display: grid; gap: 3px; min-width: 0; }
   #theme-simple .journal-notice-label { color: var(--notice-ink); font-size: .82rem; font-weight: 650; }
