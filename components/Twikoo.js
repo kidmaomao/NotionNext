@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 const scripts = new Map()
 
-function getTwikoo(url) {
+export function getTwikoo(url) {
   if (window.twikoo?.init) return Promise.resolve(window.twikoo)
   if (!url) return Promise.reject(new Error('Missing Twikoo script'))
   if (scripts.has(url)) return scripts.get(url)
@@ -37,7 +37,7 @@ function getTwikoo(url) {
   return ready
 }
 
-export default function Twikoo({ threadPath, containerId }) {
+export default function Twikoo({ threadPath, containerId, onCommentLoaded }) {
   const envId = siteConfig('COMMENT_TWIKOO_ENV_ID')
   const configuredId = siteConfig('COMMENT_TWIKOO_ELEMENT_ID', '#twikoo')
   const mountId = containerId || configuredId.replace(/^#/, '')
@@ -65,6 +65,7 @@ export default function Twikoo({ threadPath, containerId }) {
           envId,
           el: '#' + mountId,
           lang,
+          ...(onCommentLoaded && { onCommentLoaded }),
           ...(path ? { path } : {})
         })
         if (cancelled) instance?.$destroy?.()
@@ -78,7 +79,7 @@ export default function Twikoo({ threadPath, containerId }) {
       instance?.$destroy?.()
       wrapper.replaceChildren()
     }
-  }, [envId, mountId, lang, url, path, attempt])
+  }, [envId, mountId, lang, url, path, attempt, onCommentLoaded])
 
   return (
     <div>

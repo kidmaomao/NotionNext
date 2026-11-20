@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from '@testing-library/react'
 import HomeSections from '@/themes/simple/components/HomeSections'
 import TopicIndex from '@/themes/simple/components/TopicIndex'
 import ArticleContents from '@/themes/simple/components/ArticleContents'
+import { BlogItem } from '@/themes/simple/components/BlogItem'
 
 jest.mock('@/components/SmartLink', () => {
   return function Link({ prefetch, ...props }) {
@@ -122,6 +123,61 @@ test('combines category and tag filters using the same published articles', () =
   expect(within(list).queryByRole('link', { name: /更新简报/ })).toBeNull()
   fireEvent.click(screen.getByRole('button', { name: /所有/ }))
   expect(within(list).getAllByRole('link')).toHaveLength(2)
+})
+
+test('remembers the chronological text view and can restore the category cards', () => {
+  const props = {
+    groups: [{ name: '攻略', href: '/category/攻略', posts: articles }],
+    pinnedPosts: [], latestPosts: articles,
+    textPosts: Array.from({ length: 24 }, (_, index) => ({
+      ...articles[0], href: '/article/' + index, title: '攻略 ' + index
+    }))
+  }
+  const home = render(<HomeSections {...props} />)
+  expect(screen.getByRole('button', { name: '方块' })).toHaveAttribute('aria-pressed', 'true')
+  fireEvent.click(screen.getByRole('button', { name: '纯文字' }))
+  const list = screen.getByRole('region', { name: '文章列表' })
+  expect(within(list).getAllByRole('link')).toHaveLength(20)
+  expect(list.querySelector('img,.journal-title-icon,.journal-card')).toBeNull()
+  expect(screen.queryByRole('list', { name: '攻略文章' })).toBeNull()
+  fireEvent.click(within(list).getByRole('button', { name: '显示更多文章' }))
+  expect(within(list).getAllByRole('link')).toHaveLength(24)
+  home.unmount()
+  render(<HomeSections {...props} />)
+  expect(screen.getByRole('button', { name: '纯文字' })).toHaveAttribute('aria-pressed', 'true')
+  fireEvent.click(screen.getByRole('button', { name: '方块' }))
+  expect(screen.getByRole('list', { name: '攻略文章' })).toBeVisible()
+  window.localStorage.clear()
+})
+
+test('search results use regular article cards and mark a literal search term', () => {
+  const post = {
+    title: '攻略 [BOSS]', href: '/article/guide', pageCover: '/guide.webp', pageIcon: '🎯',
+    date: { start_date: '2026-11-02' }, results: ['进入 [Boss] 房间。'], category: '攻略'
+  }
+  const { rerender } = render(<BlogItem post={post} keyword='[boss]' />)
+  const card = screen.getByRole('link', { name: /攻略/ })
+  expect(card).toHaveClass('journal-card')
+  expect(card).toHaveAttribute('href', post.href)
+  expect(card.querySelector('time')).toHaveAttribute('datetime', '2026-11-02')
+  expect(card.querySelector('img')).toHaveAttribute('src', post.pageCover)
+  expect([...card.querySelectorAll('mark')].map(mark => mark.textContent)).toEqual(['[BOSS]', '[Boss]'])
+  rerender(<BlogItem post={{ ...post, password: 'protected' }} keyword='[boss]' />)
+  expect(card.querySelector('.journal-cover,.journal-card-excerpt')).toBeNull()
+})
+
+test('keeps the tag filters while changing the shared home and topic preference', () => {
+  const page = render(<TopicIndex categoryOptions={categories} tagOptions={[]} topicPosts={articles} />)
+  fireEvent.click(screen.getByRole('button', { name: /攻略/ }))
+  fireEvent.click(screen.getByRole('button', { name: '纯文字' }))
+  const list = screen.getByRole('list')
+  expect(within(list).getAllByRole('link')).toHaveLength(1)
+  expect(within(list).getByText('副本走位')).toBeVisible()
+  expect(list.querySelector('.journal-art,img')).toBeNull()
+  page.unmount()
+  render(<HomeSections groups={[]} latestPosts={articles} pinnedPosts={[]} />)
+  expect(screen.getByRole('button', { name: '纯文字' })).toHaveAttribute('aria-pressed', 'true')
+  window.localStorage.clear()
 })
 
 test('opens the chapter menu from the keyboard and dismisses it after jumping or pressing Escape', () => {

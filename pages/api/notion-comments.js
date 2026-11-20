@@ -54,20 +54,18 @@ const getDatabaseProperties = async notion => {
 const hashEmail = email =>
   createHash('sha256').update(email).digest('hex').slice(0, 32)
 
-const fetchComments = async postId => {
+const fetchComments = async postIds => {
   const notion = getClient()
   const comments = []
   let startCursor
+  const filters = postIds.map(id => ({ property: 'PostId', title: { equals: id } }))
 
   do {
     const response = await notion.databases.query({
       database_id: databaseId,
       start_cursor: startCursor,
       page_size: 100,
-      filter: {
-        property: 'PostId',
-        title: { equals: postId }
-      },
+      filter: filters.length === 1 ? filters[0] : { or: filters },
       sorts: [{ timestamp: 'created_time', direction: 'ascending' }]
     })
     comments.push(
@@ -98,12 +96,28 @@ const getParentLevel = async (notion, parentId, postId) => {
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
+    if (req.query.countFor) {
+      const ids = [...new Set(String(req.query.countFor).split(','))]
+      if (ids.length > 30 || ids.some(id => !id || id.length > 100)) {
+        return res.status(400).json({ error: 'Invalid post IDs' })
+      }
+      try {
+        const counts = new Map(ids.map(id => [id, 0]))
+        for (const comment of await fetchComments(ids)) {
+          if (counts.has(comment.postId)) counts.set(comment.postId, counts.get(comment.postId) + 1)
+        }
+        return res.status(200).json(Object.fromEntries(counts))
+      } catch (error) {
+        console.error('Failed to count Notion comments:', error)
+        return res.status(500).json({ error: 'Failed to count comments' })
+      }
+    }
     const postId = String(req.query.postId || '').trim()
     if (!postId) {
       return res.status(400).json({ error: 'Missing postId' })
     }
     try {
-      return res.status(200).json(await fetchComments(postId))
+      return res.status(200).json(await fetchComments([postId]))
     } catch (error) {
       console.error('Failed to fetch Notion comments:', error)
       return res.status(500).json({ error: 'Failed to fetch comments' })

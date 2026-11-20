@@ -27,17 +27,17 @@ export function simpleCategoryHref(name) {
 export function buildSimpleTopicPosts(allPages) {
   const posts = getPublishedTypedPages({ allPages, type: 'Post' })
   return sortTypedPagesByPublishDate(posts).map(post => ({
-    ...toCard(post),
+    ...toArticleCard(post),
     category: post.category || '',
     tags: post.tags || []
   }))
 }
 
-function toPostLink(post) {
+export function toPostLink(post) {
   return { href: post.href, title: post.title ?? '', date: publicationDay(post) }
 }
 
-function toCard(post) {
+export function toArticleCard(post) {
   const card = toPostLink(post)
   const tags = (post.tags || []).filter(Boolean).slice(0, 2)
   if (tags.length) card.tags = tags
@@ -106,7 +106,7 @@ export function buildSimpleHomepage(
   for (const post of orderedPosts) {
     if (post.pinned === true) pinnedPosts.push(toPostLink(post))
     const posts = categoryPosts.get(post.category) ?? uncategorized
-    if (posts.length < postsPerSection) posts.push(toCard(post))
+    if (posts.length < postsPerSection) posts.push(toArticleCard(post))
   }
 
   const groups = [...categoryPosts]
@@ -121,6 +121,7 @@ export function buildSimpleHomepage(
     groups: sortSimpleCategories(groups, homepageOrder),
     pinnedPosts,
     latestMoment,
+    textPosts: orderedPosts.map(toPostLink),
     latestPosts: orderedPosts.slice(0, postsPerSection).map(post => ({
       ...toPostLink(post),
       icon: post.pageIcon || ''

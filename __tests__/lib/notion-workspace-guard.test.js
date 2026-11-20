@@ -25,9 +25,11 @@ jest.mock('@/lib/utils/notion.util', () => ({
 }))
 
 /**
- * notion-utils 是 ESM 包，Jest 下 mock 掉；只用到 idToUuid
+ * notion-utils 在 Jest 中使用相同的公开接口。
  */
 jest.mock('notion-utils', () => ({
+  getBlockTitle: block => (block.properties?.title || []).map(run => run[0]).join(''),
+  getBlockIcon: block => block.format?.page_icon || null,
   idToUuid: hex => {
     const raw = String(hex).replace(/-/g, '')
     return `${raw.slice(0, 8)}-${raw.slice(8, 12)}-${raw.slice(12, 16)}-${raw.slice(16, 20)}-${raw.slice(20)}`
@@ -35,6 +37,7 @@ jest.mock('notion-utils', () => ({
 }))
 
 jest.mock('react-notion-x', () => ({}))
+jest.mock('../../lib/db/notion/mapImage', () => ({ mapImgUrl: icon => icon }))
 
 jest.mock('../../lib/utils/formatDate', () => jest.fn(source => String(source)))
 

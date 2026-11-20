@@ -1,70 +1,53 @@
 import { siteConfig } from '@/lib/config'
-import { useGlobal } from '@/lib/global'
-import throttle from 'lodash.throttle'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { BlogItem } from './BlogItem'
+import ArticleRows from './ArticleRows'
+import { toPostLink } from '../homepage'
 
-/**
- * 滚动博客列表
- * @param {*} props
- * @returns
- */
-export default function BlogListScroll(props) {
-  const { posts } = props
-  const { locale, NOTION_CONFIG } = useGlobal()
-  const [page, updatePage] = useState(1)
-  const POSTS_PER_PAGE = siteConfig('POSTS_PER_PAGE', null, NOTION_CONFIG)
-  let hasMore = false
-  const postsToShow = posts
-    ? Object.assign(posts).slice(0, POSTS_PER_PAGE * page)
-    : []
-
-  if (posts) {
-    const totalCount = posts.length
-    hasMore = page * POSTS_PER_PAGE < totalCount
-  }
-  const handleGetMore = () => {
-    if (!hasMore) return
-    updatePage(page + 1)
-  }
-
-  const targetRef = useRef(null)
-
-  // 监听滚动自动分页加载
-  const scrollTrigger = useCallback(
-    throttle(() => {
-      const scrollS = window.scrollY + window.outerHeight
-      const clientHeight = targetRef
-        ? targetRef.current
-          ? targetRef.current.clientHeight
-          : 0
-        : 0
-      if (scrollS > clientHeight + 100) {
-        handleGetMore()
-      }
-    }, 500)
-  )
-
+export default function BlogListScroll({
+  posts,
+  keyword,
+  NOTION_CONFIG,
+  textView
+}) {
+  const perPage = Number(siteConfig('POSTS_PER_PAGE', 12, NOTION_CONFIG)) || 12
+  const [limit, setLimit] = useState(perPage)
+  const more = useRef(null)
+  const hasMore = limit < posts.length
   useEffect(() => {
-    window.addEventListener('scroll', scrollTrigger, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', scrollTrigger)
-    }
-  })
-
+    if (!more.current || !window.IntersectionObserver) return
+    const observer = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        setLimit(current => current + perPage)
+      }
+    })
+    observer.observe(more.current)
+    return () => observer.disconnect()
+  }, [hasMore, perPage])
   return (
-    <div id='posts-wrapper' className='w-full md:pr-8 mb-12' ref={targetRef}>
-      {postsToShow.map(p => (
-        <BlogItem key={p.id} post={p} />
-      ))}
-
-      <div
-        onClick={handleGetMore}
-        className='w-full my-4 py-4 text-center cursor-pointer '>
-        {' '}
-        {hasMore ? locale.COMMON.MORE : `${locale.COMMON.NO_MORE} 😰`}{' '}
-      </div>
-    </div>
+    <>
+      {textView ? (
+        <ArticleRows posts={posts.slice(0, limit).map(toPostLink)} />
+      ) : (
+        <ul className='journal-topic-grid'>
+          {posts.slice(0, limit).map(post => (
+            <li key={post.id || post.href}>
+              <BlogItem post={post} keyword={keyword} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {hasMore && (
+        <div className='journal-list-pager'>
+          <button
+            type='button'
+            ref={more}
+            onClick={() => setLimit(limit + perPage)}
+          >
+            加载更多文章
+          </button>
+        </div>
+      )}
+    </>
   )
 }

@@ -10,29 +10,32 @@ import { useRouter } from 'next/router'
  * @returns
  */
 const Search = props => {
-  const { posts } = props
-
   const router = useRouter()
-  const keyword = router?.query?.s
-
-  let filteredPosts
-  // 静态过滤
-  if (keyword) {
-    filteredPosts = posts.filter(post => {
-      const tagContent = post?.tags ? post?.tags.join(' ') : ''
-      const categoryContent = post.category ? post.category.join(' ') : ''
-      const searchContent =
-        post.title + post.summary + tagContent + categoryContent
-      return searchContent.toLowerCase().includes(keyword.toLowerCase())
-    })
-  } else {
-    filteredPosts = []
-  }
-
-  props = { ...props, posts: filteredPosts }
+  const value = router.query.s
+  const keyword = (Array.isArray(value) ? value[0] : value)?.trim() || ''
+  const term = keyword.toLowerCase()
+  const posts = keyword
+    ? (props.posts || []).filter(post =>
+        [post.title, post.summary, post.tags, post.category]
+          .flat()
+          .join(' ')
+          .toLowerCase()
+          .includes(term)
+      )
+    : []
 
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  return <DynamicLayout theme={theme} layoutName='LayoutSearch' {...props} />
+  return (
+    <DynamicLayout
+      theme={theme}
+      layoutName='LayoutSearch'
+      {...props}
+      posts={posts}
+      postCount={posts.length}
+      keyword={keyword}
+      clientSearch
+    />
+  )
 }
 
 /**

@@ -1,29 +1,19 @@
-import { useGlobal } from '@/lib/global'
-
-/**
- * 文章列表上方嵌入
- * @param {*} props
- * @returns
- */
-export default function BlogPostBar(props) {
-  const { tag, category } = props
-  const { locale } = useGlobal()
-
-  if (tag) {
-    return (
-      <div className='flex items-center text-xl py-2'>
-        <i className='mr-2 fas fa-tag' />
-        {locale.COMMON.TAGS}: {tag}
-      </div>
-    )
-  } else if (category) {
-    return (
-      <div className='flex items-center text-xl py-2'>
-        <i className='mr-2 fas fa-th' />
-        {locale.COMMON.CATEGORY}: {category}
-      </div>
-    )
-  } else {
-    return <></>
-  }
+export default function BlogPostBar({
+  search,
+  keyword,
+  tag,
+  category,
+  postCount
+}) {
+  const heading = search ? '搜索文章' : tag ? '#' + tag : category || '所有文章'
+  return (
+    <header className='journal-page-heading'>
+      <h1>{heading}</h1>
+      {(!search || keyword) && (
+        <p>
+          {keyword && <>“{keyword}” · </>}共 {postCount} 篇文章
+        </p>
+      )}
+    </header>
+  )
 }

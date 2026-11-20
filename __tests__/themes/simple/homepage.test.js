@@ -61,6 +61,8 @@ test('shows the newest five articles overall and per homepage section in reading
     'third-guide'
   ])
   expect(result.latestPosts[0].icon).toBe('🧭')
+  expect(result.textPosts).toHaveLength(posts.length)
+  expect(result.textPosts.slice(0, 5).map(p => p.title)).toEqual(result.latestPosts.map(p => p.title))
   expect(result.groups.map(group => group.name)).toEqual([
     '情报',
     '汇总',
@@ -159,6 +161,7 @@ test('short notes expire from the hero after their end date in Hong Kong and sta
   expect(expired.latestMoment.text).toBe('previous')
   expect(expired.groups).toEqual([])
   expect(expired.latestPosts).toEqual([])
+  expect(expired.textPosts).toEqual([])
   expect(expired.pinnedPosts).toEqual([])
 })
 

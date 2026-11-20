@@ -18,7 +18,7 @@ const formatTime = value => {
 
 const getInitial = name => (name || '?').trim().slice(0, 1).toUpperCase()
 
-const NotionComments = ({ postId }) => {
+const NotionComments = ({ postId, onCommentLoaded }) => {
   const [comments, setComments] = useState([])
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
@@ -90,6 +90,7 @@ const NotionComments = ({ postId }) => {
         setExpandedReplies(current => ({ ...current, [replyTo]: true }))
       }
       await loadComments()
+      onCommentLoaded?.()
     } catch (error) {
       setError('评论提交失败，请稍后重试')
     } finally {

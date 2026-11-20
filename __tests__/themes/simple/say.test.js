@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import SayPage, { getStaticProps } from '@/pages/say'
 import { fetchGlobalAllData, getPostBlocks } from '@/lib/db/SiteDataApi'
 jest.mock('p-limit', () => () => fn => fn())
@@ -129,4 +129,29 @@ test('publishes only public short notes and orders same-day entries by time', as
   )
   linked.rerender(<SayPage moments={[]} />)
   expect(screen.getByText('暂时还没有公开的说说。')).toBeVisible()
+})
+
+test('shows real counts for each closed thread, including zero, without mounting the comments', async () => {
+  const moments = ['one', 'two', 'hidden'].map(id => ({
+    id, href: '/article/' + id, anchor: 'say-' + id,
+    date: '2026-11-20', text: id, comments: id !== 'hidden'
+  }))
+  window.twikoo = {
+    init: jest.fn(),
+    getCommentsCount: jest.fn().mockResolvedValue([
+      { url: '/article/two', count: 0 }, { url: '/article/one', count: 3 }
+    ])
+  }
+  try {
+    render(<SayPage moments={moments} momentCommentProvider='twikoo'
+      NOTION_CONFIG={{ COMMENT_TWIKOO_ENV_ID: 'demo' }} />)
+    await waitFor(() => expect(screen.getByRole('button', { name: /评论\s*3/ })).toBeVisible())
+    expect(screen.getByRole('button', { name: /评论\s*0/ })).toBeVisible()
+    expect(window.twikoo.getCommentsCount).toHaveBeenCalledWith({
+      envId: 'demo', urls: ['/article/one', '/article/two'], includeReply: true
+    })
+    expect(window.twikoo.init).not.toHaveBeenCalled()
+  } finally {
+    delete window.twikoo
+  }
 })

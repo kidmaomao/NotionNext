@@ -1,5 +1,6 @@
 import JournalArticleCard from './JournalArticleCard'
-import NotionIcon from '@/components/NotionIcon'
+import ArticleRows from './ArticleRows'
+import ArticleViewSwitch, { useArticleView } from './ArticleViewSwitch'
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
 import ArrowDownSLineIcon from 'remixicon-react/ArrowDownSLineIcon'
@@ -143,52 +144,29 @@ function PostLinks({ posts }) {
   )
 }
 
-function LatestPosts({ posts }) {
-  const days = new Map()
-  for (const post of posts) {
-    const day = post.date || ''
-    if (!days.has(day)) days.set(day, [])
-    days.get(day).push(post)
-  }
+const textPageSize = 20
 
+function LatestPosts({ posts, textView, onViewChange, hasMore, onMore }) {
   return (
     <section
       id='latest-articles'
       className='simple-home-panel simple-home-latest'
       aria-labelledby='latest-articles-heading'
     >
-      <h2 id='latest-articles-heading'>最新文章</h2>
-      <dl className='journal-updates'>
-        {Array.from(days, ([day, articles]) => (
-          <div key={day} className='journal-update-day'>
-            <dt>
-              {day ? (
-                <time dateTime={day}>{day.replace(/-/g, '.')}</time>
-              ) : (
-                '日期未记录'
-              )}
-            </dt>
-            <dd>
-              <ul className='journal-update-articles'>
-                {articles.map(post => (
-                  <li key={post.href}>
-                    <SmartLink href={post.href} prefetch={false}>
-                      <span className='journal-title-icon' aria-hidden='true'>
-                        {post.icon ? (
-                          <NotionIcon icon={post.icon} />
-                        ) : (
-                          <i className='far fa-file-alt' />
-                        )}
-                      </span>
-                      <span className='journal-update-title'>{post.title}</span>
-                    </SmartLink>
-                  </li>
-                ))}
-              </ul>
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <div className='journal-home-list-heading'>
+        <h2 id='latest-articles-heading'>
+          {textView ? '文章列表' : '最新文章'}
+        </h2>
+        <ArticleViewSwitch textView={textView} onViewChange={onViewChange} />
+      </div>
+      <ArticleRows posts={posts} showIcons={!textView} />
+      {hasMore && (
+        <div className='journal-list-pager'>
+          <button type='button' onClick={onMore}>
+            显示更多文章
+          </button>
+        </div>
+      )}
     </section>
   )
 }
@@ -197,11 +175,15 @@ export default function HomeSections({
   groups,
   pinnedPosts,
   latestPosts = [],
+  textPosts = latestPosts,
   notice
 }) {
   const home = useRef(null)
+  const [textView, changeView] = useArticleView()
+  const [visibleCount, setVisibleCount] = useState(textPageSize)
   useEffect(() => {
     if (
+      textView ||
       !window.IntersectionObserver ||
       window.matchMedia('(prefers-reduced-motion: reduce)').matches
     )
@@ -226,9 +208,14 @@ export default function HomeSections({
       observer.disconnect()
       rows.forEach(row => delete row.dataset.reveal)
     }
-  }, [groups])
+  }, [groups, textView])
   return (
-    <main ref={home} className='simple-home' aria-label='文章'>
+    <main
+      ref={home}
+      className='simple-home'
+      data-view={textView ? 'text' : 'cards'}
+      aria-label='文章'
+    >
       {notice?.blockMap && !notice.password && (
         <details className='journal-notice'>
           <summary>
@@ -258,13 +245,23 @@ export default function HomeSections({
         </section>
       )}
 
-      {latestPosts.length > 0 && <LatestPosts posts={latestPosts} />}
+      {latestPosts.length > 0 && (
+        <LatestPosts
+          posts={textView ? textPosts.slice(0, visibleCount) : latestPosts}
+          textView={textView}
+          onViewChange={changeView}
+          hasMore={textView && visibleCount < textPosts.length}
+          onMore={() => setVisibleCount(count => count + textPageSize)}
+        />
+      )}
 
-      <div className='journal-rails'>
-        {groups.map(group => (
-          <CategoryRail key={group.href} {...group} />
-        ))}
-      </div>
+      {!textView && (
+        <div className='journal-rails'>
+          {groups.map(group => (
+            <CategoryRail key={group.href} {...group} />
+          ))}
+        </div>
+      )}
     </main>
   )
 }

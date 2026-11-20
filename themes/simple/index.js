@@ -1,5 +1,4 @@
 import { AdSlot } from '@/components/GoogleAdsense'
-import replaceSearchResult from '@/components/Mark'
 import NotionPage from '@/components/NotionPage'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
@@ -12,6 +11,8 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { createContext, useContext, useEffect, useRef } from 'react'
 import BlogPostBar from './components/BlogPostBar'
+import ArticleViewSwitch, { useArticleView } from './components/ArticleViewSwitch'
+import SearchInput from './components/SearchInput'
 import HomeSections from './components/HomeSections'
 import TopicIndex from './components/TopicIndex'
 import ArticleInfo from './components/ArticleInfo'
@@ -43,9 +44,6 @@ const JumpToTopButton = dynamic(() => import('./components/JumpToTopButton'), {
   ssr: false
 })
 const Footer = dynamic(() => import('./components/Footer'), { ssr: false })
-const SearchInput = dynamic(() => import('./components/SearchInput'), {
-  ssr: false
-})
 const WWAds = dynamic(() => import('@/components/WWAds'), { ssr: false })
 const BlogListPage = dynamic(() => import('./components/BlogListPage'))
 const RecommendPosts = dynamic(() => import('./components/RecommendPosts'), {
@@ -62,19 +60,14 @@ export const useSimpleGlobal = () => useContext(ThemeGlobalSimple)
  * @param {*} props
  * @returns
  */
-function usesReadingLayout(post) {
-  if (post?.type === 'Post') return true
-  const path = (post?.href || post?.slug || '').split(/[?#]/)[0].replace(/^\/+|\/+$/g, '')
-  return post?.type === 'Page' && ['tools', 'links', 'updatenote', 'feedback'].includes(path)
-}
-
 const LayoutBase = props => {
   const { children, slotTop } = props
   const { onLoading, fullWidth, isLiteMode } = useGlobal()
   const searchModal = useRef(null)
-  const isReading = usesReadingLayout(props.post)
-  const journalLayout = Boolean(
-    props.homeSections || props.archivePosts || props.topicPosts || props.moments || isReading
+  const isReading = Boolean(props.post)
+  const compact = !props.homeSections && Boolean(
+    isReading || props.archivePosts || props.topicPosts ||
+    props.moments || Array.isArray(props.posts)
   )
 
   return (
@@ -96,7 +89,7 @@ const LayoutBase = props => {
           <Header
             {...props}
             lite={isLiteMode}
-            compact={isReading || Boolean(props.archivePosts || props.topicPosts || props.moments)}
+            compact={compact}
           />
 
           {/* 导航栏 */}
@@ -130,7 +123,7 @@ const LayoutBase = props => {
               <AdSlot type='native' />
             </div>
 
-            {fullWidth || journalLayout ? null : (
+            {fullWidth || props.homeSections || compact ? null : (
               <div
                 id='right-sidebar'
                 className='hidden xl:block flex-none sticky top-8 w-96 border-l dark:border-gray-800 pl-12 border-gray-100'
@@ -170,15 +163,25 @@ const LayoutIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
+  const { posts = [], postCount = posts.length, search, keyword, NOTION_CONFIG } = props
+  const usePages = !props.clientSearch && (
+    props.page || siteConfig('POST_LIST_STYLE', 'page', NOTION_CONFIG) === 'page'
+  )
+  const List = usePages ? BlogListPage : BlogListScroll
+  const [textView, changeView] = useArticleView()
+  const topicListing = Boolean(props.tag || props.category)
   return (
-    <>
-      <BlogPostBar {...props} />
-      {siteConfig('POST_LIST_STYLE') === 'page' ? (
-        <BlogListPage {...props} />
-      ) : (
-        <BlogListScroll {...props} />
+    <main className='journal-listing'>
+      <BlogPostBar {...props} postCount={postCount} />
+      {topicListing && <ArticleViewSwitch textView={textView} onViewChange={changeView} />}
+      {search && <SearchInput key={keyword || ''} keyword={keyword} />}
+      {posts.length > 0 && (
+        <List key={keyword || props.tag || props.category} {...props} postCount={postCount} textView={topicListing && textView} />
       )}
-    </>
+      {!posts.length && (!search || keyword) && (
+        <p className='journal-list-empty'>没有找到符合条件的文章。</p>
+      )}
+    </main>
   )
 }
 
@@ -189,26 +192,7 @@ const LayoutPostList = props => {
  * @returns
  */
 const LayoutSearch = props => {
-  const { keyword } = props
-
-  useEffect(() => {
-    if (isBrowser) {
-      replaceSearchResult({
-        doms: document.getElementById('posts-wrapper'),
-        search: keyword,
-        target: {
-          element: 'span',
-          className: 'text-red-500 border-b border-dashed'
-        }
-      })
-    }
-  }, [])
-
-  const slotTop = siteConfig('ALGOLIA_APP_ID') ? null : (
-    <SearchInput {...props} />
-  )
-
-  return <LayoutPostList {...props} slotTop={slotTop} />
+  return <LayoutPostList {...props} search />
 }
 
 /**
@@ -282,16 +266,10 @@ const LayoutSlug = props => {
       {lock && <ArticleLock validPassword={validPassword} />}
 
       {!lock && post && (
-        <div
-          className={
-            usesReadingLayout(post)
-              ? 'journal-reading' + (fullWidth ? ' journal-reading-wide' : '')
-              : `px-2 ${fullWidth ? '' : 'xl:max-w-4xl 2xl:max-w-6xl'}`
-          }
-        >
+        <div className={'journal-reading' + (fullWidth ? ' journal-reading-wide' : '')}>
           {/* 文章信息 */}
           <ArticleInfo post={post} />
-          {usesReadingLayout(post) && post.toc?.length > 0 && (
+          {post.toc?.length > 0 && (
             <ArticleContents key={post.id} items={post.toc} />
           )}
 

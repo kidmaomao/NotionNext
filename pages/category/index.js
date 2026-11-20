@@ -2,6 +2,7 @@ import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { DynamicLayout } from '@/themes/theme'
+import { buildSimpleTopicPosts } from '@/themes/simple/homepage'
 
 /**
  * 分类首页
@@ -17,6 +18,10 @@ export default function Category(props) {
 
 export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'category-index-props', locale })
+  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+  if (theme?.split(',')[0].trim() === 'simple') {
+    props.topicPosts = buildSimpleTopicPosts(props.allPages)
+  }
   delete props.allPages
   return {
     props,

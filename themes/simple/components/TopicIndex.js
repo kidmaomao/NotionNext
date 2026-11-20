@@ -1,4 +1,6 @@
 import JournalArticleCard from './JournalArticleCard'
+import ArticleRows from './ArticleRows'
+import ArticleViewSwitch, { useArticleView } from './ArticleViewSwitch'
 import { useEffect, useRef, useState } from 'react'
 import SmartLink from '@/components/SmartLink'
 import { simpleCategoryHref, sortSimpleCategories } from '../homepage'
@@ -159,6 +161,7 @@ export default function TopicIndex({
 }) {
   const [category, setCategory] = useState(initialCategory)
   const [tag, setTag] = useState(initialTag)
+  const [textView, changeView] = useArticleView()
   useEffect(() => {
     setCategory(initialCategory)
     setTag(initialTag)
@@ -234,16 +237,25 @@ export default function TopicIndex({
       />
       {topicPosts && (
         <section className='journal-topic-results'>
-          <h2>
-            {[category, tag && '#' + tag].filter(Boolean).join(' · ') ||
-              '所有文章'}{' '}
-            <small>{matches.length} 篇 · 按发文时间</small>
-          </h2>
-          <ul className='journal-topic-grid'>
-            {matches.map(post => (
-              <li key={post.href}><JournalArticleCard post={post} /></li>
-            ))}
-          </ul>
+          <div className='journal-home-list-heading'>
+            <h2>
+              {[category, tag && '#' + tag].filter(Boolean).join(' · ') ||
+                '所有文章'}{' '}
+              <small>{matches.length} 篇 · 按发文时间</small>
+            </h2>
+            <ArticleViewSwitch textView={textView} onViewChange={changeView} />
+          </div>
+          {textView ? (
+            <ArticleRows posts={matches} />
+          ) : (
+            <ul className='journal-topic-grid'>
+              {matches.map(post => (
+                <li key={post.href}>
+                  <JournalArticleCard post={post} />
+                </li>
+              ))}
+            </ul>
+          )}
           {!matches.length && <p>暂时没有符合条件的文章。</p>}
         </section>
       )}

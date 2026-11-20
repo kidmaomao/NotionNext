@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { getPublishedTypedPages } from '@/lib/site/typedCollections'
 import { readMomentPreview } from '@/lib/site/momentPreview'
+import useMomentCommentCounts from '@/hooks/useMomentCommentCounts'
 import {
   buildSimpleMoments,
   getMomentCommentProvider
@@ -16,7 +17,7 @@ const NotionComments = dynamic(() => import('@/components/NotionComments'), {
   ssr: false
 })
 
-function MomentComments({ note, provider }) {
+function MomentComments({ note, provider, onCommentLoaded }) {
   return (
     <div
       className='journal-say-comments'
@@ -24,16 +25,17 @@ function MomentComments({ note, provider }) {
       aria-label={'评论，' + (note.title || note.date || '说说')}
     >
       {provider === 'twikoo' ? (
-        <Twikoo containerId={'twikoo-' + note.anchor} threadPath={note.href} />
+        <Twikoo containerId={'twikoo-' + note.anchor} threadPath={note.href} onCommentLoaded={onCommentLoaded} />
       ) : (
-        <NotionComments postId={note.id} />
+        <NotionComments postId={note.id} onCommentLoaded={onCommentLoaded} />
       )}
     </div>
   )
 }
 
-export default function SayPage({ moments, momentCommentProvider }) {
+export default function SayPage({ moments, momentCommentProvider, NOTION_CONFIG }) {
   const [open, setOpen] = useState(null)
+  const [counts, refreshCounts] = useMomentCommentCounts(moments, momentCommentProvider, NOTION_CONFIG)
   useEffect(() => {
     function fromHash() {
       const hash = window.location.hash.slice(1)
@@ -109,6 +111,12 @@ export default function SayPage({ moments, momentCommentProvider }) {
                         >
                           <i aria-hidden='true' className='far fa-comment' />
                           {open === note.anchor ? '收起评论' : '评论'}
+                          <span className='journal-comment-count'
+                            title={counts[note.anchor] === null ? '评论数暂时不可用' : '评论数（含回复）'}
+                            aria-hidden={counts[note.anchor] == null || undefined}
+                          >
+                            {counts[note.anchor] ?? (counts[note.anchor] === null ? '—' : '…')}
+                          </span>
                         </button>
                       </div>
                       <div
@@ -119,6 +127,7 @@ export default function SayPage({ moments, momentCommentProvider }) {
                           <MomentComments
                             note={note}
                             provider={momentCommentProvider}
+                            onCommentLoaded={refreshCounts}
                           />
                         )}
                       </div>
