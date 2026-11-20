@@ -33,7 +33,7 @@ const categories = [
   { name: '情报', count: 1 }
 ]
 
-test('scrolls each category separately with the mouse or keyboard and links to the full archive', () => {
+test('scrolls each category separately with the mouse or keyboard', () => {
   const groups = categories.map(({ name }, index) => ({
     name,
     href: '/category/' + name,
@@ -68,9 +68,27 @@ test('scrolls each category separately with the mouse or keyboard and links to t
     left: 216,
     behavior: 'smooth'
   })
+})
+
+test('groups the latest article links by publication day and omits a second archive link', () => {
+  const latest = [
+    articles[0],
+    { ...articles[1], date: articles[0].date },
+    { href: '/article/last-year', title: '去年攻略', date: '2025-11-02' },
+    { href: '/article/undated', title: '未注明日期' }
+  ]
+  render(<HomeSections groups={[]} pinnedPosts={[]} latestPosts={latest} />)
+  const section = screen.getByRole('region', { name: '最新文章' })
+  expect([...section.querySelectorAll('time')].map(time => time.dateTime)).toEqual([
+    '2026-11-02', '2025-11-02'
+  ])
+  expect(within(section).getAllByRole('list')[0].children).toHaveLength(2)
   expect(
-    screen.getByRole('link', { name: /按时间看全部文章/ })
-  ).toHaveAttribute('href', '/archive')
+    within(section).getAllByRole('link').map(link => link.getAttribute('href'))
+  ).toEqual(latest.map(post => post.href))
+  expect(within(section).getByText('🎯')).toBeInTheDocument()
+  expect(within(section).getByText('日期未记录')).toBeInTheDocument()
+  expect(section.querySelector('a[href="/archive"]')).toBeNull()
 })
 
 test('combines category and tag filters using the same published articles', () => {

@@ -1,4 +1,5 @@
 import JournalArticleCard from './JournalArticleCard'
+import NotionIcon from '@/components/NotionIcon'
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
 import { categoryAppearance } from './CategoryIcon'
@@ -140,6 +141,59 @@ function PostLinks({ posts }) {
   )
 }
 
+function LatestPosts({ posts }) {
+  const days = new Map()
+  for (const post of posts) {
+    const day = post.date || ''
+    if (!days.has(day)) days.set(day, [])
+    days.get(day).push(post)
+  }
+
+  return (
+    <section
+      id='latest-articles'
+      className='simple-home-panel simple-home-latest'
+      aria-labelledby='latest-articles-heading'
+    >
+      <h2 id='latest-articles-heading'>最新文章</h2>
+      <dl className='journal-updates'>
+        {Array.from(days, ([day, articles]) => (
+          <div key={day} className='journal-update-day'>
+            <dt>
+              {day ? (
+                <time dateTime={day}>
+                  <span>{day.slice(0, 4)}.</span>
+                  {day.slice(5).replace('-', '.')}
+                </time>
+              ) : (
+                '日期未记录'
+              )}
+            </dt>
+            <dd>
+              <ul className='journal-update-articles'>
+                {articles.map(post => (
+                  <li key={post.href}>
+                    <SmartLink href={post.href} prefetch={false}>
+                      <span className='journal-title-icon' aria-hidden='true'>
+                        {post.icon ? (
+                          <NotionIcon icon={post.icon} />
+                        ) : (
+                          <i className='far fa-file-alt' />
+                        )}
+                      </span>
+                      <span className='journal-update-title'>{post.title}</span>
+                    </SmartLink>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )
+}
+
 export default function HomeSections({
   groups,
   pinnedPosts,
@@ -199,21 +253,7 @@ export default function HomeSections({
         </section>
       )}
 
-      {latestPosts.length > 0 && (
-        <section className='simple-home-panel simple-home-latest'>
-          <div className='simple-home-panel-heading'>
-            <h2>最新文章</h2>
-            <SmartLink
-              href='/archive'
-              prefetch={false}
-              className='journal-time-link'
-            >
-              按时间看全部文章 <span aria-hidden='true'>→</span>
-            </SmartLink>
-          </div>
-          <PostLinks posts={latestPosts} />
-        </section>
-      )}
+      {latestPosts.length > 0 && <LatestPosts posts={latestPosts} />}
 
       <div className='journal-rails'>
         {groups.map(group => (

@@ -121,7 +121,10 @@ export function buildSimpleHomepage(
     groups: sortSimpleCategories(groups, homepageOrder),
     pinnedPosts,
     latestMoment,
-    latestPosts: orderedPosts.slice(0, postsPerSection).map(toPostLink)
+    latestPosts: orderedPosts.slice(0, postsPerSection).map(post => ({
+      ...toPostLink(post),
+      icon: post.pageIcon || ''
+    }))
   }
 }
 

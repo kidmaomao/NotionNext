@@ -22,7 +22,7 @@ test('shows the newest five articles overall and per homepage section in reading
   const posts = [
     post('news', '情报', '2026-11-12'),
     post('older-guide', '攻略', '2026-10-12', true),
-    post('newest-guide', '攻略', '2026-11-13'),
+    { ...post('newest-guide', '攻略', '2026-11-13'), pageIcon: '🧭' },
     post('third-guide', '攻略', '2026-11-02'),
     post('second-guide', '攻略', '2026-11-06'),
     post('fourth-guide', '攻略', '2026-10-28'),
@@ -60,6 +60,7 @@ test('shows the newest five articles overall and per homepage section in reading
     'new-category',
     'third-guide'
   ])
+  expect(result.latestPosts[0].icon).toBe('🧭')
   expect(result.groups.map(group => group.name)).toEqual([
     '情报',
     '汇总',
