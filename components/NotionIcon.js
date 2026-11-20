@@ -10,7 +10,7 @@ const NotionIcon = ({ icon }) => {
     return <></>
   }
 
-  if (icon.startsWith('http') || icon.startsWith('data:')) {
+  if (icon.startsWith('http') || icon.startsWith('data:') || icon.startsWith('/')) {
     return <LazyImage src={icon} width={32} height={32} className='w-8 h-8 my-auto inline mr-1'/>
   }
 

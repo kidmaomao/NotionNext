@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import SayPage, { getStaticProps } from '@/pages/say'
 import { fetchGlobalAllData, getPostBlocks } from '@/lib/db/SiteDataApi'
 jest.mock('p-limit', () => () => fn => fn())
@@ -26,6 +26,7 @@ test('publishes only public short notes and orders same-day entries by time', as
     date: { start_date: '2026-11-20' }
   }
   fetchGlobalAllData.mockResolvedValue({
+    NOTION_CONFIG: { COMMENT_TWIKOO_ENV_ID: 'https://twikoo.example' },
     allPages: [
       {
         ...note,
@@ -83,14 +84,27 @@ test('publishes only public short notes and orders same-day entries by time', as
     'say-evening',
     'say-morning'
   ])
-  const page = render(<SayPage moments={props.moments} />)
+  const page = render(<SayPage {...props} />)
   expect(screen.getByText('集合地点变更')).toBeVisible()
   expect(screen.getByText('直接写在正文里的提醒')).toBeVisible()
   expect(screen.getByRole('img', { name: '游戏截图' })).toBeVisible()
   expect(screen.queryByText('嵌套页面不进入说说')).toBeNull()
   expect(getPostBlocks).toHaveBeenCalledTimes(2)
   expect(screen.getByText('21:10')).toBeVisible()
-  expect(screen.getAllByRole('link')[0]).toHaveAttribute('href', '/evening')
-  page.rerender(<SayPage moments={[]} />)
+  expect(screen.queryByText(/查看原文/)).toBeNull()
+  const actions = screen.getAllByRole('button', { name: '评论' })
+  fireEvent.click(actions[0])
+  expect(window.location.hash).toBe('#comments-say-evening')
+  expect(actions[0]).toHaveAttribute('aria-expanded', 'true')
+  fireEvent.click(actions[1])
+  expect(actions[0]).toHaveAttribute('aria-expanded', 'false')
+  expect(window.location.hash).toBe('#comments-say-morning')
+  page.unmount()
+  const linked = render(<SayPage {...props} />)
+  expect(screen.getByRole('button', { name: '收起评论' })).toHaveAttribute(
+    'aria-controls',
+    'thread-say-morning'
+  )
+  linked.rerender(<SayPage moments={[]} />)
   expect(screen.getByText('暂时还没有公开的说说。')).toBeVisible()
 })

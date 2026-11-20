@@ -1,5 +1,7 @@
+import { siteConfig } from '@/lib/config'
 import {
   getPublishedTypedPages,
+  isMomentPage,
   publicationDay,
   sortTypedPagesByPublishDate
 } from '@/lib/site/typedCollections'
@@ -25,7 +27,7 @@ export function simpleCategoryHref(name) {
 export function buildSimpleTopicPosts(allPages) {
   const posts = getPublishedTypedPages({ allPages, type: 'Post' })
   return sortTypedPagesByPublishDate(posts).map(post => ({
-    ...toPostLink(post),
+    ...toCard(post),
     category: post.category || '',
     tags: post.tags || []
   }))
@@ -39,10 +41,10 @@ function toCard(post) {
   const card = toPostLink(post)
   const tags = (post.tags || []).filter(Boolean).slice(0, 2)
   if (tags.length) card.tags = tags
+  if (post.pageIcon) card.icon = post.pageIcon
   if (!post.password) {
-    const cover = post.pageCoverThumbnail || post.pageCover
-    if (cover && !/\/images\/page-cover\/solid[_-]/i.test(cover))
-      card.cover = cover
+    const cover = post.pageCover || post.pageCoverThumbnail
+    if (cover) card.cover = cover
     else if (/布里列赫|布本/.test([post.title, ...tags].join(' '))) {
       card.cover = '/images/bri-leith-cover.webp'
     }
@@ -50,11 +52,23 @@ function toCard(post) {
   return card
 }
 
+export function getMomentCommentProvider(config) {
+  if (siteConfig('COMMENT_TWIKOO_ENV_ID', '', config)) return 'twikoo'
+  return String(siteConfig('COMMENT_NOTION_ENABLE', false, config)) === 'true'
+    ? 'notion'
+    : null
+}
+
 export function buildSimpleMoments(publishedPosts) {
   return sortTypedPagesByPublishDate(publishedPosts)
-    .filter(post => post.category === '说说' && !post.password)
+    .filter(
+      post =>
+        isMomentPage(post) && post.status === 'Published' && !post.password
+    )
     .map(post => ({
       ...toPostLink(post),
+      id: post.id || '',
+      comments: post.comment !== 'Hide',
       anchor: 'say-' + (post.id || post.href).replace(/[^\p{L}\p{N}_-]/gu, '-'),
       time: (
         post.date?.start_time ||
@@ -74,7 +88,9 @@ export function buildSimpleHomepage(
   categoryOptions,
   now = Date.now()
 ) {
-  const orderedPosts = sortTypedPagesByPublishDate(publishedPosts)
+  const orderedPosts = sortTypedPagesByPublishDate(
+    publishedPosts.filter(post => !isMomentPage(post))
+  )
   const categoryPosts = new Map(
     (categoryOptions ?? []).map(({ name }) => [name, []])
   )

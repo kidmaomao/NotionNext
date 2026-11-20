@@ -8,6 +8,8 @@ import {
 
 function post(slug, category, date, pinned = false) {
   return {
+    type: 'Post',
+    status: 'Published',
     href: `/article/${slug}`,
     title: slug,
     category,
@@ -105,25 +107,30 @@ test('keeps the existing category order in the site navigation', () => {
   ])
 })
 
-test('keeps article art, replaces solid Notion covers and excludes locked media', () => {
+test('prefers the Notion page cover and preserves game fallbacks and locked media', () => {
   const cards = ['剧场', '布里列赫攻略', '隐藏图'].map(title => ({
     ...post(title, '攻略', '2026-11-01'),
     tags: ['副本']
   }))
   cards[0].pageCover = '/uploaded.webp'
+  cards[0].pageCoverThumbnail = '/thumbnail.webp'
+  cards[0].pageIcon = '🎮'
+  cards.push({ ...cards[1], title: '布本的旧文章' })
   cards[1].pageCover = 'https://www.notion.so/images/page-cover/solid_beige.png'
   cards[2].password = 'protected'
   cards[2].pageCover = '/secret.webp'
   const { groups } = buildSimpleHomepage(cards, [{ name: '攻略' }])
   expect(groups[0].posts.map(p => p.cover)).toEqual([
     '/uploaded.webp',
-    '/images/bri-leith-cover.webp',
-    undefined
+    cards[1].pageCover,
+    undefined,
+    '/images/bri-leith-cover.webp'
   ])
+  expect(groups[0].posts[0].icon).toBe('🎮')
   expect(groups[0].posts[0].tags).toEqual(['副本'])
 })
 
-test('short notes expire from the hero after their end date in Hong Kong and remain in the archive', () => {
+test('short notes expire from the hero after their end date in Hong Kong and stay off every article list', () => {
   const locked = {
     ...post('locked', '说说', '2026-11-19'),
     password: 'protected',
@@ -149,7 +156,9 @@ test('short notes expire from the hero after their end date in Hong Kong and rem
     Date.parse('2026-11-21T00:00:00+08:00')
   )
   expect(expired.latestMoment.text).toBe('previous')
-  expect(expired.groups[0].posts).toHaveLength(3)
+  expect(expired.groups).toEqual([])
+  expect(expired.latestPosts).toEqual([])
+  expect(expired.pinnedPosts).toEqual([])
 })
 
 test('notice preview reads only the first published paragraph in document order', () => {

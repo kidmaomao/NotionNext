@@ -15,7 +15,8 @@ import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
-import { buildSimpleHomepage } from '@/themes/simple/homepage'
+import { getPublishedTypedPages } from '@/lib/site/typedCollections'
+import { buildSimpleHomepage, getMomentCommentProvider } from '@/themes/simple/homepage'
 import { readMomentPreview } from '@/lib/site/momentPreview'
 
 /**
@@ -67,15 +68,15 @@ export async function getStaticProps(req) {
     false,
     props?.NOTION_CONFIG
   )
-  props.posts = props.allPages?.filter(
-    page => page.type === 'Post' && page.status === 'Published'
-  )
+  props.posts = getPublishedTypedPages({ allPages: props.allPages, type: 'Post' })
 
   if (typeof theme === 'string' && theme.split(',')[0].trim() === 'simple') {
-    props.homeSections = buildSimpleHomepage(props.posts, props.categoryOptions)
+    const moments = getPublishedTypedPages({ allPages: props.allPages, type: 'Moment' })
+    props.homeSections = buildSimpleHomepage([...props.posts, ...moments], props.categoryOptions)
     const note = props.homeSections.latestMoment
     if (note) {
-      const source = props.posts.find(post => post.href === note.href)
+      note.comments = note.comments && Boolean(getMomentCommentProvider(props.NOTION_CONFIG))
+      const source = moments.find(post => post.href === note.href)
       if (!source?.summary?.trim()) {
         const preview = await readMomentPreview(note, source, props.allPages)
         note.text = preview.text.slice(0, 240)

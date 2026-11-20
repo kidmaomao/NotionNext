@@ -79,6 +79,16 @@ function generateLocalesSitemap(link, allPages, locale) {
       loc: buildSitemapLoc({
         baseUrl: normalizedLink,
         locale: normalizedLocale,
+        slug: 'say'
+      }),
+      lastmod: dateNow,
+      changefreq: 'daily',
+      priority: '0.7'
+    },
+    {
+      loc: buildSitemapLoc({
+        baseUrl: normalizedLink,
+        locale: normalizedLocale,
         slug: 'rss/feed.xml'
       }),
       lastmod: dateNow,
@@ -109,7 +119,7 @@ function generateLocalesSitemap(link, allPages, locale) {
 
   const postFields =
     allPages
-      ?.filter(p => p.status === BLOG.NOTION_PROPERTY_NAME.status_publish)
+      ?.filter(p => p.type !== 'Moment' && p.status === BLOG.NOTION_PROPERTY_NAME.status_publish)
       // 过滤掉外部链接(http开头)和锚点链接(#开头)
       ?.filter(p => p.slug && !p.slug.startsWith('http') && !p.slug.startsWith('#'))
       ?.map(post => {

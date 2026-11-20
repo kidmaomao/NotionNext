@@ -1,57 +1,97 @@
 import { siteConfig } from '@/lib/config'
-import { loadExternalResource } from '@/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
-/**
- * Giscus评论 @see https://giscus.app/zh-CN
- * Contribute by @txs https://github.com/txs/NotionNext/commit/1bf7179d0af21fb433e4c7773504f244998678cb
- * @returns {JSX.Element}
- * @constructor
- */
+const scripts = new Map()
 
-const Twikoo = ({ isDarkMode }) => {
-  const envId = siteConfig('COMMENT_TWIKOO_ENV_ID')
-  const el = siteConfig('COMMENT_TWIKOO_ELEMENT_ID', '#twikoo')
-  const twikooCDNURL = siteConfig('COMMENT_TWIKOO_CDN_URL')
-  const lang = siteConfig('LANG')
-  const [isInit] = useState(useRef(false))
-
-  const loadTwikoo = async () => {
-    try {
-      await loadExternalResource(twikooCDNURL, 'js')
-      const twikoo = window?.twikoo
-      if (
-        typeof twikoo !== 'undefined' &&
-        twikoo &&
-        typeof twikoo.init === 'function'
-      ) {
-        twikoo.init({
-          envId: envId, // 腾讯云环境填 envId；Vercel 环境填地址（https://xxx.vercel.app）
-          el: el, // 容器元素
-          lang: lang // 用于手动设定评论区语言，支持的语言列表 https://github.com/imaegoo/twikoo/blob/main/src/client/utils/i18n/index.js
-          // region: 'ap-guangzhou', // 环境地域，默认为 ap-shanghai，腾讯云环境填 ap-shanghai 或 ap-guangzhou；Vercel 环境不填
-          // path: location.pathname, // 用于区分不同文章的自定义 js 路径，如果您的文章路径不是 location.pathname，需传此参数
-        })
-        console.log('twikoo init', twikoo)
-        isInit.current = true
+function getTwikoo(url) {
+  if (window.twikoo?.init) return Promise.resolve(window.twikoo)
+  if (!url) return Promise.reject(new Error('Missing Twikoo script'))
+  if (scripts.has(url)) return scripts.get(url)
+  const ready = new Promise((resolve, reject) => {
+    const existing = Array.from(document.scripts).find(
+      script => script.src === url
+    )
+    const script = existing || document.createElement('script')
+    function finish() {
+      clearTimeout(timeout)
+      script.removeEventListener('load', finish)
+      script.removeEventListener('error', finish)
+      if (window.twikoo?.init) resolve(window.twikoo)
+      else {
+        script.remove()
+        reject(new Error('Twikoo is unavailable'))
       }
-    } catch (error) {
-      console.error('twikoo 加载失败', error)
     }
-  }
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (isInit.current) {
-        console.log('twioo init! clear interval')
-        clearInterval(interval)
-      } else {
-        loadTwikoo()
-      }
-    }, 1000)
-    return () => clearInterval(interval)
-  }, [isDarkMode])
-  return <div id="twikoo"></div>
+    const timeout = setTimeout(finish, 15000)
+    script.addEventListener('load', finish)
+    script.addEventListener('error', finish)
+    if (!existing) {
+      script.src = url
+      document.head.appendChild(script)
+    }
+  }).catch(error => {
+    scripts.delete(url)
+    throw error
+  })
+  scripts.set(url, ready)
+  return ready
 }
 
-export default Twikoo
+export default function Twikoo({ threadPath, containerId }) {
+  const envId = siteConfig('COMMENT_TWIKOO_ENV_ID')
+  const configuredId = siteConfig('COMMENT_TWIKOO_ELEMENT_ID', '#twikoo')
+  const mountId = containerId || configuredId.replace(/^#/, '')
+  const url = siteConfig('COMMENT_TWIKOO_CDN_URL')
+  const lang = siteConfig('LANG')
+  const path =
+    threadPath ||
+    (typeof window !== 'undefined' ? window.location.pathname : '')
+  const host = useRef(null)
+  const [status, setStatus] = useState('loading')
+  const [attempt, setAttempt] = useState(0)
+
+  useEffect(() => {
+    const wrapper = host.current
+    const mount = document.createElement('div')
+    mount.id = mountId
+    wrapper.replaceChildren(mount)
+    let cancelled = false
+    let instance
+    setStatus('loading')
+    getTwikoo(url)
+      .then(async sdk => {
+        if (cancelled) return
+        instance = await sdk.init({
+          envId,
+          el: '#' + mountId,
+          lang,
+          ...(path ? { path } : {})
+        })
+        if (cancelled) instance?.$destroy?.()
+        else setStatus('ready')
+      })
+      .catch(() => {
+        if (!cancelled) setStatus('error')
+      })
+    return () => {
+      cancelled = true
+      instance?.$destroy?.()
+      wrapper.replaceChildren()
+    }
+  }, [envId, mountId, lang, url, path, attempt])
+
+  return (
+    <div>
+      {status === 'loading' && <p role='status'>正在载入评论…</p>}
+      {status === 'error' && (
+        <p role='status'>
+          评论暂时未能载入。{' '}
+          <button type='button' onClick={() => setAttempt(n => n + 1)}>
+            重试
+          </button>
+        </p>
+      )}
+      <div ref={host} />
+    </div>
+  )
+}

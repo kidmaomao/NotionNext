@@ -129,12 +129,16 @@ export const MenuList = ({ customNav, customMenu }) => {
     <div ref={nav} className='journal-nav-links'>
       <div className='journal-nav-desktop'>
         {entries(primary)}
+        <div className='journal-nav-extra'>{entries(others.slice(0, 5))}</div>
         {others.length > 0 && (
-          <details className='journal-nav-group'>
+          <details className='journal-nav-group journal-nav-overflow' data-extra={others.length > 5 || undefined}>
             <summary>
               更多 <span aria-hidden='true'>⌄</span>
             </summary>
-            <div className='journal-nav-popover'>{entries(others)}</div>
+            <div className='journal-nav-popover'>
+              <div className='journal-nav-compact-only'>{entries(others.slice(0, 5))}</div>
+              {entries(others.slice(5))}
+            </div>
           </details>
         )}
       </div>

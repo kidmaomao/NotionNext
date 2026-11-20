@@ -60,11 +60,17 @@ export const useSimpleGlobal = () => useContext(ThemeGlobalSimple)
  * @param {*} props
  * @returns
  */
+function usesReadingLayout(post) {
+  if (post?.type === 'Post') return true
+  const path = (post?.href || post?.slug || '').split(/[?#]/)[0].replace(/^\/+|\/+$/g, '')
+  return post?.type === 'Page' && ['tools', 'links', 'updatenote', 'feedback'].includes(path)
+}
+
 const LayoutBase = props => {
   const { children, slotTop } = props
   const { onLoading, fullWidth, isLiteMode } = useGlobal()
   const searchModal = useRef(null)
-  const isReading = props.post?.type === 'Post'
+  const isReading = usesReadingLayout(props.post)
   const journalLayout = Boolean(
     props.homeSections || props.archivePosts || props.topicPosts || props.moments || isReading
   )
@@ -87,6 +93,7 @@ const LayoutBase = props => {
           {/* 顶部LOGO */}
           <Header
             {...props}
+            lite={isLiteMode}
             compact={isReading || Boolean(props.archivePosts || props.topicPosts || props.moments)}
           />
 
@@ -265,14 +272,14 @@ const LayoutSlug = props => {
       {!lock && post && (
         <div
           className={
-            post.type === 'Post'
+            usesReadingLayout(post)
               ? 'journal-reading' + (fullWidth ? ' journal-reading-wide' : '')
               : `px-2 ${fullWidth ? '' : 'xl:max-w-4xl 2xl:max-w-6xl'}`
           }
         >
           {/* 文章信息 */}
           <ArticleInfo post={post} />
-          {post.type === 'Post' && post.toc?.length > 0 && (
+          {usesReadingLayout(post) && post.toc?.length > 0 && (
             <ArticleContents key={post.id} items={post.toc} />
           )}
 

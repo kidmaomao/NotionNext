@@ -1,3 +1,4 @@
+import JournalArticleCard from './JournalArticleCard'
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
 import { categoryAppearance } from './CategoryIcon'
@@ -93,36 +94,7 @@ function CategoryRail({ name, href, posts }) {
         >
           {posts.map((post, index) => (
             <li key={post.href} style={{ '--card-index': index }}>
-              <SmartLink
-                href={post.href}
-                prefetch={false}
-                className='journal-card'
-              >
-                <span className='journal-art'>
-                  <Icon aria-hidden='true' className='journal-watermark' />
-                  {post.cover && (
-                    <img
-                      key={post.cover}
-                      src={post.cover}
-                      alt=''
-                      loading='lazy'
-                      decoding='async'
-                      onError={event => {
-                        event.currentTarget.hidden = true
-                      }}
-                    />
-                  )}
-                  <span className='journal-card-title'>{post.title}</span>
-                </span>
-                <span className='journal-card-meta'>
-                  {post.date && (
-                    <time dateTime={post.date}>
-                      {post.date.replace(/-/g, '.')}
-                    </time>
-                  )}
-                  {!!post.tags?.length && <span>{post.tags.join(' · ')}</span>}
-                </span>
-              </SmartLink>
+              <JournalArticleCard post={post} category={name} />
             </li>
           ))}
         </ul>

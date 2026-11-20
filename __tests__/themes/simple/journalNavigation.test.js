@@ -13,6 +13,8 @@ jest.mock('@/themes/simple/components/Announcement', () => () => null)
 const articles = [
   {
     title: '副本走位',
+    icon: '🎯',
+    cover: '/notion-cover.webp',
     date: '2026-11-02',
     category: '攻略',
     tags: ['副本'],
@@ -86,8 +88,11 @@ test('combines category and tag filters using the same published articles', () =
   expect(
     within(screen.getByRole('list'))
       .getAllByRole('link')
-      .map(link => link.textContent)
-  ).toEqual(['副本走位2026-11-02', '更新简报2026-11-01'])
+      .map(link => link.getAttribute('href'))
+  ).toEqual(['/article/one', '/article/two'])
+  const card = screen.getByRole('link', { name: /副本走位/ })
+  expect(card.querySelector('.journal-cover')).toHaveAttribute('src', '/notion-cover.webp')
+  expect(card.querySelector('.journal-title-icon')).toHaveTextContent('🎯')
   fireEvent.click(screen.getByRole('button', { name: /攻略/ }))
   fireEvent.click(screen.getByRole('button', { name: /#副本/ }))
   const list = screen.getByRole('list')

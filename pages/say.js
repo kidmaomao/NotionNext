@@ -1,13 +1,51 @@
 import BLOG from '@/blog.config'
-import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { getPublishedTypedPages } from '@/lib/site/typedCollections'
-import { buildSimpleMoments } from '@/themes/simple/homepage'
 import { readMomentPreview } from '@/lib/site/momentPreview'
+import {
+  buildSimpleMoments,
+  getMomentCommentProvider
+} from '@/themes/simple/homepage'
+import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import pLimit from 'p-limit'
 
-export default function SayPage({ moments }) {
+const Twikoo = dynamic(() => import('@/components/Twikoo'), { ssr: false })
+const NotionComments = dynamic(() => import('@/components/NotionComments'), {
+  ssr: false
+})
+
+function MomentComments({ note, provider }) {
+  return (
+    <div
+      className='journal-say-comments'
+      role='region'
+      aria-label={'评论，' + note.title}
+    >
+      {provider === 'twikoo' ? (
+        <Twikoo containerId={'twikoo-' + note.anchor} threadPath={note.href} />
+      ) : (
+        <NotionComments postId={note.id} />
+      )}
+    </div>
+  )
+}
+
+export default function SayPage({ moments, momentCommentProvider }) {
+  const [open, setOpen] = useState(null)
+  useEffect(() => {
+    function fromHash() {
+      const hash = window.location.hash.slice(1)
+      const target = moments.find(
+        note => note.comments && 'comments-' + note.anchor === hash
+      )
+      setOpen(target?.anchor || null)
+    }
+    fromHash()
+    window.addEventListener('hashchange', fromHash)
+    return () => window.removeEventListener('hashchange', fromHash)
+  }, [moments])
   return (
     <main className='journal-say'>
       <header className='journal-page-heading'>
@@ -43,13 +81,47 @@ export default function SayPage({ moments }) {
                       )}
                     </figure>
                   ))}
-                  <SmartLink
-                    href={note.href}
-                    aria-label={'查看说说原文，' + note.title}
-                    prefetch={false}
-                  >
-                    查看原文 <span aria-hidden='true'>↗</span>
-                  </SmartLink>
+                  {note.comments && momentCommentProvider && (
+                    <>
+                      <div
+                        className='journal-say-actions'
+                        id={'comments-' + note.anchor}
+                      >
+                        <button
+                          type='button'
+                          aria-expanded={open === note.anchor}
+                          aria-controls={'thread-' + note.anchor}
+                          onClick={() => {
+                            const target =
+                              open === note.anchor ? null : note.anchor
+                            setOpen(target)
+                            const hash = target
+                              ? 'comments-' + target
+                              : note.anchor
+                            window.history.replaceState(
+                              window.history.state,
+                              '',
+                              '#' + hash
+                            )
+                          }}
+                        >
+                          <i aria-hidden='true' className='far fa-comment' />
+                          {open === note.anchor ? '收起评论' : '评论'}
+                        </button>
+                      </div>
+                      <div
+                        id={'thread-' + note.anchor}
+                        hidden={open !== note.anchor}
+                      >
+                        {open === note.anchor && (
+                          <MomentComments
+                            note={note}
+                            provider={momentCommentProvider}
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </article>
             </li>
@@ -66,10 +138,11 @@ export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'say-index-props', locale })
   const posts = getPublishedTypedPages({
     allPages: props.allPages,
-    type: 'Post'
+    type: 'Moment'
   })
   const byHref = new Map(posts.map(post => [post.href, post]))
   const limit = pLimit(3)
+  props.momentCommentProvider = getMomentCommentProvider(props.NOTION_CONFIG)
   props.moments = await Promise.all(
     buildSimpleMoments(posts).map(note =>
       limit(() =>

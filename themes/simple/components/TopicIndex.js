@@ -1,3 +1,4 @@
+import JournalArticleCard from './JournalArticleCard'
 import { useEffect, useRef, useState } from 'react'
 import SmartLink from '@/components/SmartLink'
 import { simpleCategoryHref, sortSimpleCategories } from '../homepage'
@@ -158,6 +159,10 @@ export default function TopicIndex({
 }) {
   const [category, setCategory] = useState(initialCategory)
   const [tag, setTag] = useState(initialTag)
+  useEffect(() => {
+    setCategory(initialCategory)
+    setTag(initialTag)
+  }, [initialCategory, initialTag])
   const categories = sortSimpleCategories(categoryOptions)
   const posts = (topicPosts || []).filter(
     post => !category || post.category === category
@@ -234,14 +239,9 @@ export default function TopicIndex({
               '所有文章'}{' '}
             <small>{matches.length} 篇 · 按发文时间</small>
           </h2>
-          <ul className='simple-home-posts'>
+          <ul className='journal-topic-grid'>
             {matches.map(post => (
-              <li key={post.href}>
-                <SmartLink href={post.href} prefetch={false}>
-                  <span>{post.title}</span>
-                  <time dateTime={post.date}>{post.date}</time>
-                </SmartLink>
-              </li>
+              <li key={post.href}><JournalArticleCard post={post} /></li>
             ))}
           </ul>
           {!matches.length && <p>暂时没有符合条件的文章。</p>}
