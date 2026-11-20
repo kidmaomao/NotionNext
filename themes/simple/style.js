@@ -1538,23 +1538,21 @@ const Style = () => {
   #theme-simple .journal-track > li { scroll-snap-align: start; }
   #theme-simple .journal-card { display: block; color: var(--simple-text); border-radius: 18px; text-decoration: none; }
   #theme-simple .journal-art {
-    --glass-blur: 1.75px;
+    --glass-backdrop: blur(2px) saturate(1.12);
     --glass-opacity: .94;
     --glass-glint: 8%;
-    --glass-sheen: rgba(237,248,255,.36);
-    --glass-rim-width: clamp(4px,.45vw,7px);
+    --glass-sheen: rgba(237,248,255,.20);
     display: grid; position: relative; isolation: isolate; place-items: center; aspect-ratio: 16/9;
     overflow: hidden; padding: 16px; border-radius: inherit; background: #293642;
     box-shadow: 0 5px 12px rgba(40,61,82,.20), 0 1px 3px rgba(40,61,82,.16);
   }
   .dark #theme-simple .journal-art {
-    --glass-sheen: rgba(208,232,254,.23);
+    --glass-sheen: rgba(208,232,254,.14);
     box-shadow: 0 4px 10px rgba(4,9,17,.38), 0 1px 2px rgba(4,9,17,.48);
   }
   #theme-simple .journal-art::before, #theme-simple .journal-art > .journal-cover {
     position: absolute; z-index: -2; inset: -3px;
     width: calc(100% + 6px); height: calc(100% + 6px); max-width: none; object-fit: cover;
-    filter: blur(var(--glass-blur)); transition: filter .28s ease-out;
   }
   #theme-simple .journal-art:not(:has(> .journal-cover:not([hidden]))) {
     --journal-landscape: url('/images/erinn-cover.webp') 50% 42% / cover no-repeat;
@@ -1567,20 +1565,24 @@ const Style = () => {
   }
   #theme-simple .journal-art::after {
     content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; border-radius: inherit;
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    backdrop-filter: var(--glass-backdrop);
     background:
       radial-gradient(ellipse at center, rgba(8,18,33,.71), rgba(12,24,40,.49) 42%, transparent 84%),
-      linear-gradient(145deg, var(--glass-sheen), transparent 43%, rgba(15,28,45,.32));
-    box-shadow: inset 2px 3px 9px rgba(247,252,255,.22), inset -2px -4px 8px rgba(8,19,34,.36);
-    opacity: var(--glass-opacity); transition: opacity .28s ease-out;
+      radial-gradient(ellipse at top left, var(--glass-sheen), transparent 42%),
+      linear-gradient(145deg, transparent 48%, rgba(15,28,45,.22));
+    box-shadow: inset 0 1px 2px rgba(247,252,255,.12), inset 0 -1px 2px rgba(8,19,34,.16);
+    opacity: var(--glass-opacity);
+    transition: opacity .24s ease-out, backdrop-filter .24s ease-out;
   }
   #theme-simple .journal-glass-rim {
     position: absolute; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none;
-    box-shadow: inset 1px 1px 1px rgba(254,255,255,.92), inset -1px -1px 2px rgba(149,184,205,.65);
+    box-shadow: inset 0 0 0 1px rgba(206,228,243,.19);
   }
   #theme-simple .journal-glass-rim > .journal-cover { display: none; }
   @supports (mask-composite: exclude) or (-webkit-mask-composite: xor) {
     #theme-simple .journal-glass-rim {
-      box-sizing: border-box; padding: var(--glass-rim-width);
+      box-sizing: border-box; padding: 1px;
       -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
       -webkit-mask-composite: xor;
       mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -1589,18 +1591,16 @@ const Style = () => {
     /* A magnified strip of the same artwork simulates refraction at the bevel. */
     #theme-simple .journal-glass-rim::before, #theme-simple .journal-glass-rim > .journal-cover:not([hidden]) {
       display: block; position: absolute; inset: 0; width: 100%; height: 100%; max-width: none;
-      object-fit: cover; transform: scale(1.09);
+      object-fit: cover; transform: scale(1.025); opacity: .46;
     }
     #theme-simple .journal-art:not(:has(> .journal-cover:not([hidden]))) .journal-glass-rim::before {
       content: ""; background: var(--journal-landscape);
     }
     #theme-simple .journal-glass-rim::after {
       content: ""; position: absolute; inset: 0; border-radius: inherit;
-      background: linear-gradient(128deg, rgba(251,255,255,.85) 2%, rgba(207,238,255,.24) 18%, transparent 37%,
-        rgba(24,48,66,.23) 52%, transparent 65%, rgba(230,249,255,.64) 84%, rgba(255,255,255,.16));
+      background: linear-gradient(128deg, rgba(251,255,255,.74) 2%, rgba(229,246,255,.17) 17%, transparent 29%,
+        transparent 62%, rgba(230,249,255,.45) 82%, transparent 95%);
       background-size: 160% 100%; background-position: var(--glass-glint) center;
-      box-shadow: inset 1px 1px 1px #f3fcff, inset -1px -1px 1px rgba(236,251,255,.75),
-        inset 2px 3px 3px rgba(225,248,255,.44), inset -2px -3px 3px rgba(19,37,57,.62);
       transition: background-position .35s ease-out;
     }
   }
@@ -1747,10 +1747,10 @@ const Style = () => {
     100% { transform: translateY(-1px) scale(1.035); }
   }
   @media (hover:hover) and (pointer:fine) {
-    #theme-simple .journal-card:hover .journal-art { --glass-blur: 0px; --glass-opacity: .76; --glass-glint: 88%; }
+    #theme-simple .journal-card:hover .journal-art { --glass-backdrop: none; --glass-opacity: .82; --glass-glint: 88%; }
     #theme-simple .journal-card:hover .journal-card-title { animation: journal-title-spring .5s both; }
   }
-  #theme-simple .journal-card:focus-visible .journal-art { --glass-blur: 0px; --glass-opacity: .76; --glass-glint: 88%; }
+  #theme-simple .journal-card:focus-visible .journal-art { --glass-backdrop: none; --glass-opacity: .82; --glass-glint: 88%; }
   #theme-simple .journal-card:focus-visible .journal-card-title { animation: journal-title-spring .5s both; }
   #theme-simple .journal-reading .notion-h, #theme-simple .journal-reading .notion-h > [id],
   #theme-simple .journal-month h2 { scroll-margin-top: 80px; }
@@ -1827,6 +1827,7 @@ const Style = () => {
     align-items: start; gap: clamp(18px, 2.4vw, 34px); padding: 0; margin: 18px 0 0; list-style: none;
   }
   #theme-simple .journal-topic-grid li { min-width: 0; }
+  #theme-simple .journal-topic-grid .journal-art { content-visibility: auto; }
   #theme-simple .journal-topic-grid .journal-card { display: block; padding: 0; background: transparent; }
   #theme-simple .journal-listing { margin-bottom: 3rem; }
   #theme-simple .journal-result-search {
@@ -1908,9 +1909,8 @@ const Style = () => {
   #theme-simple[data-lite] :is(.journal-tag-track,.journal-card-title,.simple-home-panel,.journal-notice,.journal-row-heading,.journal-track > li,.journal-route-progress),
   #theme-simple[data-lite] header.simple-home-header[data-arrived] > *, #theme-simple[data-lite] header.simple-home-header[data-arrived]::before { animation: none !important; opacity: 1 !important; }
   #theme-simple[data-lite] .journal-tag-lane { overflow: auto; mask-image: none; }
-  #theme-simple[data-lite] .journal-art { --glass-blur: 0px; }
-  #theme-simple[data-lite] .journal-art::before, #theme-simple[data-lite] .journal-art > .journal-cover,
-  #theme-simple[data-lite] .journal-art::after, #theme-simple[data-lite] .journal-glass-rim::after { transition: none; }
+  #theme-simple[data-lite] .journal-art::after { -webkit-backdrop-filter: none; backdrop-filter: none; transition: none; }
+  #theme-simple[data-lite] .journal-glass-rim::after { transition: none; }
   #theme-simple[data-lite] .journal-tag-segment[aria-hidden=true], #theme-simple[data-lite] .journal-motion-toggle { display: none !important; }
   @media (prefers-reduced-motion: reduce) {
     #theme-simple,
