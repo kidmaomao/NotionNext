@@ -2,6 +2,8 @@ import JournalArticleCard from './JournalArticleCard'
 import NotionIcon from '@/components/NotionIcon'
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
+import ArrowDownSLineIcon from 'remixicon-react/ArrowDownSLineIcon'
+import Pushpin2LineIcon from 'remixicon-react/Pushpin2LineIcon'
 import { categoryAppearance } from './CategoryIcon'
 import Announcement from './Announcement'
 import { noticeHeadline } from '../homepage'
@@ -233,13 +235,19 @@ export default function HomeSections({
       {notice?.blockMap && !notice.password && (
         <details className='journal-notice'>
           <summary>
-            <span>
-              <i aria-hidden='true' className='fas fa-bullhorn' /> 公告板
+            <span className='journal-notice-pin' aria-hidden='true'>
+              <Pushpin2LineIcon size={22} />
             </span>
-            <span className='journal-notice-headline'>
-              {noticeHeadline(notice)}
+            <span className='journal-notice-copy'>
+              <span className='journal-notice-label'>公告板</span>
+              <span className='journal-notice-headline'>
+                {noticeHeadline(notice)}
+              </span>
+              <span className='journal-notice-close'>收起公告</span>
             </span>
-            <span className='journal-disclosure'>展开公告</span>
+            <span className='journal-notice-chevron' aria-hidden='true'>
+              <ArrowDownSLineIcon size={20} />
+            </span>
           </summary>
           <Announcement post={notice} />
         </details>
