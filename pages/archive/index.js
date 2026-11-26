@@ -1,54 +1,8 @@
-import BLOG from '@/blog.config'
-import { siteConfig } from '@/lib/config'
-import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
-import { isBrowser } from '@/lib/utils'
-import {
-  getPublishedTypedPages,
-  groupPublishedPostsByMonth
-} from '@/lib/site/typedCollections'
-import { DynamicLayout } from '@/themes/theme'
-import { useEffect } from 'react'
-
-/**
- * 归档首页
- * @param {*} props
- * @returns
- */
-const ArchiveIndex = props => {
-  useEffect(() => {
-    if (isBrowser) {
-      const anchor = window.location.hash
-      if (anchor) {
-        document
-          .getElementById(anchor.slice(1))
-          ?.scrollIntoView({ block: 'start' })
-      }
-    }
-  }, [])
-
-  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  return <DynamicLayout theme={theme} layoutName='LayoutArchive' {...props} />
-}
+import ArchiveIndex from '@/components/ArchiveIndex'
+import { loadArchiveProps } from '@/lib/site/archiveProps'
 
 export async function getStaticProps({ locale }) {
-  const props = await fetchGlobalAllData({ from: 'archive-index', locale })
-  props.posts = getPublishedTypedPages({
-    allPages: props.allPages,
-    type: 'Post'
-  })
-  props.archivePosts = groupPublishedPostsByMonth(props.posts)
-  delete props.allPages
-
-  return {
-    props,
-    revalidate: process.env.EXPORT
-      ? undefined
-      : siteConfig(
-          'NEXT_REVALIDATE_SECOND',
-          BLOG.NEXT_REVALIDATE_SECOND,
-          props.NOTION_CONFIG
-        )
-  }
+  return loadArchiveProps(locale, !process.env.EXPORT)
 }
 
 export default ArchiveIndex

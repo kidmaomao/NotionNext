@@ -1,4 +1,5 @@
 import {
+  buildArchivePageData,
   getPublishedTypedPages,
   groupPublishedPostsByMonth,
   getTypedPages,
@@ -65,5 +66,68 @@ describe('typedCollections', () => {
       'event-1',
       'post-1'
     ])
+  })
+})
+
+describe('archive page data', () => {
+  const newer = {
+    id: 'newer',
+    type: 'Post',
+    status: 'Published',
+    href: '/article/newer',
+    title: 'Newer',
+    category: '攻略',
+    date: { start_date: '2026-01-01' },
+    publishDate: Date.parse('2026-01-01'),
+    summary: 'Metadata only the non-Simple themes may need.'
+  }
+  const older = {
+    type: 'Post',
+    status: 'Published',
+    href: '/article/older',
+    title: 'Older',
+    publishDate: Date.parse('2025-12-31'),
+    pinned: true
+  }
+  const allPages = [
+    older,
+    { ...newer, category: '说说' },
+    { ...newer, type: 'Moment' },
+    { ...newer, status: 'Invisible' },
+    newer
+  ]
+  const input = { allPages, posts: ['old list'], allNavPages: ['/archive'] }
+
+  it('keeps the existing archive layout values in order without serializing full or duplicate posts', () => {
+    const compact = buildArchivePageData(input, true)
+    expect(compact).toEqual({
+      allNavPages: ['/archive'],
+      archivePosts: {
+        '2026-01': [{
+          id: newer.id,
+          href: newer.href,
+          title: newer.title,
+          category: newer.category,
+          date: newer.date,
+          publishDate: newer.publishDate
+        }],
+        '2025-12': [{
+          href: older.href,
+          title: older.title,
+          publishDate: older.publishDate
+        }]
+      }
+    })
+    expect(Object.keys(compact.archivePosts)).toEqual(['2026-01', '2025-12'])
+    expect(Object.keys(compact.archivePosts['2025-12'][0])).not.toContain('id')
+    expect(input.posts).toEqual(['old list'])
+  })
+
+  it('keeps full props for other archive themes', () => {
+    expect(buildArchivePageData(input, false)).toEqual({
+      allNavPages: ['/archive'],
+      posts: [older, newer],
+      archivePosts: { '2026-01': [newer], '2025-12': [older] }
+    })
   })
 })

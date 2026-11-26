@@ -301,27 +301,39 @@ const nextConfig = {
         )
       }
 
-      return [
-        ...langsRewrites,
-        // RSS fallback: when static file doesn't exist, route to API
-        {
-          source: '/rss/feed.xml',
-          destination: '/api/rss'
-        },
-        {
-          source: '/rss/atom.xml',
-          destination: '/api/rss?format=atom'
-        },
-        {
-          source: '/rss/feed.json',
-          destination: '/api/rss?format=json'
-        },
-        // 伪静态重写
-        {
-          source: '/:path*.html',
-          destination: '/:path*'
-        }
-      ]
+      const fullArchiveForThemeOverride = {
+        source: '/archive',
+        has: [{ type: 'query', key: 'theme', value: '(?!simple$).+' }],
+        destination: '/archive/_theme'
+      }
+
+      return {
+        beforeFiles: [
+          // Theme-specific layouts still receive the original full archive data.
+          fullArchiveForThemeOverride
+        ],
+        afterFiles: [
+          ...langsRewrites,
+          // RSS fallback: when static file doesn't exist, route to API
+          {
+            source: '/rss/feed.xml',
+            destination: '/api/rss'
+          },
+          {
+            source: '/rss/atom.xml',
+            destination: '/api/rss?format=atom'
+          },
+          {
+            source: '/rss/feed.json',
+            destination: '/api/rss?format=json'
+          },
+          // 伪静态重写
+          {
+            source: '/:path*.html',
+            destination: '/:path*'
+          }
+        ]
+      }
     },
   headers: process.env.EXPORT
     ? undefined
