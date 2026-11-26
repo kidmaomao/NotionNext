@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import HomeSections from '@/themes/simple/components/HomeSections'
 import TopicIndex from '@/themes/simple/components/TopicIndex'
 import ArticleContents from '@/themes/simple/components/ArticleContents'
@@ -46,7 +46,7 @@ test('scrolls each category separately with the mouse or keyboard', () => {
   const tracks = groups.map(({ name }) =>
     screen.getByRole('list', { name: name + '文章' })
   )
-  for (const track of tracks) {
+  const scrolls = tracks.map(track => {
     Object.defineProperties(track, {
       clientWidth: { value: 400 },
       scrollWidth: { value: 750 }
@@ -55,17 +55,19 @@ test('scrolls each category separately with the mouse or keyboard', () => {
       value: 200
     })
     track.style.columnGap = '16px'
-    track.scrollBy = jest.fn()
+    const scrollBy = jest.fn()
+    track.scrollBy = scrollBy
     fireEvent.scroll(track)
-  }
+    return scrollBy
+  })
   fireEvent.click(screen.getByRole('button', { name: '情报，下一张' }))
-  expect(tracks[1].scrollBy).toHaveBeenCalledWith({
+  expect(scrolls[1]).toHaveBeenCalledWith({
     left: 216,
     behavior: 'smooth'
   })
-  expect(tracks[0].scrollBy).not.toHaveBeenCalled()
+  expect(scrolls[0]).not.toHaveBeenCalled()
   fireEvent.keyDown(tracks[0], { key: 'ArrowRight' })
-  expect(tracks[0].scrollBy).toHaveBeenCalledWith({
+  expect(scrolls[0]).toHaveBeenCalledWith({
     left: 216,
     behavior: 'smooth'
   })
@@ -138,6 +140,9 @@ test('keeps the latest articles and shows each category as a text module or a ca
   }
   const home = render(<HomeSections {...props} />)
   const latest = screen.getByRole('region', { name: '最新文章' })
+  const switcher = screen.getByRole('group', { name: '文章展示方式' })
+  expect(latest.contains(switcher)).toBe(false)
+  expect(latest.nextElementSibling).toContainElement(switcher)
   const latestRows = latest.querySelector('.journal-updates').outerHTML
   expect(screen.getByRole('button', { name: '方块' })).toHaveAttribute('aria-pressed', 'true')
   fireEvent.click(screen.getByRole('button', { name: '纯文字' }))
@@ -160,6 +165,43 @@ test('keeps the latest articles and shows each category as a text module or a ca
     expect(screen.getByRole('list', { name: name + '文章' }).querySelector('.journal-card')).toBeVisible()
   }
   window.localStorage.clear()
+})
+
+test('reveals topic cards on entry and cleans up when switching to text or reduced motion', () => {
+  const originalObserver = window.IntersectionObserver
+  const observers = []
+  window.IntersectionObserver = jest.fn().mockImplementation((callback, options) => {
+    const observer = { callback, options, observe: jest.fn(), unobserve: jest.fn(), disconnect: jest.fn() }
+    observers.push(observer)
+    return observer
+  })
+  const geometry = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function () {
+    return { top: this.textContent.includes('更新简报') ? 2000 : 100, width: 300 }
+  })
+  const props = { categoryOptions: categories, tagOptions: [], topicPosts: articles }
+  try {
+    const view = render(<TopicIndex {...props} />)
+    const cards = screen.getByRole('list').children
+    const observer = observers.find(item => item.options?.threshold === 0.06)
+    expect(cards[0]).toHaveAttribute('data-reveal', 'in')
+    expect(cards[1]).toHaveAttribute('data-reveal', 'pending')
+    expect(observer.observe).toHaveBeenCalledWith(cards[1])
+    act(() => observer.callback([{ target: cards[1], isIntersecting: true }]))
+    expect(cards[1]).toHaveAttribute('data-reveal', 'in')
+    expect(observer.unobserve).toHaveBeenCalledWith(cards[1])
+    fireEvent.click(screen.getByRole('button', { name: '纯文字' }))
+    expect(observer.disconnect).toHaveBeenCalled()
+    expect(view.container.querySelector('[data-reveal]')).toBeNull()
+    view.unmount()
+    window.localStorage.clear()
+    window.matchMedia.mockReturnValueOnce({ matches: true })
+    const reduced = render(<TopicIndex {...props} />)
+    expect(reduced.container.querySelector('[data-reveal]')).toBeNull()
+  } finally {
+    window.IntersectionObserver = originalObserver
+    geometry.mockRestore()
+    window.localStorage.clear()
+  }
 })
 
 test('search results use regular article cards and mark a literal search term', () => {

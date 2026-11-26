@@ -1,7 +1,8 @@
 import JournalArticleCard from './JournalArticleCard'
 import ArticleRows from './ArticleRows'
 import ArticleViewSwitch, { useArticleView } from './ArticleViewSwitch'
-import { useEffect, useRef, useState } from 'react'
+import useArticleReveal from './useArticleReveal'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import SmartLink from '@/components/SmartLink'
 import { simpleCategoryHref, sortSimpleCategories } from '../homepage'
 import { categoryAppearance } from './CategoryIcon'
@@ -162,6 +163,9 @@ export default function TopicIndex({
   const [category, setCategory] = useState(initialCategory)
   const [tag, setTag] = useState(initialTag)
   const [textView, changeView] = useArticleView()
+  const results = useRef(null)
+  const revealRevision = useMemo(() => ({ topicPosts, category, tag }), [topicPosts, category, tag])
+  useArticleReveal(results, '.journal-topic-grid > li', !textView, revealRevision)
   useEffect(() => {
     setCategory(initialCategory)
     setTag(initialTag)
@@ -236,7 +240,7 @@ export default function TopicIndex({
         choose={topicPosts ? name => setTag(tag === name ? '' : name) : null}
       />
       {topicPosts && (
-        <section className='journal-topic-results'>
+        <section className='journal-topic-results' ref={results}>
           <div className='journal-home-list-heading'>
             <h2>
               {[category, tag && '#' + tag].filter(Boolean).join(' · ') ||
@@ -249,8 +253,8 @@ export default function TopicIndex({
             <ArticleRows posts={matches} />
           ) : (
             <ul className='journal-topic-grid'>
-              {matches.map(post => (
-                <li key={post.href}>
+              {matches.map((post, index) => (
+                <li key={post.href} style={{ '--card-index': index % 4 }}>
                   <JournalArticleCard post={post} />
                 </li>
               ))}

@@ -3,6 +3,7 @@ import { siteConfig } from '@/lib/config'
 import { fetchGlobalAllData } from '@/lib/db/SiteDataApi'
 import { getPublishedTypedPages } from '@/lib/site/typedCollections'
 import { readMomentPreview } from '@/lib/site/momentPreview'
+import MomentContent from '@/themes/simple/components/MomentContent'
 import useMomentCommentCounts from '@/hooks/useMomentCommentCounts'
 import {
   buildSimpleMoments,
@@ -69,22 +70,7 @@ export default function SayPage({ moments, momentCommentProvider, NOTION_CONFIG 
                   {note.time && <span>{note.time}</span>}
                 </time>
                 <div className='journal-say-bubble'>
-                  <p>{note.text}</p>
-                  {note.pictures?.map((image, index) => (
-                    <figure key={index}>
-                      <img
-                        src={image.src}
-                        alt={image.caption || '说说配图'}
-                        className={image.width ? undefined : 'journal-say-thumbnail'}
-                        style={image.width ? { width: image.width } : undefined}
-                        loading='lazy'
-                        decoding='async'
-                      />
-                      {image.caption && (
-                        <figcaption>{image.caption}</figcaption>
-                      )}
-                    </figure>
-                  ))}
+                  <MomentContent note={note} />
                   {note.comments && momentCommentProvider && (
                     <>
                       <div

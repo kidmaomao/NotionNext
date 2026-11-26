@@ -1,6 +1,7 @@
 import JournalArticleCard from './JournalArticleCard'
 import ArticleRows from './ArticleRows'
 import ArticleViewSwitch, { useArticleView } from './ArticleViewSwitch'
+import useArticleReveal from './useArticleReveal'
 import SmartLink from '@/components/SmartLink'
 import { useEffect, useId, useRef, useState } from 'react'
 import ArrowDownSLineIcon from 'remixicon-react/ArrowDownSLineIcon'
@@ -155,7 +156,7 @@ function HomeCategory({ name, href, posts, textView }) {
   )
 }
 
-function LatestPosts({ posts, textView, onViewChange }) {
+function LatestPosts({ posts }) {
   return (
     <section
       id='latest-articles'
@@ -164,7 +165,6 @@ function LatestPosts({ posts, textView, onViewChange }) {
     >
       <div className='journal-home-list-heading'>
         <h2 id='latest-articles-heading'>最新文章</h2>
-        <ArticleViewSwitch textView={textView} onViewChange={onViewChange} />
       </div>
       <ArticleRows posts={posts} showIcons />
     </section>
@@ -179,34 +179,7 @@ export default function HomeSections({
 }) {
   const home = useRef(null)
   const [textView, changeView] = useArticleView()
-  useEffect(() => {
-    if (
-      textView ||
-      !window.IntersectionObserver ||
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    )
-      return
-    const rows = Array.from(home.current.querySelectorAll('.journal-rail'))
-    const observer = new IntersectionObserver(
-      entries => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue
-          entry.target.dataset.reveal = 'in'
-          observer.unobserve(entry.target)
-        }
-      },
-      { threshold: 0.06 }
-    )
-    for (const row of rows) {
-      row.dataset.reveal =
-        row.getBoundingClientRect().top >= window.innerHeight ? 'pending' : 'in'
-      if (row.dataset.reveal === 'pending') observer.observe(row)
-    }
-    return () => {
-      observer.disconnect()
-      rows.forEach(row => delete row.dataset.reveal)
-    }
-  }, [groups, textView])
+  useArticleReveal(home, '.journal-rail', !textView, groups)
   return (
     <main
       ref={home}
@@ -244,13 +217,12 @@ export default function HomeSections({
       )}
 
       {latestPosts.length > 0 && (
-        <LatestPosts
-          posts={latestPosts}
-          textView={textView}
-          onViewChange={changeView}
-        />
+        <LatestPosts posts={latestPosts} />
       )}
 
+      <div className='journal-home-view-control'>
+        <ArticleViewSwitch textView={textView} onViewChange={changeView} />
+      </div>
       <div className={textView ? 'simple-home-grid' : 'journal-rails'}>
         {groups.map(group => (
           <HomeCategory key={group.href} {...group} textView={textView} />
