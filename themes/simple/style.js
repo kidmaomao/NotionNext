@@ -1632,7 +1632,7 @@ const Style = () => {
   #theme-simple .journal-reading #article-wrapper { padding: clamp(18px,3.5vw,48px); }
   #theme-simple .journal-reading .notion-page { width: 100%; max-width: 100%; min-width: 0; }
   #theme-simple .journal-reading .notion-page > :is(.notion-text,.notion-list,.notion-quote,.notion-callout,.notion-toggle,.notion-divider) {
-    width: 100%; max-width: 47rem; margin-inline: 0; align-self: flex-start;
+    width: 100%; margin-inline: 0; align-self: flex-start;
   }
   #theme-simple .journal-reading .notion-list-disc { padding-inline-start: 1.25em; }
   #theme-simple .journal-reading .notion-list-numbered { padding-inline-start: 1.75em; }
