@@ -3,6 +3,7 @@ import Image from 'next/image'
 import styles from '@/styles/NogiWikiWidget.module.css'
 import {
   libraryCategories,
+  localizeOgham,
   modes,
   recipeOperations,
   tabs,
@@ -151,7 +152,9 @@ export default function NogiWikiWidget() {
       overrides.operation = nextOperation
     }
     setMode(nextMode)
-    setQuery(candidate.query)
+    setQuery(
+      nextMode === 'library' ? localizeOgham(candidate.query) : candidate.query
+    )
     search(payload(overrides))
   }
 
@@ -271,7 +274,9 @@ export default function NogiWikiWidget() {
                   disabled={busy}
                 >
                   {libraryCategories.map(item => (
-                    <option key={item}>{item}</option>
+                    <option key={item} value={item}>
+                      {localizeOgham(item)}
+                    </option>
                   ))}
                 </select>
               </label>
@@ -404,7 +409,7 @@ export default function NogiWikiWidget() {
           <div className={styles.results} aria-busy={busy}>
             {error && (
               <p className={styles.error} role='alert'>
-                {error}
+                {localizeOgham(error)}
               </p>
             )}
             {busy && (
@@ -431,7 +436,7 @@ export default function NogiWikiWidget() {
                         search(payload({ query: name }))
                       }}
                     >
-                      {name || `浏览${libraryCategory}`}
+                      {name || `浏览${localizeOgham(libraryCategory)}`}
                       <span aria-hidden='true'> ↗</span>
                     </button>
                   ))}
@@ -440,7 +445,9 @@ export default function NogiWikiWidget() {
             )}
             {result && (
               <article className={styles.article} aria-label='百科查询结果'>
-                <p className={styles.resultText}>{result.text}</p>
+                <p className={styles.resultText}>
+                  {localizeOgham(result.text)}
+                </p>
                 {Array.isArray(result.candidates) &&
                   result.candidates.length > 0 && (
                     <div className={styles.candidates}>
@@ -452,15 +459,18 @@ export default function NogiWikiWidget() {
                           onClick={() => selectCandidate(item)}
                         >
                           <span>
-                            {item.name}
+                            {localizeOgham(item.name)}
                             {item.description && (
                               <span className={styles.candidateDescription}>
-                                {item.description}
+                                {localizeOgham(item.description)}
                               </span>
                             )}
                           </span>
                           <small>
-                            {item.category || item.label || '详情'} →
+                            {localizeOgham(
+                              item.category || item.label || '详情'
+                            )}{' '}
+                            →
                           </small>
                         </button>
                       ))}

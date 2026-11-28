@@ -155,6 +155,23 @@ test('only allowed tool fields are forwarded, and each help request has a module
   expect(JSON.parse(fetch.mock.calls[2][1].body).category).toBe('回音')
 })
 
+test.each(['欧甘', '奥甘'])(
+  'accepts %s for the Ogham library',
+  async category => {
+    const res = response()
+    await handler(
+      request({ mode: 'library', category, query: '欧甘组合' }),
+      res
+    )
+    expect(res.status).toHaveBeenCalledWith(200)
+    expect(JSON.parse(fetch.mock.calls[0][1].body)).toMatchObject({
+      mode: 'library',
+      category: '奥甘',
+      query: '奥甘组合'
+    })
+  }
+)
+
 test('cross-origin requests are rejected before reaching the plugin', async () => {
   const res = response()
   await handler(

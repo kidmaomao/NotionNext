@@ -82,6 +82,46 @@ test('recipe tools send quantities, library browsing is allowed, and help stays 
   expect(screen.getByText(/所有工具 冰精通伤害/)).toBeInTheDocument()
 })
 
+test('shows 欧甘 in the library and opens candidates returned under the old category', async () => {
+  fetch.mockResolvedValueOnce({
+    ok: true,
+    json: () =>
+      Promise.resolve({
+        ok: true,
+        text: '奥甘：共 1 条',
+        candidates: [
+          {
+            name: '奥甘组合',
+            category: '奥甘',
+            query: '奥甘组合',
+            mode: 'library'
+          }
+        ]
+      })
+  })
+  render(<NogiWikiWidget />)
+  fireEvent.click(screen.getByRole('button', { name: '打开洛奇百科助手' }))
+  fireEvent.click(screen.getByRole('button', { name: '资料', exact: true }))
+  const option = screen.getByRole('option', { name: '欧甘' })
+  fireEvent.change(screen.getByLabelText('资料专题'), {
+    target: { value: option.value }
+  })
+  fireEvent.click(screen.getByRole('button', { name: '浏览', exact: true }))
+  expect(await screen.findByText('欧甘：共 1 条')).toBeInTheDocument()
+
+  fetch.mockResolvedValueOnce({
+    ok: true,
+    json: () => Promise.resolve({ ok: true, text: '奥甘组合详情' })
+  })
+  fireEvent.click(screen.getByRole('button', { name: '欧甘组合 欧甘 →' }))
+  expect(await screen.findByText('欧甘组合详情')).toBeInTheDocument()
+  expect(screen.getByLabelText('查询名称')).toHaveValue('欧甘组合')
+  expect(JSON.parse(fetch.mock.calls[1][1].body)).toMatchObject({
+    category: option.value,
+    query: '奥甘组合'
+  })
+})
+
 test('switching modules aborts and ignores the old result; simulations allow an empty query', async () => {
   let resolve
   fetch.mockImplementationOnce(
